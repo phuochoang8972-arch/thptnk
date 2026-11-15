@@ -6,6 +6,7 @@
     <title>Trường THPT Nguyễn Khuyến 3D - Vĩnh Bảo, Hải Phòng</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/mqtt@5.10.1/dist/mqtt.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
         * {
@@ -28,7 +29,6 @@
             width: 100%;
             height: 100%;
         }
-        /* Thanh cuộn gọn cho chat & lưu bút */
         .custom-scroll::-webkit-scrollbar {
             width: 5px;
         }
@@ -135,7 +135,7 @@
 
             <div class="mt-3 pt-2.5 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-500">
                 <span>• Xuất phát từ ngoài cổng chính</span>
-                <span>• Đủ 36 phòng học 2 tầng</span>
+                <span>• 1 Máy chủ chung (500 bạn)</span>
             </div>
         </div>
     </div>
@@ -184,7 +184,7 @@
                     </button>
                     <button id="btn-perf-mode"
                         class="px-2.5 py-1.5 rounded-xl bg-amber-950/90 hover:bg-amber-900 backdrop-blur-md border border-amber-400/40 text-[11px] font-bold text-amber-200 shadow cursor-pointer">
-                        ✨ Đồ họa Cao • <span id="fps-counter">60</span> FPS
+                        ⚡ Siêu mượt • <span id="fps-counter">60</span> FPS
                     </button>
                     <button id="btn-shards-hud"
                         class="px-2.5 py-1.5 rounded-xl bg-amber-950/90 hover:bg-amber-900 backdrop-blur-md border border-amber-400/45 text-[11px] font-extrabold text-amber-300 shadow cursor-pointer">
@@ -198,7 +198,7 @@
                 <div class="relative rounded-2xl overflow-hidden border-2 border-white/25 bg-slate-900/85 shadow-xl">
                     <canvas id="minimap-canvas" width="126" height="126" class="block w-[108px] h-[108px] sm:w-[126px] sm:h-[126px]"></canvas>
                     <div class="absolute bottom-1 left-1.5 right-1.5 flex justify-between text-[9px] font-bold text-white/90 drop-shadow pointer-events-none">
-                        <span>Bắc (Sân bóng)</span>
+                        <span>Bắc</span>
                         <span id="online-pill" class="text-emerald-300">● 1/500</span>
                     </div>
                 </div>
@@ -304,7 +304,7 @@
             <div class="flex items-center justify-between mb-2">
                 <div>
                     <h3 class="text-sm font-extrabold text-white">👥 Máy chủ chung THPT Nguyễn Khuyến</h3>
-                    <p id="server-status-text" class="text-[11px] text-emerald-400">Tất cả học sinh & cựu học sinh cùng 1 sân trường</p>
+                    <p id="server-status-text" class="text-[11px] text-amber-300">⏳ Đang kết nối máy chủ chung tự động...</p>
                 </div>
                 <button class="close-panel-btn px-2.5 py-1 rounded-lg bg-white/10 text-xs font-bold cursor-pointer">✕</button>
             </div>
@@ -367,31 +367,26 @@
             </div>
         </div>
 
-        <!-- 5. Bảng Chia Sẻ Link Mời Bạn Bè (Tránh lỗi 404 khi gửi qua Zalo/Facebook) -->
+        <!-- 5. Bảng Chia Sẻ Link Mời Bạn Bè -->
         <div id="panel-share" class="modal-panel hidden pointer-events-auto fixed inset-x-0 bottom-16 mx-auto w-[94vw] max-w-md rounded-3xl bg-slate-900/95 border border-emerald-400/40 p-4 shadow-2xl backdrop-blur-md z-30">
             <div class="flex items-center justify-between mb-2">
                 <div>
                     <h3 class="text-sm font-extrabold text-emerald-300">🔗 Mời bạn bè vào Trường THPT Nguyễn Khuyến</h3>
-                    <p class="text-[11px] text-slate-400">Hướng dẫn lấy link chuẩn để gửi Zalo không bị lỗi 404</p>
+                    <p class="text-[11px] text-slate-400">Gửi link này lên nhóm Zalo để mọi người vào cùng 1 sân trường</p>
                 </div>
                 <button class="close-panel-btn px-2.5 py-1 rounded-lg bg-white/10 text-xs font-bold cursor-pointer">✕</button>
             </div>
 
             <div id="share-sandbox-notice" class="hidden space-y-2.5 text-xs">
                 <div class="p-3 rounded-2xl bg-amber-500/15 border border-amber-400/40 text-amber-200 leading-relaxed">
-                    <strong>⚠️ Vì sao gửi link trực tiếp từ khung xem trước bị lỗi 404?</strong><br>
-                    Link khung xem trước hiện tại là link nội bộ tạm thời, chỉ mình bạn mở được. Khi gửi qua Zalo/Messenger người khác bấm vào sẽ báo <strong>404</strong>.
-                </div>
-                <div class="p-3 rounded-2xl bg-slate-950/70 border border-white/10 space-y-1.5 text-slate-200">
-                    <div class="font-extrabold text-emerald-300">✅ Cách lấy link chuẩn gửi cho 500 bạn (30 giây):</div>
-                    <div><strong>Cách 1 (Khuyên dùng - Vào chung 1 sân trường):</strong> Bấm nút <strong>Tải xuống (Download)</strong> file <code>index.html</code> ở góc trên bên phải khung code → kéo thả vào <span class="text-sky-300 font-bold">tiiny.host</span> hoặc <span class="text-sky-300 font-bold">app.netlify.com/drop</span> để lấy link web thật gửi Zalo!</div>
-                    <div><strong>Cách 2 (Chia sẻ nhanh):</strong> Bấm biểu tượng <strong>Chia sẻ (Share)</strong> của khung Canvas ở góc trên cùng bên phải màn hình.</div>
+                    <strong>⚠️ Bạn đang mở ở khung xem trước tạm thời:</strong><br>
+                    Hãy tải file <code>index.html</code> này lên GitHub Pages của bạn (<code>https://phuochoang8972-arch.github.io/thptnk/</code>) rồi chia sẻ đường link đó cho học sinh nhé!
                 </div>
             </div>
 
             <div id="share-public-box" class="hidden space-y-2.5 text-xs">
                 <div class="p-2.5 rounded-xl bg-emerald-500/15 border border-emerald-400/40 text-emerald-200">
-                    🟢 Đường link công khai của bạn đã sẵn sàng gửi cho học sinh toàn trường qua Zalo / Facebook:
+                    🟢 Đường link công khai của trường đã sẵn sàng! Các bạn mở link trên nhiều máy khác nhau sẽ tự động gặp nhau:
                 </div>
                 <div class="flex gap-2">
                     <input id="share-url-input" type="text" readonly
@@ -405,22 +400,16 @@
         </div>
     </div>
 
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, doc, setDoc, addDoc, deleteDoc, onSnapshot, collection } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-
-        // Cấu hình Firebase tùy chọn khi tự xuất bản file ra host ngoài (Cloudflare Pages / Tiiny.host)
-        const CUSTOM_FIREBASE_CONFIG = null;
-
+    <script>
         window.addEventListener('load', () => {
             // =========================================================================
-            // 1. CẤU HÌNH HIỆU NĂNG & THÔNG TIN THẺ HỌC SINH
+            // 1. NHẬN DIỆN THIẾT BỊ & THÔNG TIN THẺ HỌC SINH
             // =========================================================================
-            let highGraphicsMode = true;
+            const isMobileDevice = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent) || window.innerWidth < 768;
+            let highGraphicsMode = !isMobileDevice;
 
             const playerProfile = {
-                id: 'nk_' + Math.random().toString(36).slice(2, 9),
+                id: 'nk_' + Math.random().toString(36).slice(2, 10),
                 name: 'Nguyễn Văn An',
                 cohort: 'Học sinh đang học',
                 className: '12A1',
@@ -433,14 +422,12 @@
             const cohortSelect = document.getElementById('select-cohort');
             const classSelect = document.getElementById('select-class');
 
-            // Điền danh sách Niên khóa (Học sinh đang học & 1999 -> 2026)
             const cohortOptions = ['Học sinh đang học'];
             for (let y = 2026; y >= 1999; y--) {
                 cohortOptions.push(`Khóa ${y} - ${y + 3}`);
             }
             cohortSelect.innerHTML = cohortOptions.map(c => `<option value="${c}">${c}</option>`).join('');
 
-            // Điền danh sách 33 lớp học (12A1-12A11, 11B1-11B11, 10C1-10C11)
             const classOptions = [];
             ['12A', '11B', '10C'].forEach(prefix => {
                 for (let n = 1; n <= 11; n++) {
@@ -449,7 +436,6 @@
             });
             classSelect.innerHTML = classOptions.map(cl => `<option value="${cl}">Lớp ${cl}</option>`).join('');
 
-            // Chọn giới tính Nam / Nữ
             document.querySelectorAll('.gender-btn').forEach(btn => {
                 btn.addEventListener('click', () => {
                     playerProfile.gender = btn.dataset.gender;
@@ -459,11 +445,10 @@
                             ? 'gender-btn px-3 py-2 rounded-xl border-2 border-sky-600 bg-sky-50 text-sky-900 text-xs font-bold text-center transition cursor-pointer'
                             : 'gender-btn px-3 py-2 rounded-xl border border-slate-200 bg-slate-50 text-slate-700 text-xs font-semibold text-center transition cursor-pointer';
                     });
-                    if (typeof rebuildPlayerAvatar === 'function') rebuildPlayerAvatar();
+                    rebuildPlayerAvatar();
                 });
             });
 
-            // Chọn trang phục nhân vật
             document.querySelectorAll('.outfit-btn').forEach(btn => {
                 btn.addEventListener('click', () => {
                     playerProfile.outfit = btn.dataset.outfit;
@@ -473,39 +458,45 @@
                             ? 'outfit-btn px-3 py-2 rounded-xl border-2 border-sky-600 bg-sky-50 text-sky-900 text-xs font-bold text-left transition cursor-pointer'
                             : 'outfit-btn px-3 py-2 rounded-xl border border-slate-200 bg-slate-50 text-slate-700 text-xs font-semibold text-left transition cursor-pointer';
                     });
-                    if (typeof rebuildPlayerAvatar === 'function') rebuildPlayerAvatar();
+                    rebuildPlayerAvatar();
                 });
             });
 
             // =========================================================================
-            // 2. KHỞI TẠO CẢNH 3D THREE.JS, BẦU TRỜI, ĐỔ BÓNG & VẬT LIỆU CHI TIẾT CAO
+            // 2. KHỞI TẠO CẢNH 3D THREE.JS TỐI ƯU 60 FPS TRÊN MỌI ĐIỆN THOẠI
             // =========================================================================
             const canvas = document.getElementById('game-canvas');
             const scene = new THREE.Scene();
             scene.background = new THREE.Color(0x7dd3fc);
             scene.fog = new THREE.FogExp2(0xbae6fd, 0.0042);
 
-            const camera = new THREE.PerspectiveCamera(58, window.innerWidth / window.innerHeight, 0.2, 260);
+            const camera = new THREE.PerspectiveCamera(58, window.innerWidth / window.innerHeight, 0.2, 240);
             camera.position.set(-4.6, 3.2, 51.5);
 
-            const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, powerPreference: 'high-performance' });
-            renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.75));
+            const renderer = new THREE.WebGLRenderer({
+                canvas,
+                antialias: !isMobileDevice,
+                powerPreference: 'high-performance'
+            });
+            renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, highGraphicsMode ? 1.5 : 1.1));
             renderer.setSize(window.innerWidth, window.innerHeight);
-            renderer.shadowMap.enabled = true;
+            renderer.shadowMap.enabled = highGraphicsMode;
             renderer.shadowMap.type = THREE.PCFSoftShadowMap;
             renderer.toneMapping = THREE.ACESFilmicToneMapping;
-            renderer.toneMappingExposure = 1.06;
+            renderer.toneMappingExposure = 1.05;
 
-            // Ánh sáng bầu trời + Nắng chính đổ bóng mềm + Ánh sáng phản xạ mát dịu
-            const hemiLight = new THREE.HemisphereLight(0xe0f2fe, 0x3f6212, 0.78);
+            const btnPerfMode = document.getElementById('btn-perf-mode');
+            btnPerfMode.innerHTML = `${highGraphicsMode ? '✨ Đồ họa Cao' : '⚡ Siêu mượt'} • <span id="fps-counter">60</span> FPS`;
+
+            const hemiLight = new THREE.HemisphereLight(0xe0f2fe, 0x3f6212, 0.85);
             hemiLight.position.set(0, 60, 0);
             scene.add(hemiLight);
 
-            const dirLight = new THREE.DirectionalLight(0xfffbeb, 1.05);
+            const dirLight = new THREE.DirectionalLight(0xfffbeb, 1.0);
             dirLight.position.set(34, 58, 38);
-            dirLight.castShadow = true;
-            dirLight.shadow.mapSize.width = 2048;
-            dirLight.shadow.mapSize.height = 2048;
+            dirLight.castShadow = highGraphicsMode;
+            dirLight.shadow.mapSize.width = isMobileDevice ? 1024 : 2048;
+            dirLight.shadow.mapSize.height = isMobileDevice ? 1024 : 2048;
             dirLight.shadow.camera.near = 10;
             dirLight.shadow.camera.far = 165;
             dirLight.shadow.camera.left = -52;
@@ -515,11 +506,10 @@
             dirLight.shadow.bias = -0.0005;
             scene.add(dirLight);
 
-            const fillLight = new THREE.DirectionalLight(0xbae6fd, 0.34);
+            const fillLight = new THREE.DirectionalLight(0xbae6fd, 0.35);
             fillLight.position.set(-36, 28, -42);
             scene.add(fillLight);
 
-            // Công cụ tạo texture chữ & biển hiệu sắc nét
             function makeCanvasTexture(w, h, drawFn) {
                 const c = document.createElement('canvas');
                 c.width = w;
@@ -536,14 +526,13 @@
                 tex.wrapS = THREE.RepeatWrapping;
                 tex.wrapT = THREE.RepeatWrapping;
                 tex.repeat.set(repeatX, repeatY);
-                tex.anisotropy = 4;
                 return tex;
             }
 
-            // Vòm trời 3D chuyển sắc nắng ấm & cụm mây trắng bồng bềnh
+            // Vòm trời 3D & Mây trắng nhẹ
             const skyClouds = [];
             function buildSkyDome() {
-                const skyTex = makeCanvasTexture(512, 512, (ctx, w, h) => {
+                const skyTex = makeCanvasTexture(256, 256, (ctx, w, h) => {
                     const grad = ctx.createLinearGradient(0, 0, 0, h);
                     grad.addColorStop(0.0, '#0284c7');
                     grad.addColorStop(0.32, '#38bdf8');
@@ -553,38 +542,36 @@
                     ctx.fillStyle = grad;
                     ctx.fillRect(0, 0, w, h);
 
-                    // Quầng nắng ấm phía Đông Nam
-                    const sunGrad = ctx.createRadialGradient(w * 0.72, h * 0.36, 4, w * 0.72, h * 0.36, 95);
+                    const sunGrad = ctx.createRadialGradient(w * 0.72, h * 0.36, 2, w * 0.72, h * 0.36, 52);
                     sunGrad.addColorStop(0, 'rgba(255, 255, 240, 0.95)');
-                    sunGrad.addColorStop(0.25, 'rgba(254, 240, 138, 0.55)');
+                    sunGrad.addColorStop(0.28, 'rgba(254, 240, 138, 0.52)');
                     sunGrad.addColorStop(1, 'rgba(254, 240, 138, 0)');
                     ctx.fillStyle = sunGrad;
                     ctx.fillRect(0, 0, w, h);
                 });
                 const skyDome = new THREE.Mesh(
-                    new THREE.SphereGeometry(185, 28, 18),
+                    new THREE.SphereGeometry(180, 20, 14),
                     new THREE.MeshBasicMaterial({ map: skyTex, side: THREE.BackSide, fog: false })
                 );
                 scene.add(skyDome);
 
-                // Các cụm mây trắng mềm trôi nhẹ trên bầu trời
                 const cloudMat = new THREE.MeshLambertMaterial({ color: 0xffffff, transparent: true, opacity: 0.88, fog: false });
-                const puffGeo = new THREE.SphereGeometry(1, 10, 8);
-                for (let c = 0; c < 12; c++) {
+                const puffGeo = new THREE.SphereGeometry(1, 8, 6);
+                for (let c = 0; c < 8; c++) {
                     const cloud = new THREE.Group();
-                    const cx = -75 + (c * 19) % 150;
-                    const cy = 36 + (c % 4) * 4.5;
-                    const cz = -90 + Math.floor(c / 3) * 42;
+                    const cx = -75 + (c * 24) % 150;
+                    const cy = 36 + (c % 3) * 5;
+                    const cz = -90 + Math.floor(c / 2) * 44;
                     cloud.position.set(cx, cy, cz);
 
-                    [[0, 0, 0, 5.5, 2.2, 3.4], [4.2, -0.3, 0.6, 4.2, 1.8, 2.8], [-4.0, -0.4, -0.5, 4.0, 1.7, 2.7], [1.6, 0.9, -0.4, 3.6, 1.7, 2.5]].forEach(([px, py, pz, sx, sy, sz]) => {
+                    [[0, 0, 0, 5.5, 2.2, 3.4], [4.0, -0.3, 0.5, 4.1, 1.8, 2.7], [-3.8, -0.4, -0.4, 3.9, 1.7, 2.6]].forEach(([px, py, pz, sx, sy, sz]) => {
                         const puff = new THREE.Mesh(puffGeo, cloudMat);
                         puff.position.set(px, py, pz);
                         puff.scale.set(sx, sy, sz);
                         cloud.add(puff);
                     });
                     scene.add(cloud);
-                    skyClouds.push({ mesh: cloud, speed: 0.45 + (c % 3) * 0.18 });
+                    skyClouds.push({ mesh: cloud, speed: 0.4 + (c % 3) * 0.16 });
                 }
             }
             buildSkyDome();
@@ -599,7 +586,7 @@
             }
 
             function makeSignPlane(w, h, drawFn) {
-                const tex = makeCanvasTexture(Math.max(128, Math.round(w * 96)), Math.max(64, Math.round(h * 96)), drawFn);
+                const tex = makeCanvasTexture(Math.max(128, Math.round(w * 88)), Math.max(64, Math.round(h * 88)), drawFn);
                 return new THREE.Mesh(
                     new THREE.PlaneGeometry(w, h),
                     new THREE.MeshBasicMaterial({ map: tex, side: THREE.DoubleSide })
@@ -607,16 +594,16 @@
             }
 
             function makeTextSprite(text, bgColor = '#0f172a', textColor = '#ffffff', borderColor = '#38bdf8') {
-                const tex = makeCanvasTexture(384, 76, (ctx, w, h) => {
+                const tex = makeCanvasTexture(360, 72, (ctx, w, h) => {
                     ctx.fillStyle = bgColor;
                     ctx.beginPath();
-                    ctx.roundRect(4, 4, w - 8, h - 8, 18);
+                    ctx.roundRect(4, 4, w - 8, h - 8, 16);
                     ctx.fill();
                     ctx.strokeStyle = borderColor;
                     ctx.lineWidth = 4;
                     ctx.stroke();
                     ctx.fillStyle = textColor;
-                    ctx.font = 'bold 22px Inter, sans-serif';
+                    ctx.font = 'bold 21px Inter, sans-serif';
                     ctx.textAlign = 'center';
                     ctx.textBaseline = 'middle';
                     ctx.fillText(text, w / 2, h / 2);
@@ -626,10 +613,10 @@
             }
 
             function makeParticipantNameplate(name, className, cohort, isSelf = false) {
-                const tex = makeCanvasTexture(420, 104, (ctx, w, h) => {
+                const tex = makeCanvasTexture(400, 96, (ctx, w, h) => {
                     ctx.fillStyle = isSelf ? 'rgba(12, 74, 110, 0.9)' : 'rgba(15, 23, 42, 0.88)';
                     ctx.beginPath();
-                    ctx.roundRect(6, 6, w - 12, h - 12, 20);
+                    ctx.roundRect(6, 6, w - 12, h - 12, 18);
                     ctx.fill();
                     ctx.strokeStyle = isSelf ? '#38bdf8' : '#94a3b8';
                     ctx.lineWidth = 4;
@@ -637,27 +624,26 @@
 
                     ctx.textAlign = 'center';
                     ctx.fillStyle = '#ffffff';
-                    ctx.font = '800 24px Inter, sans-serif';
-                    ctx.fillText(`${name} • Lớp ${className}`, w / 2, 42);
+                    ctx.font = '800 23px Inter, sans-serif';
+                    ctx.fillText(`${name} • Lớp ${className}`, w / 2, 39);
 
                     ctx.fillStyle = '#fde047';
-                    ctx.font = 'bold 19px Inter, sans-serif';
-                    ctx.fillText(cohort, w / 2, 76);
+                    ctx.font = 'bold 18px Inter, sans-serif';
+                    ctx.fillText(cohort, w / 2, 71);
                 });
                 const sprite = new THREE.Sprite(new THREE.SpriteMaterial({ map: tex, transparent: true, depthTest: false }));
-                sprite.scale.set(2.55, 0.64, 1);
+                sprite.scale.set(2.5, 0.6, 1);
                 sprite.position.set(0, 2.38, 0);
                 return sprite;
             }
 
-            // Vật liệu kiến trúc chi tiết cao (Procedural PBR / Surface Textures)
-            const texPlaster = makeRepeatingTexture(128, 128, 4, 4, (ctx, w, h) => {
+            // Vật liệu kiến trúc chi tiết cao
+            const texPlaster = makeRepeatingTexture(64, 64, 4, 4, (ctx, w, h) => {
                 ctx.fillStyle = '#fef3c7';
                 ctx.fillRect(0, 0, w, h);
-                for (let i = 0; i < 240; i++) {
-                    ctx.fillStyle = i % 2 === 0 ? 'rgba(217, 119, 6, 0.04)' : 'rgba(255, 255, 255, 0.08)';
-                    ctx.fillRect((i * 37) % w, (i * 53) % h, 3, 3);
-                }
+                ctx.fillStyle = 'rgba(217, 119, 6, 0.05)';
+                ctx.fillRect(0, 0, 32, 32);
+                ctx.fillRect(32, 32, 32, 32);
             });
 
             const texRoofTile = makeRepeatingTexture(128, 128, 18, 8, (ctx, w, h) => {
@@ -674,64 +660,52 @@
                         ctx.beginPath();
                         ctx.arc(x + 16, y + 14, 15, 0.1 * Math.PI, 0.9 * Math.PI);
                         ctx.stroke();
-                        ctx.strokeStyle = 'rgba(254, 202, 202, 0.22)';
-                        ctx.lineWidth = 2;
-                        ctx.beginPath();
-                        ctx.arc(x + 16, y + 11, 13, 0.2 * Math.PI, 0.8 * Math.PI);
-                        ctx.stroke();
                     }
                 }
             });
 
-            const texWindowGlass = makeCanvasTexture(256, 256, (ctx, w, h) => {
-                // Khung cửa sổ trắng & kính xanh phản chiếu mây trời
+            const texWindowGlass = makeCanvasTexture(128, 128, (ctx, w, h) => {
                 ctx.fillStyle = '#ffffff';
                 ctx.fillRect(0, 0, w, h);
                 const glassGrad = ctx.createLinearGradient(0, 0, w, h);
                 glassGrad.addColorStop(0, '#0284c7');
-                glassGrad.addColorStop(0.45, '#38bdf8');
-                glassGrad.addColorStop(0.55, '#e0f2fe');
+                glassGrad.addColorStop(0.5, '#38bdf8');
                 glassGrad.addColorStop(1, '#0369a1');
                 ctx.fillStyle = glassGrad;
-                ctx.fillRect(14, 14, w - 28, h - 28);
-
-                // Vệt nắng phản chiếu chéo trên kính & song cửa trắng
-                ctx.fillStyle = 'rgba(255, 255, 255, 0.32)';
+                ctx.fillRect(8, 8, w - 16, h - 16);
+                ctx.fillStyle = 'rgba(255, 255, 255, 0.35)';
                 ctx.beginPath();
-                ctx.moveTo(28, 14);
-                ctx.lineTo(74, 14);
-                ctx.lineTo(24, h - 14);
-                ctx.lineTo(14, h - 14);
+                ctx.moveTo(16, 8);
+                ctx.lineTo(42, 8);
+                ctx.lineTo(14, h - 8);
+                ctx.lineTo(8, h - 8);
                 ctx.closePath();
                 ctx.fill();
-
                 ctx.fillStyle = '#f8fafc';
-                ctx.fillRect(w / 2 - 5, 14, 10, h - 28);
-                ctx.fillRect(14, h * 0.34, w - 28, 9);
-                ctx.fillRect(14, h * 0.68, w - 28, 9);
+                ctx.fillRect(w / 2 - 3, 8, 6, h - 16);
+                ctx.fillRect(8, h * 0.35, w - 16, 5);
+                ctx.fillRect(8, h * 0.68, w - 16, 5);
             });
 
-            const texWood = makeRepeatingTexture(128, 128, 2, 2, (ctx, w, h) => {
+            const texWood = makeRepeatingTexture(64, 64, 2, 2, (ctx, w, h) => {
                 ctx.fillStyle = '#92400e';
                 ctx.fillRect(0, 0, w, h);
                 ctx.fillStyle = 'rgba(69, 26, 3, 0.28)';
-                for (let y = 0; y < h; y += 8) {
-                    ctx.fillRect(0, y, w, 2);
-                }
+                for (let y = 0; y < h; y += 8) ctx.fillRect(0, y, w, 2);
             });
 
-            const matWhite = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.65, metalness: 0.04 });
-            const matCream = new THREE.MeshStandardMaterial({ map: texPlaster, roughness: 0.82, metalness: 0.02 });
-            const matRedTile = new THREE.MeshStandardMaterial({ map: texRoofTile, roughness: 0.68, metalness: 0.06 });
-            const matStone = new THREE.MeshStandardMaterial({ color: 0x94a3b8, roughness: 0.85, metalness: 0.05 });
+            const matWhite = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.65 });
+            const matCream = new THREE.MeshStandardMaterial({ map: texPlaster, roughness: 0.82 });
+            const matRedTile = new THREE.MeshStandardMaterial({ map: texRoofTile, roughness: 0.68 });
+            const matStone = new THREE.MeshStandardMaterial({ color: 0x94a3b8, roughness: 0.85 });
             const matTrunk = new THREE.MeshStandardMaterial({ color: 0x78350f, roughness: 0.9 });
-            const matWood = new THREE.MeshStandardMaterial({ map: texWood, roughness: 0.62, metalness: 0.05 });
-            const matIron = new THREE.MeshStandardMaterial({ color: 0x1e293b, roughness: 0.4, metalness: 0.55 });
-            const matGold = new THREE.MeshStandardMaterial({ color: 0xfacc15, roughness: 0.32, metalness: 0.65 });
-            const matFloorTile = new THREE.MeshStandardMaterial({ color: 0xe2e8f0, roughness: 0.55, metalness: 0.05 });
+            const matWood = new THREE.MeshStandardMaterial({ map: texWood, roughness: 0.62 });
+            const matIron = new THREE.MeshStandardMaterial({ color: 0x1e293b, roughness: 0.4, metalness: 0.5 });
+            const matGold = new THREE.MeshStandardMaterial({ color: 0xfacc15, roughness: 0.35, metalness: 0.6 });
+            const matFloorTile = new THREE.MeshStandardMaterial({ color: 0xe2e8f0, roughness: 0.55 });
             const matBrickPillar = new THREE.MeshStandardMaterial({ color: 0xc2410c, roughness: 0.82 });
             const matRoyalBlue = new THREE.MeshStandardMaterial({ color: 0x0284c7, roughness: 0.45, metalness: 0.12 });
-            const matWindowGlass = new THREE.MeshStandardMaterial({ map: texWindowGlass, roughness: 0.22, metalness: 0.25 });
+            const matWindowGlass = new THREE.MeshStandardMaterial({ map: texWindowGlass, roughness: 0.25, metalness: 0.2 });
 
             const stripedTex = makeCanvasTexture(64, 128, (ctx, w, h) => {
                 ctx.fillStyle = '#fef3c7';
@@ -768,22 +742,20 @@
             function buildGroundAndRoads() {
                 const groundGroup = new THREE.Group();
 
-                const texGrass = makeRepeatingTexture(256, 256, 28, 34, (ctx, w, h) => {
+                const texGrass = makeRepeatingTexture(128, 128, 28, 34, (ctx, w, h) => {
                     ctx.fillStyle = '#4d7c0f';
                     ctx.fillRect(0, 0, w, h);
-                    for (let i = 0; i < 420; i++) {
-                        ctx.fillStyle = i % 3 === 0 ? '#3f6212' : (i % 3 === 1 ? '#65a30d' : '#84cc16');
-                        ctx.fillRect((i * 43) % w, (i * 71) % h, 3, 7);
+                    for (let i = 0; i < 160; i++) {
+                        ctx.fillStyle = i % 2 === 0 ? '#3f6212' : '#65a30d';
+                        ctx.fillRect((i * 43) % w, (i * 71) % h, 3, 6);
                     }
                 });
 
-                const texAsphalt = makeRepeatingTexture(256, 256, 24, 3, (ctx, w, h) => {
+                const texAsphalt = makeRepeatingTexture(128, 128, 24, 3, (ctx, w, h) => {
                     ctx.fillStyle = '#334155';
                     ctx.fillRect(0, 0, w, h);
-                    for (let i = 0; i < 380; i++) {
-                        ctx.fillStyle = i % 2 === 0 ? 'rgba(15, 23, 42, 0.28)' : 'rgba(148, 163, 184, 0.14)';
-                        ctx.fillRect((i * 29) % w, (i * 61) % h, 2, 2);
-                    }
+                    ctx.fillStyle = 'rgba(15, 23, 42, 0.25)';
+                    for (let i = 0; i < 120; i++) ctx.fillRect((i * 29) % w, (i * 61) % h, 2, 2);
                 });
 
                 const texStonePaver = makeRepeatingTexture(128, 128, 22, 4, (ctx, w, h) => {
@@ -815,7 +787,6 @@
                     ctx.strokeRect(65.5, 65.5, 61, 61);
                 });
 
-                // Nền cỏ xanh toàn khuôn viên
                 const grass = new THREE.Mesh(
                     new THREE.PlaneGeometry(140, 170),
                     new THREE.MeshStandardMaterial({ map: texGrass, roughness: 0.92 })
@@ -825,7 +796,6 @@
                 grass.receiveShadow = true;
                 groundGroup.add(grass);
 
-                // Đường nhựa phía ngoài cổng trường (z = 39.2 -> 51.0)
                 const road = new THREE.Mesh(
                     new THREE.PlaneGeometry(120, 11.8),
                     new THREE.MeshStandardMaterial({ map: texAsphalt, roughness: 0.85 })
@@ -835,11 +805,7 @@
                 road.receiveShadow = true;
                 groundGroup.add(road);
 
-                // Vạch kẻ đường, vạch sang đường trước cổng & vỉa hè lát đá
-                const roadStripe = new THREE.Mesh(
-                    new THREE.PlaneGeometry(116, 0.24),
-                    matWhite
-                );
+                const roadStripe = new THREE.Mesh(new THREE.PlaneGeometry(116, 0.24), matWhite);
                 roadStripe.rotation.x = -Math.PI / 2;
                 roadStripe.position.set(2, 0.012, 45.1);
                 groundGroup.add(roadStripe);
@@ -860,7 +826,6 @@
                 sidewalk.receiveShadow = true;
                 groundGroup.add(sidewalk);
 
-                // Sân gạch đỏ truyền thống trước các dãy nhà học
                 const courtyard = new THREE.Mesh(
                     new THREE.PlaneGeometry(37.2, 55.5),
                     new THREE.MeshStandardMaterial({ map: texRedBrickTile, roughness: 0.76 })
@@ -870,7 +835,6 @@
                 courtyard.receiveShadow = true;
                 groundGroup.add(courtyard);
 
-                // Lối lát đá nối thẳng từ ngoài mặt đường qua cổng chính vào sân trường
                 const entryWalkway = new THREE.Mesh(
                     new THREE.PlaneGeometry(6.6, 13.5),
                     new THREE.MeshStandardMaterial({ map: texStonePaver, roughness: 0.72 })
@@ -885,14 +849,13 @@
             buildGroundAndRoads();
 
             // =========================================================================
-            // 5. CỔNG TRƯỜNG THPT NGUYỄN KHUYẾN (CHUẨN THEO ẢNH THỰC TẾ) & CỘT CỜ
+            // 5. CỔNG TRƯỜNG THPT NGUYỄN KHUYẾN & CỘT CỜ TỔ QUỐC
             // =========================================================================
             let flagMesh = null;
             function buildFrontGateAndFences() {
                 const gateGroup = new THREE.Group();
                 const gz = 36.8;
 
-                // --- A. Mái vòm xanh dương uốn cong bên trái cổng (-14.8 -> -7.6) ---
                 const archShape = new THREE.Shape();
                 archShape.moveTo(-14.8, 0);
                 archShape.lineTo(-13.4, 0);
@@ -903,15 +866,14 @@
                 const archGeo = new THREE.ExtrudeGeometry(archShape, {
                     depth: 1.55,
                     bevelEnabled: true,
-                    bevelThickness: 0.06,
-                    bevelSize: 0.06,
-                    bevelSegments: 3
+                    bevelThickness: 0.05,
+                    bevelSize: 0.05,
+                    bevelSegments: 2
                 });
                 const archMesh = new THREE.Mesh(archGeo, matRoyalBlue);
                 archMesh.position.set(0, 0, gz - 0.78);
                 gateGroup.add(archMesh);
 
-                // Viền trắng nổi dọc mép trên mái vòm cong
                 const trimShape = new THREE.Shape();
                 trimShape.moveTo(-14.9, 0);
                 trimShape.lineTo(-14.55, 0);
@@ -924,16 +886,14 @@
                 trimMesh.position.set(0, 0, gz - 0.83);
                 gateGroup.add(trimMesh);
 
-                // Mái hiên phẳng màu trắng & Cột trụ tròn xanh dương lớn đỡ đầu vòm
                 const canopy = new THREE.Mesh(new THREE.BoxGeometry(5.6, 0.34, 1.85), matWhite);
                 canopy.position.set(-10.1, 3.45, gz);
                 gateGroup.add(canopy);
 
-                const roundBlueCol = new THREE.Mesh(new THREE.CylinderGeometry(0.36, 0.38, 3.45, 18), matRoyalBlue);
+                const roundBlueCol = new THREE.Mesh(new THREE.CylinderGeometry(0.36, 0.38, 3.45, 16), matRoyalBlue);
                 roundBlueCol.position.set(-7.95, 1.725, gz);
                 gateGroup.add(roundBlueCol);
 
-                // 3 Khung bảng tin kính đặt gọn dưới mái hiên trắng bên trái cổng
                 const boardBack = new THREE.Mesh(new THREE.BoxGeometry(4.1, 2.35, 0.35), matWhite);
                 boardBack.position.set(-10.5, 1.35, gz);
                 gateGroup.add(boardBack);
@@ -946,17 +906,17 @@
                         ctx.fillStyle = '#f8fafc';
                         ctx.fillRect(0, 0, w, h);
                         ctx.fillStyle = boardColors[idx];
-                        ctx.fillRect(0, 0, w, 56);
+                        ctx.fillRect(0, 0, w, 52);
                         ctx.fillStyle = '#ffffff';
-                        ctx.font = 'bold 20px Inter, sans-serif';
+                        ctx.font = 'bold 18px Inter, sans-serif';
                         ctx.textAlign = 'center';
-                        ctx.fillText(title, w / 2, 36);
+                        ctx.fillText(title, w / 2, 34);
                         ctx.fillStyle = '#334155';
-                        ctx.font = '18px Inter, sans-serif';
-                        ctx.fillText('THPT Nguyễn Khuyến', w / 2, 115);
-                        ctx.fillText('Vĩnh Bảo - Hải Phòng', w / 2, 155);
+                        ctx.font = '16px Inter, sans-serif';
+                        ctx.fillText('THPT Nguyễn Khuyến', w / 2, 108);
+                        ctx.fillText('Vĩnh Bảo - Hải Phòng', w / 2, 145);
                         ctx.fillStyle = '#bae6fd';
-                        ctx.fillRect(36, 195, w - 72, 180);
+                        ctx.fillRect(30, 180, w - 60, 160);
                     });
                     poster.position.set(bx, 1.45, gz + 0.19);
                     gateGroup.add(poster);
@@ -964,7 +924,6 @@
 
                 addWallCollider(-15.0, -7.55, gz - 0.85, gz + 0.85, 0, 5.4);
 
-                // --- B. Khoảng cổng chính mở rộng (-7.55 -> -1.55) & Hai cánh cổng sắt mở sang hai bên ---
                 [-7.35, -1.75].forEach((gx, idx) => {
                     const gateLeaf = new THREE.Mesh(new THREE.BoxGeometry(0.12, 2.1, 2.2), matIron);
                     gateLeaf.position.set(gx, 1.05, gz - 1.15);
@@ -972,7 +931,6 @@
                     gateGroup.add(gateLeaf);
                 });
 
-                // --- C. Trụ tường trắng vuông gắn chiếc Ê-KE XANH DƯƠNG đặc trưng (-1.55 -> +1.15) ---
                 const whitePillar = new THREE.Mesh(new THREE.BoxGeometry(2.7, 3.65, 1.35), matWhite);
                 whitePillar.position.set(-0.2, 1.825, gz);
                 gateGroup.add(whitePillar);
@@ -981,7 +939,6 @@
                 pillarCap.position.set(-0.2, 3.72, gz);
                 gateGroup.add(pillarCap);
 
-                // Chiếc Ê-ke tam giác xanh dương khoét lỗ gắn chính giữa mặt trước trụ trắng
                 const ekeShape = new THREE.Shape();
                 ekeShape.moveTo(-0.62, -0.78);
                 ekeShape.lineTo(0.68, -0.78);
@@ -1000,7 +957,6 @@
                 ekeMesh.position.set(-0.2, 1.95, gz + 0.68);
                 gateGroup.add(ekeMesh);
 
-                // --- D. Tường biển tên trường màu xanh dương liền kề trụ trắng (+1.15 -> +6.65) ---
                 const signWall = new THREE.Mesh(new THREE.BoxGeometry(5.5, 2.25, 1.05), matRoyalBlue);
                 signWall.position.set(3.9, 1.125, gz);
                 gateGroup.add(signWall);
@@ -1014,21 +970,20 @@
 
                     ctx.textAlign = 'center';
                     ctx.fillStyle = '#e0f2fe';
-                    ctx.font = 'bold 21px Inter, sans-serif';
-                    ctx.fillText('SỞ GIÁO DỤC VÀ ĐÀO TẠO HẢI PHÒNG', w / 2, 52);
+                    ctx.font = 'bold 20px Inter, sans-serif';
+                    ctx.fillText('SỞ GIÁO DỤC VÀ ĐÀO TẠO HẢI PHÒNG', w / 2, 48);
 
                     ctx.fillStyle = '#ffffff';
-                    ctx.font = '800 30px Inter, sans-serif';
-                    ctx.fillText('TRƯỜNG THPT NGUYỄN KHUYẾN', w / 2, 104);
+                    ctx.font = '800 28px Inter, sans-serif';
+                    ctx.fillText('TRƯỜNG THPT NGUYỄN KHUYẾN', w / 2, 96);
 
                     ctx.fillStyle = '#bae6fd';
-                    ctx.font = 'bold 20px Inter, sans-serif';
-                    ctx.fillText('VĨNH BẢO - HẢI PHÒNG', w / 2, 148);
+                    ctx.font = 'bold 19px Inter, sans-serif';
+                    ctx.fillText('VĨNH BẢO - HẢI PHÒNG', w / 2, 138);
                 });
                 schoolSignBoard.position.set(3.9, 1.18, gz + 0.54);
                 gateGroup.add(schoolSignBoard);
 
-                // Bồn hoa viền trắng phía trước tường biển tên
                 const signPlanter = new THREE.Mesh(new THREE.BoxGeometry(5.4, 0.28, 0.65), matWhite);
                 signPlanter.position.set(3.9, 0.14, gz + 0.88);
                 gateGroup.add(signPlanter);
@@ -1042,7 +997,7 @@
 
                 addWallCollider(-1.55, 6.65, gz - 0.72, gz + 1.15, 0, 3.8);
 
-                // --- E. Hàng rào cột gạch đỏ - song sắt đen hai bên & Băng rôn chào mừng ---
+                // Hàng rào cột gạch đỏ - song sắt tối ưu 1 mặt phẳng lặp lại (giảm mạnh lag điện thoại)
                 function buildFenceRun(xStart, xEnd) {
                     const len = Math.abs(xEnd - xStart);
                     const midX = (xStart + xEnd) / 2;
@@ -1055,6 +1010,19 @@
                     topRail.position.set(midX, 2.25, gz);
                     gateGroup.add(topRail);
 
+                    const fenceBarsTex = makeRepeatingTexture(64, 64, Math.max(4, Math.round(len * 2.2)), 1, (ctx, w, h) => {
+                        ctx.clearRect(0, 0, w, h);
+                        ctx.fillStyle = '#1e293b';
+                        ctx.fillRect(26, 0, 12, h);
+                        ctx.fillRect(0, 6, w, 6);
+                    });
+                    const barsPlane = new THREE.Mesh(
+                        new THREE.PlaneGeometry(len, 1.55),
+                        new THREE.MeshBasicMaterial({ map: fenceBarsTex, transparent: true, side: THREE.DoubleSide })
+                    );
+                    barsPlane.position.set(midX, 1.52, gz);
+                    gateGroup.add(barsPlane);
+
                     const step = 3.2;
                     for (let px = Math.min(xStart, xEnd); px <= Math.max(xStart, xEnd) + 0.05; px += step) {
                         const pier = new THREE.Mesh(new THREE.BoxGeometry(0.54, 2.65, 0.54), matBrickPillar);
@@ -1066,20 +1034,12 @@
                         gateGroup.add(cap);
                     }
 
-                    // Song sắt dọc (tối ưu số lượng)
-                    for (let bx = Math.min(xStart, xEnd) + 0.4; bx < Math.max(xStart, xEnd) - 0.3; bx += 0.45) {
-                        const bar = new THREE.Mesh(new THREE.BoxGeometry(0.05, 1.55, 0.05), matIron);
-                        bar.position.set(bx, 1.52, gz);
-                        gateGroup.add(bar);
-                    }
-
                     addWallCollider(Math.min(xStart, xEnd), Math.max(xStart, xEnd), gz - 0.35, gz + 0.35, 0, 2.8);
                 }
 
                 buildFenceRun(-32.0, -15.2);
                 buildFenceRun(6.8, 34.0);
 
-                // Băng rôn đỏ chữ vàng treo trên hàng rào bên phải cổng (giống ảnh thật)
                 const rightFenceBanner = makeSignPlane(14.5, 1.05, (ctx, w, h) => {
                     ctx.fillStyle = '#dc2626';
                     ctx.fillRect(0, 0, w, h);
@@ -1087,15 +1047,14 @@
                     ctx.lineWidth = 6;
                     ctx.strokeRect(4, 4, w - 8, h - 8);
                     ctx.fillStyle = '#fef08a';
-                    ctx.font = 'extrabold 24px Inter, sans-serif';
+                    ctx.font = 'extrabold 22px Inter, sans-serif';
                     ctx.textAlign = 'center';
-                    ctx.fillText('THẦY VÀ TRÒ TRƯỜNG THPT NGUYỄN KHUYẾN', w / 2, 42);
-                    ctx.fillText('QUYẾT TÂM THI ĐUA DẠY TỐT - HỌC TỐT', w / 2, 78);
+                    ctx.fillText('THẦY VÀ TRÒ TRƯỜNG THPT NGUYỄN KHUYẾN', w / 2, 38);
+                    ctx.fillText('QUYẾT TÂM THI ĐUA DẠY TỐT - HỌC TỐT', w / 2, 72);
                 });
                 rightFenceBanner.position.set(17.5, 1.85, gz + 0.24);
                 gateGroup.add(rightFenceBanner);
 
-                // Băng rôn chào mừng bên trái cổng
                 const leftFenceBanner = makeSignPlane(11.0, 0.95, (ctx, w, h) => {
                     ctx.fillStyle = '#dc2626';
                     ctx.fillRect(0, 0, w, h);
@@ -1103,14 +1062,13 @@
                     ctx.lineWidth = 6;
                     ctx.strokeRect(4, 4, w - 8, h - 8);
                     ctx.fillStyle = '#fef08a';
-                    ctx.font = 'extrabold 28px Inter, sans-serif';
+                    ctx.font = 'extrabold 26px Inter, sans-serif';
                     ctx.textAlign = 'center';
-                    ctx.fillText('CHÀO MỪNG CÁC EM HỌC SINH!', w / 2, 58);
+                    ctx.fillText('CHÀO MỪNG CÁC EM HỌC SINH!', w / 2, 54);
                 });
                 leftFenceBanner.position.set(-22.5, 1.85, gz + 0.24);
                 gateGroup.add(leftFenceBanner);
 
-                // Hàng rào bao quanh toàn bộ khuôn viên trường (Trái, Phải & Phía sau)
                 const sideFenceLeft = new THREE.Mesh(new THREE.BoxGeometry(0.4, 2.2, 118), matBrickPillar);
                 sideFenceLeft.position.set(-34.0, 1.1, -21.0);
                 gateGroup.add(sideFenceLeft);
@@ -1126,46 +1084,40 @@
                 gateGroup.add(backFence);
                 addWallCollider(-34.2, 42.4, -79.6, -78.8, 0, 3.0);
 
-                // Đèn đường trang trí dọc vỉa hè trước cổng trường
                 [-19.5, -1.0, 14.5, 30.0].forEach(lx => {
-                    const lampPole = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.1, 4.4, 10), matIron);
+                    const lampPole = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.1, 4.4, 8), matIron);
                     lampPole.position.set(lx, 2.2, 39.2);
                     gateGroup.add(lampPole);
 
-                    const lampArm = new THREE.Mesh(new THREE.BoxGeometry(0.06, 0.06, 0.75), matIron);
-                    lampArm.position.set(lx, 4.35, 39.55);
-                    gateGroup.add(lampArm);
-
                     const lampBulb = new THREE.Mesh(
-                        new THREE.SphereGeometry(0.16, 10, 8),
+                        new THREE.SphereGeometry(0.16, 8, 6),
                         new THREE.MeshBasicMaterial({ color: 0xfef08a })
                     );
                     lampBulb.position.set(lx, 4.25, 39.88);
                     gateGroup.add(lampBulb);
                 });
 
-                // Cột cờ Tổ quốc cao vút ở trung tâm sân trường trước Khán đài
                 const flagBase = new THREE.Mesh(new THREE.BoxGeometry(1.6, 0.36, 1.6), matWhite);
                 flagBase.position.set(0.5, 0.18, -11.4);
                 gateGroup.add(flagBase);
 
                 const flagPole = new THREE.Mesh(
-                    new THREE.CylinderGeometry(0.055, 0.09, 9.6, 12),
+                    new THREE.CylinderGeometry(0.055, 0.09, 9.6, 10),
                     new THREE.MeshStandardMaterial({ color: 0xf8fafc, roughness: 0.25, metalness: 0.8 })
                 );
                 flagPole.position.set(0.5, 4.95, -11.4);
                 gateGroup.add(flagPole);
 
-                const poleFinial = new THREE.Mesh(new THREE.SphereGeometry(0.14, 10, 10), matGold);
+                const poleFinial = new THREE.Mesh(new THREE.SphereGeometry(0.14, 8, 8), matGold);
                 poleFinial.position.set(0.5, 9.82, -11.4);
                 gateGroup.add(poleFinial);
 
-                const vnFlagTex = makeCanvasTexture(256, 170, (ctx, w, h) => {
+                const vnFlagTex = makeCanvasTexture(192, 128, (ctx, w, h) => {
                     ctx.fillStyle = '#dc2626';
                     ctx.fillRect(0, 0, w, h);
                     ctx.fillStyle = '#facc15';
                     ctx.beginPath();
-                    const cx = w / 2, cy = h / 2, spikes = 5, outerR = 46, innerR = 18;
+                    const cx = w / 2, cy = h / 2, spikes = 5, outerR = 34, innerR = 13;
                     let rot = Math.PI / 2 * 3;
                     ctx.moveTo(cx, cy - outerR);
                     for (let i = 0; i < spikes; i++) {
@@ -1177,7 +1129,7 @@
                     ctx.closePath();
                     ctx.fill();
                 });
-                const flagGeo = new THREE.PlaneGeometry(2.1, 1.4, 12, 4);
+                const flagGeo = new THREE.PlaneGeometry(2.1, 1.4, 8, 2);
                 flagGeo.translate(1.05, 0, 0);
                 flagMesh = new THREE.Mesh(
                     flagGeo,
@@ -1192,7 +1144,7 @@
             buildFrontGateAndFences();
 
             // =========================================================================
-            // ĐÀN CÁ KOI & HỒ CÁ HÌNH ELIP CÓ ĐÁ CẢNH QUANH BỜ & HOA SEN
+            // 6. HỒ CÁ KOI HÌNH ELIP CÓ ĐÁ CẢNH QUANH BỜ (KHÔNG CÓ HÒN NON BỘ)
             // =========================================================================
             const koiFishList = [];
             let pondWaterTex = null;
@@ -1205,22 +1157,20 @@
                 const rxInner = rxOuter - 0.36;
                 const rzInner = rzOuter - 0.36;
 
-                // Thành hồ đá trắng hình elip bao quanh
                 const rimShape = new THREE.Shape();
                 rimShape.absellipse(0, 0, rxOuter, rzOuter, 0, Math.PI * 2, false, 0);
                 const rimHole = new THREE.Path();
                 rimHole.absellipse(0, 0, rxInner, rzInner, 0, Math.PI * 2, true, 0);
                 rimShape.holes.push(rimHole);
 
-                const rimGeo = new THREE.ExtrudeGeometry(rimShape, { depth: 0.44, bevelEnabled: true, bevelThickness: 0.03, bevelSize: 0.03, bevelSegments: 2 });
+                const rimGeo = new THREE.ExtrudeGeometry(rimShape, { depth: 0.44, bevelEnabled: false });
                 rimGeo.rotateX(Math.PI / 2);
                 const rimMesh = new THREE.Mesh(rimGeo, matWhite);
                 rimMesh.position.set(cx, 0.44, cz);
                 pondGroup.add(rimMesh);
 
-                // Đáy hồ & mặt nước hình elip xanh trong gợn sóng
                 const basinFloor = new THREE.Mesh(
-                    new THREE.CylinderGeometry(1, 1, 0.06, 36),
+                    new THREE.CylinderGeometry(1, 1, 0.06, 28),
                     new THREE.MeshStandardMaterial({ color: 0x0c4a6e, roughness: 0.9 })
                 );
                 basinFloor.scale.set(rxInner, 1, rzInner);
@@ -1241,21 +1191,19 @@
                 });
 
                 const waterMesh = new THREE.Mesh(
-                    new THREE.CylinderGeometry(1, 1, 0.06, 36),
+                    new THREE.CylinderGeometry(1, 1, 0.06, 28),
                     new THREE.MeshStandardMaterial({
                         map: pondWaterTex,
                         color: 0x38bdf8,
                         transparent: true,
                         opacity: 0.85,
-                        roughness: 0.18,
-                        metalness: 0.25
+                        roughness: 0.2
                     })
                 );
                 waterMesh.scale.set(rxInner, 1, rzInner);
                 waterMesh.position.set(cx, 0.34, cz);
                 pondGroup.add(waterMesh);
 
-                // Xếp đá cảnh / đá cuội tự nhiên nhiều kích cỡ dọc quanh bờ hồ elip
                 const rockMats = [
                     new THREE.MeshStandardMaterial({ color: 0x64748b, roughness: 0.88 }),
                     new THREE.MeshStandardMaterial({ color: 0x94a3b8, roughness: 0.82 }),
@@ -1263,7 +1211,7 @@
                     new THREE.MeshStandardMaterial({ color: 0x78716c, roughness: 0.86 })
                 ];
                 const rockGeo = new THREE.DodecahedronGeometry(0.32, 0);
-                const rockCount = 26;
+                const rockCount = 24;
                 for (let r = 0; r < rockCount; r++) {
                     const theta = (r / rockCount) * Math.PI * 2 + (r % 2) * 0.06;
                     const distFactor = (r % 3 === 0) ? 1.03 : 0.99;
@@ -1279,23 +1227,10 @@
                     pondGroup.add(rock);
                 }
 
-                // Cụm đá trang trí lớn hơn ở hai đầu hồ elip & vài lá sen trên mặt nước
-                [
-                    { x: cx - rxOuter - 0.15, z: cz + 0.35, s: [1.5, 1.2, 1.3] },
-                    { x: cx - rxOuter + 0.25, z: cz - 0.55, s: [1.2, 0.9, 1.1] },
-                    { x: cx + rxOuter + 0.15, z: cz - 0.3, s: [1.45, 1.15, 1.3] },
-                    { x: cx + rxOuter - 0.2, z: cz + 0.55, s: [1.15, 0.85, 1.1] }
-                ].forEach((b, idx) => {
-                    const boulder = new THREE.Mesh(rockGeo, rockMats[idx % rockMats.length]);
-                    boulder.scale.set(b.s[0], b.s[1], b.s[2]);
-                    boulder.position.set(b.x, 0.32, b.z);
-                    pondGroup.add(boulder);
-                });
-
                 const lilyMat = new THREE.MeshStandardMaterial({ color: 0x15803d, roughness: 0.65 });
                 const lotusPinkMat = new THREE.MeshStandardMaterial({ color: 0xf472b6, roughness: 0.45 });
                 [[-3.2, -0.6], [2.8, 0.7], [-1.1, 0.85], [3.6, -0.55]].forEach(([lx, lz], idx) => {
-                    const pad = new THREE.Mesh(new THREE.CylinderGeometry(0.34, 0.34, 0.02, 14), lilyMat);
+                    const pad = new THREE.Mesh(new THREE.CylinderGeometry(0.34, 0.34, 0.02, 12), lilyMat);
                     pad.position.set(cx + lx, 0.38, cz + lz);
                     pondGroup.add(pad);
 
@@ -1306,8 +1241,7 @@
                     }
                 });
 
-                // Đàn cá Koi nhiều màu bơi lội tự do trong hồ hình elip
-                const fishGeo = new THREE.ConeGeometry(0.12, 0.46, 8);
+                const fishGeo = new THREE.ConeGeometry(0.12, 0.46, 6);
                 fishGeo.rotateX(Math.PI / 2);
                 const fishColors = [0xf97316, 0xef4444, 0xfacc15, 0xffffff, 0xfb923c, 0xdc2626, 0xfde047, 0xffedd5, 0xea580c];
 
@@ -1330,7 +1264,6 @@
                 }
 
                 scene.add(pondGroup);
-                enableShadowRecursive(pondGroup, true, true);
                 addWallCollider(cx - rxOuter - 0.2, cx + rxOuter + 0.2, cz - rzOuter - 0.2, cz + rzOuter + 0.2, 0, 1.1);
 
                 interactables.push({
@@ -1346,7 +1279,7 @@
             buildKoiPond();
 
             // =========================================================================
-            // 7. HÀNG CÂY CAU VUA DỌC AO CÁ & HÀNG CÂY BÓNG MÁT + GHẾ ĐÁ + HOA PHƯỢNG RƠI
+            // 7. HÀNG CÂY CAU VUA DỌC AO CÁ & HÀNG CÂY BÓNG MÁT + GHẾ ĐÁ
             // =========================================================================
             const flamboyantPetals = [];
             function buildTreesAndPlanters() {
@@ -1355,30 +1288,27 @@
                 const darkLeafMat = new THREE.MeshStandardMaterial({ color: 0x15803d, roughness: 0.82 });
                 const redFlowerMat = new THREE.MeshStandardMaterial({ color: 0xdc2626, roughness: 0.65 });
 
-                // Bồn cây cảnh xanh cắt tỉa chạy dọc phía sau ao cá (giống hàng rào cây xanh trong ảnh thực tế)
                 const hedgeStrip = new THREE.Mesh(new THREE.BoxGeometry(15.6, 0.55, 1.1), hedgeMat);
                 hedgeStrip.position.set(22.8, 0.275, 29.4);
                 treeGroup.add(hedgeStrip);
                 addWallCollider(15.0, 30.6, 28.85, 29.95, 0, 1.2);
 
-                // Hàng 8 cây cau vua thẳng tắp dọc theo bờ ao cá & hàng rào phải (x = 15.8 -> 29.8, z = 29.4)
                 for (let i = 0; i < 8; i++) {
                     const px = 15.8 + i * 2.0;
                     const pz = 29.4;
                     const palm = new THREE.Group();
                     palm.position.set(px, 0, pz);
 
-                    const trunk = new THREE.Mesh(new THREE.CylinderGeometry(0.14, 0.23, 5.4, 10), matStone);
+                    const trunk = new THREE.Mesh(new THREE.CylinderGeometry(0.14, 0.23, 5.4, 8), matStone);
                     trunk.position.y = 2.7;
                     palm.add(trunk);
 
-                    const crownNeck = new THREE.Mesh(new THREE.CylinderGeometry(0.18, 0.16, 0.95, 10), hedgeMat);
+                    const crownNeck = new THREE.Mesh(new THREE.CylinderGeometry(0.18, 0.16, 0.95, 8), hedgeMat);
                     crownNeck.position.y = 5.55;
                     palm.add(crownNeck);
 
-                    // Tàu lá cau cong mềm tự nhiên
-                    for (let f = 0; f < 8; f++) {
-                        const a = (f / 8) * Math.PI * 2 + (i % 2) * 0.2;
+                    for (let f = 0; f < 6; f++) {
+                        const a = (f / 6) * Math.PI * 2 + (i % 2) * 0.2;
                         const frondInner = new THREE.Mesh(new THREE.BoxGeometry(0.24, 0.05, 1.15), darkLeafMat);
                         frondInner.position.set(Math.sin(a) * 0.52, 6.02, Math.cos(a) * 0.52);
                         frondInner.rotation.y = a;
@@ -1395,8 +1325,6 @@
                     treeGroup.add(palm);
                 }
 
-                // Hai hàng cây bóng mát (phượng vĩ & bàng) xếp thẳng hàng dọc hai mép ngoài sân gạch đỏ
-                // Giữ thông thoáng toàn bộ lòng sân chào cờ ở giữa
                 const shadeRows = [
                     { x: -16.4, z: 22.5, hasBlossom: true },
                     { x: -16.4, z: 12.0, hasBlossom: false },
@@ -1411,7 +1339,6 @@
                     const tObj = new THREE.Group();
                     tObj.position.set(tx, 0, tz);
 
-                    // Bồn cây vuông viền trắng
                     const planter = new THREE.Mesh(new THREE.BoxGeometry(1.65, 0.34, 1.65), matWhite);
                     planter.position.y = 0.17;
                     tObj.add(planter);
@@ -1423,44 +1350,31 @@
                     soil.position.y = 0.18;
                     tObj.add(soil);
 
-                    // Thân cây chính & cành vươn
-                    const trunk = new THREE.Mesh(new THREE.CylinderGeometry(0.2, 0.32, 3.2, 10), matTrunk);
+                    const trunk = new THREE.Mesh(new THREE.CylinderGeometry(0.2, 0.32, 3.2, 8), matTrunk);
                     trunk.position.y = 1.75;
                     tObj.add(trunk);
 
-                    // Tán lá nhiều tầng tròn mượt (không góc cạnh)
-                    const crown1 = new THREE.Mesh(new THREE.SphereGeometry(2.1, 14, 10), darkLeafMat);
+                    const crown1 = new THREE.Mesh(new THREE.SphereGeometry(2.1, 10, 8), darkLeafMat);
                     crown1.scale.set(1.15, 0.68, 1.15);
                     crown1.position.set(0, 4.05, 0);
                     tObj.add(crown1);
 
-                    const crown2 = new THREE.Mesh(new THREE.SphereGeometry(1.55, 12, 10), hedgeMat);
+                    const crown2 = new THREE.Mesh(new THREE.SphereGeometry(1.55, 10, 8), hedgeMat);
                     crown2.scale.set(1.1, 0.65, 1.1);
                     crown2.position.set(0.75, 4.35, 0.35);
                     tObj.add(crown2);
 
-                    const crown3 = new THREE.Mesh(new THREE.SphereGeometry(1.45, 12, 10), hedgeMat);
-                    crown3.scale.set(1.1, 0.65, 1.1);
-                    crown3.position.set(-0.7, 4.25, -0.35);
-                    tObj.add(crown3);
-
                     if (hasBlossom) {
-                        const blossom1 = new THREE.Mesh(new THREE.SphereGeometry(0.85, 10, 8), redFlowerMat);
+                        const blossom1 = new THREE.Mesh(new THREE.SphereGeometry(0.85, 8, 6), redFlowerMat);
                         blossom1.scale.set(1.2, 0.55, 1.2);
                         blossom1.position.set(0.45, 4.75, -0.25);
                         tObj.add(blossom1);
-
-                        const blossom2 = new THREE.Mesh(new THREE.SphereGeometry(0.75, 10, 8), redFlowerMat);
-                        blossom2.scale.set(1.2, 0.55, 1.2);
-                        blossom2.position.set(-0.55, 4.65, 0.45);
-                        tObj.add(blossom2);
                     }
 
                     treeGroup.add(tObj);
                     addWallCollider(tx - 0.82, tx + 0.82, tz - 0.82, tz + 0.82, 0, 3);
                 });
 
-                // Ghế đá sân trường đặt dọc hai hàng cây bóng mát
                 [
                     { x: -15.6, z: 17.2, rot: Math.PI / 2 },
                     { x: -15.6, z: 6.8, rot: Math.PI / 2 },
@@ -1485,10 +1399,10 @@
                     treeGroup.add(bench);
                 });
 
-                // Cánh hoa phượng đỏ rơi nhẹ nhàng trong gió quanh sân trường
                 const petalGeo = new THREE.PlaneGeometry(0.12, 0.08);
                 const petalMat = new THREE.MeshBasicMaterial({ color: 0xef4444, side: THREE.DoubleSide });
-                for (let p = 0; p < 34; p++) {
+                const petalCount = isMobileDevice ? 16 : 30;
+                for (let p = 0; p < petalCount; p++) {
                     const petal = new THREE.Mesh(petalGeo, petalMat);
                     const px = -16 + ((p * 11) % 33);
                     const py = 0.6 + (p % 6) * 0.72;
@@ -1517,7 +1431,6 @@
                 const sx = 0.5;
                 const sz = -16.5;
 
-                // Bục sân khấu chính (y = 0 -> 0.6)
                 const platform = new THREE.Mesh(
                     new THREE.BoxGeometry(12.0, 0.6, 5.4),
                     new THREE.MeshLambertMaterial({ color: 0x991b1b })
@@ -1534,7 +1447,6 @@
 
                 floorZones.push({ minX: sx - 5.9, maxX: sx + 5.9, minZ: sz - 2.6, maxZ: sz + 2.6, y: 0.62 });
 
-                // Bậc tam cấp phía trước để bước lên khán đài
                 for (let step = 0; step < 3; step++) {
                     const stepH = (step + 1) * 0.2;
                     const stepMesh = new THREE.Mesh(
@@ -1556,7 +1468,6 @@
                     endY: 0.62
                 });
 
-                // Phông nền đỏ khán đài & khẩu hiệu
                 const backScreen = new THREE.Mesh(
                     new THREE.BoxGeometry(11.4, 3.6, 0.25),
                     new THREE.MeshLambertMaterial({ color: 0xb91c1c })
@@ -1572,17 +1483,16 @@
                     ctx.lineWidth = 8;
                     ctx.strokeRect(10, 10, w - 20, h - 20);
                     ctx.fillStyle = '#fef08a';
-                    ctx.font = 'bold 24px Inter, sans-serif';
+                    ctx.font = 'bold 22px Inter, sans-serif';
                     ctx.textAlign = 'center';
-                    ctx.fillText('TRƯỜNG THPT NGUYỄN KHUYẾN - VĨNH BẢO - HẢI PHÒNG', w / 2, 54);
+                    ctx.fillText('TRƯỜNG THPT NGUYỄN KHUYẾN - VĨNH BẢO - HẢI PHÒNG', w / 2, 50);
                     ctx.fillStyle = '#ffffff';
-                    ctx.font = 'extrabold 38px Inter, sans-serif';
-                    ctx.fillText('LỄ KHAI GIẢNG & CHÀO MỪNG HỌC SINH', w / 2, 114);
+                    ctx.font = 'extrabold 34px Inter, sans-serif';
+                    ctx.fillText('LỄ KHAI GIẢNG & CHÀO MỪNG HỌC SINH', w / 2, 108);
                 });
                 backdropSign.position.set(sx, 2.45, sz - 2.31);
                 stageGroup.add(backdropSign);
 
-                // Tượng bán thân Bác Hồ trên bục đỏ
                 const bustPedestal = new THREE.Mesh(
                     new THREE.BoxGeometry(0.95, 1.25, 0.85),
                     new THREE.MeshLambertMaterial({ color: 0x7f1d1d })
@@ -1590,15 +1500,14 @@
                 bustPedestal.position.set(sx - 3.6, 1.24, sz - 1.5);
                 stageGroup.add(bustPedestal);
 
-                const bustBody = new THREE.Mesh(new THREE.CylinderGeometry(0.28, 0.34, 0.55, 14), matWhite);
+                const bustBody = new THREE.Mesh(new THREE.CylinderGeometry(0.28, 0.34, 0.55, 12), matWhite);
                 bustBody.position.set(sx - 3.6, 2.12, sz - 1.5);
                 stageGroup.add(bustBody);
 
-                const bustHead = new THREE.Mesh(new THREE.SphereGeometry(0.21, 14, 14), matWhite);
+                const bustHead = new THREE.Mesh(new THREE.SphereGeometry(0.21, 12, 12), matWhite);
                 bustHead.position.set(sx - 3.6, 2.52, sz - 1.5);
                 stageGroup.add(bustHead);
 
-                // Bàn đại biểu phủ khăn đỏ & lẵng hoa
                 const vipTable = new THREE.Mesh(
                     new THREE.BoxGeometry(4.2, 0.82, 0.9),
                     new THREE.MeshLambertMaterial({ color: 0x991b1b })
@@ -1606,23 +1515,13 @@
                 vipTable.position.set(sx + 0.2, 1.03, sz - 0.9);
                 stageGroup.add(vipTable);
 
-                const flowerBowl = new THREE.Mesh(new THREE.SphereGeometry(0.26, 10, 10), matGold);
-                flowerBowl.position.set(sx + 0.2, 1.58, sz - 0.9);
-                stageGroup.add(flowerBowl);
-
-                // Bục phát biểu gắn micro bên phải sân khấu
                 const podium = new THREE.Mesh(new THREE.BoxGeometry(0.85, 1.18, 0.72), matWood);
                 podium.position.set(sx + 4.1, 1.21, sz + 0.9);
                 stageGroup.add(podium);
 
-                const micStem = new THREE.Mesh(new THREE.CylinderGeometry(0.015, 0.015, 0.32, 6), matIron);
-                micStem.position.set(sx + 4.1, 1.92, sz + 0.95);
-                stageGroup.add(micStem);
-
-                // 4 Cột đỏ viền vàng đỡ mái ngói đỏ khán đài + Băng rôn chào mừng học sinh
                 [[-5.6, -2.3], [5.6, -2.3], [-5.6, 2.3], [5.6, 2.3]].forEach(([dx, dz]) => {
                     const col = new THREE.Mesh(
-                        new THREE.CylinderGeometry(0.24, 0.26, 3.8, 12),
+                        new THREE.CylinderGeometry(0.24, 0.26, 3.8, 10),
                         new THREE.MeshLambertMaterial({ color: 0xb91c1c })
                     );
                     col.position.set(sx + dx, 2.5, sz + dz);
@@ -1640,14 +1539,13 @@
                     ctx.lineWidth = 6;
                     ctx.strokeRect(4, 4, w - 8, h - 8);
                     ctx.fillStyle = '#fef08a';
-                    ctx.font = 'extrabold 34px Inter, sans-serif';
+                    ctx.font = 'extrabold 32px Inter, sans-serif';
                     ctx.textAlign = 'center';
-                    ctx.fillText('CHÀO MỪNG CÁC EM HỌC SINH TRỞ LẠI TRƯỜNG', w / 2, 54);
+                    ctx.fillText('CHÀO MỪNG CÁC EM HỌC SINH TRỞ LẠI TRƯỜNG', w / 2, 50);
                 });
                 frontStageBanner.position.set(sx, 4.15, sz + 2.75);
                 stageGroup.add(frontStageBanner);
 
-                // 2 Loa thùng & 2 Pano đứng hai bên khán đài
                 [-6.7, 6.7].forEach((offsetX, idx) => {
                     const speaker = new THREE.Mesh(new THREE.BoxGeometry(0.65, 1.25, 0.6), matIron);
                     speaker.position.set(sx + offsetX, 0.625, sz + 1.8);
@@ -1660,21 +1558,20 @@
                         ctx.lineWidth = 6;
                         ctx.strokeRect(8, 8, w - 16, h - 16);
                         ctx.fillStyle = '#ffffff';
-                        ctx.font = 'bold 28px Inter, sans-serif';
+                        ctx.font = 'bold 26px Inter, sans-serif';
                         ctx.textAlign = 'center';
-                        ctx.fillText(idx === 0 ? 'TIÊN PHONG' : 'SÁNG TẠO', w / 2, 160);
-                        ctx.fillText(idx === 0 ? 'BẢN LĨNH' : 'HỘI NHẬP', w / 2, 220);
+                        ctx.fillText(idx === 0 ? 'TIÊN PHONG' : 'SÁNG TẠO', w / 2, 145);
+                        ctx.fillText(idx === 0 ? 'BẢN LĨNH' : 'HỘI NHẬP', w / 2, 200);
                     });
                     standee.position.set(sx + (idx === 0 ? -7.8 : 7.8), 1.35, sz + 1.2);
                     stageGroup.add(standee);
                 });
 
-                // Hàng biển tên khối lớp xếp ngay ngắn phía trước khán đài
                 const classSigns = ['KHỐI 12A', 'KHỐI 11B', 'KHỐI 10C'];
                 classSigns.forEach((label, idx) => {
                     const cx = sx - 3.6 + idx * 3.6;
                     const cz = sz + 5.2;
-                    const pole = new THREE.Mesh(new THREE.CylinderGeometry(0.03, 0.03, 1.35, 8), matWhite);
+                    const pole = new THREE.Mesh(new THREE.CylinderGeometry(0.03, 0.03, 1.35, 6), matWhite);
                     pole.position.set(cx, 0.675, cz);
                     stageGroup.add(pole);
 
@@ -1685,9 +1582,9 @@
                         ctx.lineWidth = 6;
                         ctx.strokeRect(4, 4, w - 8, h - 8);
                         ctx.fillStyle = '#ffffff';
-                        ctx.font = 'extrabold 42px Inter, sans-serif';
+                        ctx.font = 'extrabold 38px Inter, sans-serif';
                         ctx.textAlign = 'center';
-                        ctx.fillText(label, w / 2, 108);
+                        ctx.fillText(label, w / 2, 98);
                     });
                     board.position.set(cx, 1.45, cz);
                     stageGroup.add(board);
@@ -1719,7 +1616,6 @@
                 const mx = 13.5;
                 const mz = -9.2;
 
-                // Bồn hoa vuông bao quanh chân tượng đài
                 const flowerBed = new THREE.Mesh(
                     new THREE.BoxGeometry(4.4, 0.28, 4.4),
                     new THREE.MeshLambertMaterial({ color: 0x15803d })
@@ -1727,7 +1623,6 @@
                 flowerBed.position.set(mx, 0.14, mz);
                 monGroup.add(flowerBed);
 
-                // Bệ đá 3 cấp
                 const tier1 = new THREE.Mesh(new THREE.BoxGeometry(2.8, 0.45, 2.8), matStone);
                 tier1.position.set(mx, 0.45, mz);
                 monGroup.add(tier1);
@@ -1743,26 +1638,25 @@
                     ctx.lineWidth = 8;
                     ctx.strokeRect(6, 6, w - 12, h - 12);
                     ctx.fillStyle = '#fef08a';
-                    ctx.font = 'bold 26px Inter, sans-serif';
+                    ctx.font = 'bold 24px Inter, sans-serif';
                     ctx.textAlign = 'center';
-                    ctx.fillText('DANH NHÂN VĂN HÓA', w / 2, 85);
-                    ctx.font = 'extrabold 32px Inter, sans-serif';
-                    ctx.fillText('NGUYỄN BỈNH KHIÊM', w / 2, 145);
+                    ctx.fillText('DANH NHÂN VĂN HÓA', w / 2, 78);
+                    ctx.font = 'extrabold 30px Inter, sans-serif';
+                    ctx.fillText('NGUYỄN BỈNH KHIÊM', w / 2, 134);
                 });
                 plaque.position.set(mx, 1.38, mz + 0.96);
                 monGroup.add(plaque);
 
-                // Tượng Danh nhân Văn hóa Nguyễn Bỉnh Khiêm hướng mặt ra cổng (+Z)
                 const statueMat = new THREE.MeshLambertMaterial({ color: 0xd97706 });
-                const robe = new THREE.Mesh(new THREE.CylinderGeometry(0.42, 0.56, 1.85, 14), statueMat);
+                const robe = new THREE.Mesh(new THREE.CylinderGeometry(0.42, 0.56, 1.85, 12), statueMat);
                 robe.position.set(mx, 2.95, mz);
                 monGroup.add(robe);
 
-                const head = new THREE.Mesh(new THREE.SphereGeometry(0.28, 14, 14), statueMat);
+                const head = new THREE.Mesh(new THREE.SphereGeometry(0.28, 12, 12), statueMat);
                 head.position.set(mx, 4.12, mz);
                 monGroup.add(head);
 
-                const hat = new THREE.Mesh(new THREE.CylinderGeometry(0.32, 0.3, 0.25, 12), statueMat);
+                const hat = new THREE.Mesh(new THREE.CylinderGeometry(0.32, 0.3, 0.25, 10), statueMat);
                 hat.position.set(mx, 4.38, mz);
                 monGroup.add(hat);
 
@@ -1793,7 +1687,6 @@
                 const gx = -12.8;
                 const gz = 25.5;
 
-                // Bàn gỗ đặt Sổ Lưu Bút & ghế băng nhỏ
                 const deskTop = new THREE.Mesh(new THREE.BoxGeometry(1.9, 0.1, 1.0), matWood);
                 deskTop.position.set(gx, 0.82, gz);
                 gbGroup.add(deskTop);
@@ -1804,7 +1697,6 @@
                     gbGroup.add(leg);
                 });
 
-                // Quyển Sổ Lưu Bút bìa đỏ mở trang trắng trên mặt bàn
                 const bookCover = new THREE.Mesh(
                     new THREE.BoxGeometry(0.68, 0.04, 0.46),
                     new THREE.MeshLambertMaterial({ color: 0xb91c1c })
@@ -1816,23 +1708,7 @@
                 bookPages.position.set(gx - 0.15, 0.905, gz);
                 gbGroup.add(bookPages);
 
-                // Lọ hoa trang trí góc bàn
-                const vase = new THREE.Mesh(
-                    new THREE.CylinderGeometry(0.09, 0.07, 0.24, 10),
-                    new THREE.MeshLambertMaterial({ color: 0x0284c7 })
-                );
-                vase.position.set(gx + 0.58, 0.99, gz - 0.18);
-                gbGroup.add(vase);
-
-                const flowerTop = new THREE.Mesh(
-                    new THREE.SphereGeometry(0.14, 10, 8),
-                    new THREE.MeshLambertMaterial({ color: 0xf43f5e })
-                );
-                flowerTop.position.set(gx + 0.58, 1.15, gz - 0.18);
-                gbGroup.add(flowerTop);
-
-                // Biển chỉ dẫn Góc Sổ Lưu Bút Kỷ Niệm
-                const post = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.04, 1.95, 8), matWhite);
+                const post = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.04, 1.95, 6), matWhite);
                 post.position.set(gx - 0.95, 0.975, gz - 0.45);
                 gbGroup.add(post);
 
@@ -1843,7 +1719,7 @@
                     ctx.lineWidth = 6;
                     ctx.strokeRect(4, 4, w - 8, h - 8);
                     ctx.fillStyle = '#fef08a';
-                    ctx.font = 'bold 30px Inter, sans-serif';
+                    ctx.font = 'bold 28px Inter, sans-serif';
                     ctx.textAlign = 'center';
                     ctx.textBaseline = 'middle';
                     ctx.fillText('📖 GÓC SỔ LƯU BÚT KỶ NIỆM', w / 2, h / 2);
@@ -1877,14 +1753,14 @@
             const ceilingFans = [];
             function getDoorSignTexture(className) {
                 if (doorSignCache.has(className)) return doorSignCache.get(className);
-                const tex = makeCanvasTexture(256, 72, (ctx, w, h) => {
+                const tex = makeCanvasTexture(224, 64, (ctx, w, h) => {
                     ctx.fillStyle = '#0284c7';
                     ctx.fillRect(0, 0, w, h);
                     ctx.strokeStyle = '#ffffff';
-                    ctx.lineWidth = 6;
+                    ctx.lineWidth = 5;
                     ctx.strokeRect(3, 3, w - 6, h - 6);
                     ctx.fillStyle = '#ffffff';
-                    ctx.font = 'extrabold 32px Inter, sans-serif';
+                    ctx.font = 'extrabold 28px Inter, sans-serif';
                     ctx.textAlign = 'center';
                     ctx.textBaseline = 'middle';
                     ctx.fillText(className, w / 2, h / 2);
@@ -1895,31 +1771,30 @@
 
             function getChalkboardTexture(className) {
                 if (chalkboardCache.has(className)) return chalkboardCache.get(className);
-                const tex = makeCanvasTexture(512, 224, (ctx, w, h) => {
+                const tex = makeCanvasTexture(384, 168, (ctx, w, h) => {
                     ctx.fillStyle = '#14532d';
                     ctx.fillRect(0, 0, w, h);
                     ctx.strokeStyle = '#92400e';
-                    ctx.lineWidth = 14;
-                    ctx.strokeRect(7, 7, w - 14, h - 14);
+                    ctx.lineWidth = 10;
+                    ctx.strokeRect(5, 5, w - 10, h - 10);
 
                     ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
-                    ctx.font = 'bold 24px Inter, sans-serif';
+                    ctx.font = 'bold 18px Inter, sans-serif';
                     ctx.textAlign = 'center';
-                    ctx.fillText('TIÊN HỌC LỄ - HẬU HỌC VĂN', w / 2, 48);
+                    ctx.fillText('TIÊN HỌC LỄ - HẬU HỌC VĂN', w / 2, 36);
 
-                    ctx.font = '600 20px Inter, sans-serif';
+                    ctx.font = '600 16px Inter, sans-serif';
                     ctx.fillStyle = '#fde047';
-                    ctx.fillText(`Chào mừng đến với ${className}`, w / 2, 92);
+                    ctx.fillText(`Chào mừng đến với ${className}`, w / 2, 70);
 
                     ctx.fillStyle = 'rgba(255, 255, 255, 0.82)';
-                    ctx.font = '18px Inter, sans-serif';
-                    ctx.fillText('Trường THPT Nguyễn Khuyến - Vĩnh Bảo, Hải Phòng', w / 2, 140);
+                    ctx.font = '14px Inter, sans-serif';
+                    ctx.fillText('Trường THPT Nguyễn Khuyến - Vĩnh Bảo, Hải Phòng', w / 2, 108);
                 });
                 chalkboardCache.set(className, tex);
                 return tex;
             }
 
-            // Hàm tạo 1 phòng học hoàn chỉnh (cửa mở rộng, cửa sổ kính, ảnh Bác Hồ, quạt trần & 4 dãy bàn)
             function buildClassroomBay(parent, opts) {
                 const { cx, cz, floorY, roomW, roomD, facing, className } = opts;
                 const halfW = roomW / 2;
@@ -1937,7 +1812,6 @@
                 else if (facing === 'west') rotY = -Math.PI / 2;
                 roomGroup.rotation.y = rotY;
 
-                // Tường sau (z = -halfD) có 2 ô cửa sổ kính khung trắng nhìn ra ngoài
                 const backWall = new THREE.Mesh(new THREE.BoxGeometry(roomW, wallH, wallT), matCream);
                 backWall.position.set(0, wallH / 2, -halfD);
                 roomGroup.add(backWall);
@@ -1953,14 +1827,12 @@
                     roomGroup.add(winIn);
                 });
 
-                // Hai tường ngăn bên trái & phải (x = +-halfW)
                 [-halfW, halfW].forEach(wx => {
                     const sideWall = new THREE.Mesh(new THREE.BoxGeometry(wallT, wallH, roomD), matCream);
                     sideWall.position.set(wx, wallH / 2, 0);
                     roomGroup.add(sideWall);
                 });
 
-                // Tường mặt tiền hành lang (z = +halfD) có CỬA MỞ RỘNG 1.4m & Cửa sổ hành lang kính trắng
                 const doorW = 1.42;
                 const leftWallW = roomW - doorW - 0.35;
                 const frontLeft = new THREE.Mesh(new THREE.BoxGeometry(leftWallW, wallH, wallT), matCream);
@@ -1979,7 +1851,6 @@
                 lintel.position.set(halfW - 0.35 - doorW / 2, wallH - 0.575, halfD);
                 roomGroup.add(lintel);
 
-                // Cánh cửa gỗ mở vào trong & Biển tên lớp treo trên cửa
                 const doorLeaf = new THREE.Mesh(new THREE.BoxGeometry(0.08, 2.32, 1.15), matWood);
                 doorLeaf.position.set(halfW - 0.38, 1.16, halfD - 0.62);
                 doorLeaf.rotation.y = 0.18;
@@ -1992,7 +1863,6 @@
                 doorSign.position.set(halfW - 0.35 - doorW / 2, 2.68, halfD + 0.13);
                 roomGroup.add(doorSign);
 
-                // Nội thất bên trong lớp học: Bục giảng, Bảng xanh lớn, Ảnh Bác Hồ, Quạt trần & Bàn ghế
                 const podium = new THREE.Mesh(new THREE.BoxGeometry(1.1, 0.18, 2.4), matWood);
                 podium.position.set(-halfW + 0.72, 0.09, 0);
                 roomGroup.add(podium);
@@ -2009,12 +1879,8 @@
                 portraitFrame.position.set(-halfW + 0.13, 2.75, 0);
                 roomGroup.add(portraitFrame);
 
-                // Quạt trần quay nhẹ giữa phòng học
                 const fanGroup = new THREE.Group();
                 fanGroup.position.set(0.25, wallH - 0.22, 0);
-                const fanRod = new THREE.Mesh(new THREE.CylinderGeometry(0.025, 0.025, 0.24, 6), matWhite);
-                fanRod.position.y = 0.1;
-                fanGroup.add(fanRod);
                 const fanBlades = new THREE.Mesh(new THREE.BoxGeometry(1.15, 0.02, 0.11), matWhite);
                 fanGroup.add(fanBlades);
                 roomGroup.add(fanGroup);
@@ -2063,7 +1929,6 @@
                 }
             }
 
-            // Hàm dựng Cầu thang chữ U (2 vế + chiếu nghỉ giữa tầng 1.9m + tay vịn ngăn đôi)
             function buildUStairwell(parent, opts) {
                 const { cx, cz, bayW, bayD, facing, label } = opts;
                 const stairGroup = new THREE.Group();
@@ -2176,7 +2041,6 @@
             function buildAcademicBlocks() {
                 const campusGroup = new THREE.Group();
 
-                // A. DÃY A
                 const dayA_classesF1 = ['Lớp 12A1', 'Lớp 12A2', 'Lớp 12A3', 'Lớp 12A4', 'Lớp 12A5', 'Lớp 12A6'];
                 const dayA_classesF2 = ['Lớp 12A7', 'Lớp 12A8', 'Lớp 12A9', 'Lớp 12A10', 'Lớp 12A11', 'Phòng Tin học'];
                 const bayW = 4.3;
@@ -2252,14 +2116,13 @@
                     ctx.lineWidth = 6;
                     ctx.strokeRect(4, 4, w - 8, h - 8);
                     ctx.fillStyle = '#fef08a';
-                    ctx.font = 'extrabold 38px Inter, sans-serif';
+                    ctx.font = 'extrabold 36px Inter, sans-serif';
                     ctx.textAlign = 'center';
-                    ctx.fillText('THI ĐUA DẠY TỐT - HỌC TỐT', w / 2, 54);
+                    ctx.fillText('THI ĐUA DẠY TỐT - HỌC TỐT', w / 2, 50);
                 });
                 bannerA.position.set(0.5, 7.05, -20.58);
                 campusGroup.add(bannerA);
 
-                // B. HAI GÓC NỐI 2 TẦNG & 2 LỐI TẮT VÒM THÔNG TẦNG 1 RA ĐẰNG SAU
                 [-20.2, 21.2].forEach(cornerX => {
                     const bridgeF2 = new THREE.Mesh(new THREE.BoxGeometry(5.6, 3.6, 7.2), matCream);
                     bridgeF2.position.set(cornerX, 5.4, -24.3);
@@ -2287,7 +2150,6 @@
                     );
                 });
 
-                // C. DÃY B
                 const dayB_classesF1 = ['Lớp 11B1', 'Lớp 11B2', 'Lớp 11B3', 'Lớp 11B4', 'Lớp 11B5', 'Lớp 11B6'];
                 const dayB_classesF2 = ['Lớp 11B7', 'Lớp 11B8', 'Lớp 11B9', 'Lớp 11B10', 'Lớp 11B11', 'Phòng Thí nghiệm'];
                 const startBZ = -10.5;
@@ -2353,7 +2215,6 @@
                 ridgeB.position.set(-22.1, 7.52, -20.8);
                 campusGroup.add(ridgeB);
 
-                // D. DÃY C
                 const dayC_classesF1 = ['Lớp 10C1', 'Lớp 10C2', 'Lớp 10C3', 'Lớp 10C4', 'Lớp 10C5', 'Lớp 10C6'];
                 const dayC_classesF2 = ['Lớp 10C7', 'Lớp 10C8', 'Lớp 10C9', 'Lớp 10C10', 'Lớp 10C11', 'Thư viện trường'];
                 const roomCX = 24.3;
@@ -2413,7 +2274,7 @@
                 ridgeC.position.set(23.1, 7.52, -20.8);
                 campusGroup.add(ridgeC);
 
-                enableShadowRecursive(campusGroup, true, true);
+                enableShadowRecursive(campusGroup, highGraphicsMode, true);
                 scene.add(campusGroup);
             }
             buildAcademicBlocks();
@@ -2487,11 +2348,6 @@
                         frontWin.rotation.y = Math.PI / 2;
                         frontWin.position.set(eastX + wallT / 2 + 0.015, minY + 1.85, rm.cz + winOffsetZ);
                         adminGroup.add(frontWin);
-
-                        const westWin = new THREE.Mesh(new THREE.PlaneGeometry(1.12, 1.38), matWindowGlass);
-                        westWin.rotation.y = -Math.PI / 2;
-                        westWin.position.set(ax - halfW - wallT / 2 - 0.015, minY + 1.85, rm.cz + winOffsetZ);
-                        adminGroup.add(westWin);
                     });
 
                     const sign = new THREE.Mesh(
@@ -2505,10 +2361,6 @@
                     const desk = new THREE.Mesh(new THREE.BoxGeometry(0.95, 0.76, 1.9), matWood);
                     desk.position.set(ax - 1.5, minY + 0.38, rm.cz);
                     adminGroup.add(desk);
-
-                    const cabinet = new THREE.Mesh(new THREE.BoxGeometry(0.55, 1.85, 1.3), matWood);
-                    cabinet.position.set(ax - halfW + 0.45, minY + 0.925, rm.cz - 1.4);
-                    adminGroup.add(cabinet);
 
                     roomLabels.push({
                         minX: ax - halfW,
@@ -2594,7 +2446,7 @@
                     ctx.lineWidth = 6;
                     ctx.strokeRect(4, 4, sw - 8, sh - 8);
                     ctx.fillStyle = '#ffffff';
-                    ctx.font = 'extrabold 38px Inter, sans-serif';
+                    ctx.font = 'extrabold 36px Inter, sans-serif';
                     ctx.textAlign = 'center';
                     ctx.textBaseline = 'middle';
                     ctx.fillText('KHU HIỆU BỘ', sw / 2, sh / 2);
@@ -2603,22 +2455,7 @@
                 eastBanner.position.set(-17.82, 6.95, az);
                 adminGroup.add(eastBanner);
 
-                const southBanner = makeSignPlane(5.2, 0.72, (ctx, sw, sh) => {
-                    ctx.fillStyle = '#0284c7';
-                    ctx.fillRect(0, 0, sw, sh);
-                    ctx.strokeStyle = '#ffffff';
-                    ctx.lineWidth = 6;
-                    ctx.strokeRect(4, 4, sw - 8, sh - 8);
-                    ctx.fillStyle = '#ffffff';
-                    ctx.font = 'extrabold 36px Inter, sans-serif';
-                    ctx.textAlign = 'center';
-                    ctx.textBaseline = 'middle';
-                    ctx.fillText('KHU HIỆU BỘ', sw / 2, sh / 2);
-                });
-                southBanner.position.set(ax, 6.85, az + halfD + 0.14);
-                adminGroup.add(southBanner);
-
-                enableShadowRecursive(adminGroup, true, true);
+                enableShadowRecursive(adminGroup, highGraphicsMode, true);
                 scene.add(adminGroup);
             }
             buildAdministrationBuilding();
@@ -2632,7 +2469,7 @@
                 const wheelMat = new THREE.MeshLambertMaterial({ color: 0x1e293b });
 
                 [-0.52, 0.52].forEach(wz => {
-                    const wheel = new THREE.Mesh(new THREE.TorusGeometry(0.32, 0.045, 8, 16), wheelMat);
+                    const wheel = new THREE.Mesh(new THREE.TorusGeometry(0.32, 0.045, 6, 14), wheelMat);
                     wheel.rotation.y = Math.PI / 2;
                     wheel.position.set(0, 0.34, wz);
                     bike.add(wheel);
@@ -2673,7 +2510,7 @@
                 shed.add(roof);
 
                 [[-w / 2 + 0.2, -d / 2 + 0.2], [w / 2 - 0.2, -d / 2 + 0.2], [-w / 2 + 0.2, d / 2 - 0.2], [w / 2 - 0.2, d / 2 - 0.2]].forEach(([dx, dz]) => {
-                    const post = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.06, 2.55, 8), matStone);
+                    const post = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.06, 2.55, 6), matStone);
                     post.position.set(cx + dx, 1.275, cz + dz);
                     shed.add(post);
                 });
@@ -2686,9 +2523,9 @@
                         ctx.lineWidth = 6;
                         ctx.strokeRect(4, 4, sw - 8, sh - 8);
                         ctx.fillStyle = '#ffffff';
-                        ctx.font = 'bold 30px Inter, sans-serif';
+                        ctx.font = 'bold 28px Inter, sans-serif';
                         ctx.textAlign = 'center';
-                        ctx.fillText(labelText, sw / 2, 46);
+                        ctx.fillText(labelText, sw / 2, 42);
                     });
                     sign.position.set(cx, 2.38, cz + d / 2 + 0.05);
                     shed.add(sign);
@@ -2744,7 +2581,6 @@
                 backRestroomRoad.position.set(27.5, 0.02, -68.5);
                 backGroup.add(backRestroomRoad);
 
-                // 1. Sân bóng cỏ xanh kẻ sọc & hai khung thành + quả bóng đá họa tiết
                 const fx = 6.5;
                 const fz = -52.5;
                 const fw = 32.0;
@@ -2772,7 +2608,7 @@
                 botLine.rotation.x = -Math.PI / 2; botLine.position.set(fx, 0.055, fz + fd / 2 - 0.6); backGroup.add(botLine);
                 const midLine = new THREE.Mesh(new THREE.PlaneGeometry(0.16, fd - 1.2), lineMat);
                 midLine.rotation.x = -Math.PI / 2; midLine.position.set(fx, 0.055, fz); backGroup.add(midLine);
-                const centerRing = new THREE.Mesh(new THREE.RingGeometry(2.8, 2.98, 28), lineMat);
+                const centerRing = new THREE.Mesh(new THREE.RingGeometry(2.8, 2.98, 24), lineMat);
                 centerRing.rotation.x = -Math.PI / 2; centerRing.position.set(fx, 0.055, fz); backGroup.add(centerRing);
 
                 [-1, 1].forEach(side => {
@@ -2781,11 +2617,11 @@
                     goalGroup.position.set(gx, 0, fz);
 
                     [-2.1, 2.1].forEach(gzOff => {
-                        const post = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.06, 2.15, 8), matWhite);
+                        const post = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.06, 2.15, 6), matWhite);
                         post.position.set(0, 1.075, gzOff);
                         goalGroup.add(post);
                     });
-                    const crossbar = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.06, 4.32, 8), matWhite);
+                    const crossbar = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.06, 4.32, 6), matWhite);
                     crossbar.rotation.x = Math.PI / 2;
                     crossbar.position.set(0, 2.15, 0);
                     goalGroup.add(crossbar);
@@ -2811,14 +2647,12 @@
                     });
                 });
                 soccerBallMesh = new THREE.Mesh(
-                    new THREE.SphereGeometry(0.26, 16, 16),
+                    new THREE.SphereGeometry(0.26, 12, 12),
                     new THREE.MeshStandardMaterial({ map: ballTex, roughness: 0.45 })
                 );
                 soccerBallMesh.position.set(fx, 0.28, fz);
-                soccerBallMesh.castShadow = true;
                 backGroup.add(soccerBallMesh);
 
-                // 2. Dãy 5 lán xe liền nhau đặt sát ngay sau tường khu nhà học (Dãy A, z = -27.9)
                 const shedColors = [
                     [0x0284c7, 0xf59e0b],
                     [0x16a34a, 0xe11d48],
@@ -2831,7 +2665,6 @@
                     buildBikeShedBay(backGroup, scx, -29.75, 7.2, 3.6, `LÁN XE SỐ ${s + 1}`, shedColors[s]);
                 }
 
-                // 3. Hai khu Nhà vệ sinh Nam & Nữ ở góc cuối cùng bên phải
                 window.restroomZones = [];
                 const restrooms = [
                     { cx: 32.0, title: 'NHÀ VỆ SINH NAM', color: '#0284c7' },
@@ -2879,9 +2712,9 @@
                         ctx.lineWidth = 6;
                         ctx.strokeRect(4, 4, sw - 8, sh - 8);
                         ctx.fillStyle = '#ffffff';
-                        ctx.font = 'extrabold 32px Inter, sans-serif';
+                        ctx.font = 'extrabold 28px Inter, sans-serif';
                         ctx.textAlign = 'center';
-                        ctx.fillText(`🚻 ${r.title} • 🚭 CẤM HÚT THUỐC`, sw / 2, 48);
+                        ctx.fillText(`🚻 ${r.title} • 🚭 CẤM HÚT THUỐC`, sw / 2, 44);
                     });
                     sign.position.set(0, 2.85, halfD + 0.14);
                     rGroup.add(sign);
@@ -3016,7 +2849,7 @@
             const memoryShardObjs = [];
             const shardPaperGeo = new THREE.BoxGeometry(0.46, 0.58, 0.05);
             const shardRibbonGeo = new THREE.BoxGeometry(0.48, 0.08, 0.06);
-            const shardRingGeo = new THREE.RingGeometry(0.45, 0.65, 20);
+            const shardRingGeo = new THREE.RingGeometry(0.45, 0.65, 16);
             shardRingGeo.rotateX(-Math.PI / 2);
 
             const shardPaperMat = new THREE.MeshBasicMaterial({ color: 0xfef08a });
@@ -3051,9 +2884,7 @@
                 const shardObj = {
                     ...item,
                     collected: false,
-                    mesh: group,
-                    paper,
-                    ribbon
+                    mesh: group
                 };
                 memoryShardObjs.push(shardObj);
 
@@ -3110,16 +2941,15 @@
                     const msg = `🏆 Chúc mừng ${playerProfile.name}! Bạn đã thu thập đủ 12/12 Mảnh Lưu Bút Kỷ Niệm Trường THPT Nguyễn Khuyến!`;
                     showToast(msg);
                     const entry = {
+                        id: 'gb_' + Date.now() + '_' + Math.random().toString(36).slice(2, 6),
                         tag: '🏆 Đại Sứ Ký Ức',
                         author: `${playerProfile.name} (${playerProfile.className})`,
                         cohort: playerProfile.cohort,
                         text: 'Đã hoàn thành hành trình thu thập trọn vẹn 12/12 Mảnh Lưu Bút Kỷ Niệm quanh mái trường THPT Nguyễn Khuyến!',
                         createdAt: Date.now()
                     };
-                    guestbookEntries.push(entry);
-                    renderGuestbook();
-                    if (channel) channel.postMessage({ type: 'guestbook', id: playerProfile.id, entry });
-                    publishGuestbookToCloud(entry);
+                    addGuestbookEntryLocal(entry);
+                    publishGuestbookToNetwork(entry);
                 } else {
                     showToast(`📜 Đã nhặt ${shardObj.title} (${collectedCount}/12): "${shardObj.story}"`);
                 }
@@ -3205,7 +3035,7 @@
                     char.add(backFlap);
                 }
 
-                const neck = new THREE.Mesh(new THREE.CylinderGeometry(0.075, 0.085, 0.12, 10), skinMat);
+                const neck = new THREE.Mesh(new THREE.CylinderGeometry(0.075, 0.085, 0.12, 8), skinMat);
                 neck.position.set(0, 1.5, 0);
                 char.add(neck);
 
@@ -3277,7 +3107,7 @@
                 }
 
                 char.userData = { leftLeg, rightLeg, leftArm, rightArm };
-                enableShadowRecursive(char, true, false);
+                enableShadowRecursive(char, highGraphicsMode, false);
                 return char;
             }
 
@@ -3311,7 +3141,6 @@
                 scene.add(playerMesh);
             }
 
-            // KHU BẢO VỆ CẠNH CỔNG TRƯỜNG & ĐÚNG 3 BÁC BẢO VỆ
             function buildGuardPost() {
                 const postGroup = new THREE.Group();
                 const gx = -12.2;
@@ -3348,7 +3177,7 @@
                     ctx.lineWidth = 6;
                     ctx.strokeRect(4, 4, sw - 8, sh - 8);
                     ctx.fillStyle = '#ffffff';
-                    ctx.font = 'extrabold 34px Inter, sans-serif';
+                    ctx.font = 'extrabold 32px Inter, sans-serif';
                     ctx.textAlign = 'center';
                     ctx.textBaseline = 'middle';
                     ctx.fillText('KHU BẢO VỆ', sw / 2, sh / 2);
@@ -3384,7 +3213,7 @@
                     x: 16.5,
                     z: -11.5,
                     yaw: -0.6,
-                    quote: 'Đây là tượng đài Danh nhân Văn hóa Nguyễn Bỉnh Khiêm. Phía sau Dãy A có lán xe đạp, sân bóng và hai khu nhà vệ sinh ở góc cuối nhé!'
+                    quote: 'Đây là tượng đài Danh nhân Văn hóa Nguyễn Bỉnh Khiêm. Phía sau Dãy A có 5 lán xe đạp, sân bóng và hai khu nhà vệ sinh ở góc cuối nhé!'
                 }
             ];
 
@@ -3570,7 +3399,6 @@
 
             const btnCamMode = document.getElementById('btn-cam-mode');
             const btnFlycam = document.getElementById('btn-flycam');
-            const btnPerfMode = document.getElementById('btn-perf-mode');
 
             btnCamMode.addEventListener('click', () => {
                 cameraMode = cameraMode === 'first' ? 'third' : 'first';
@@ -3595,33 +3423,35 @@
                 highGraphicsMode = !highGraphicsMode;
                 renderer.shadowMap.enabled = highGraphicsMode;
                 dirLight.castShadow = highGraphicsMode;
-                renderer.setPixelRatio(highGraphicsMode ? Math.min(window.devicePixelRatio || 1, 1.75) : 1);
+                renderer.setPixelRatio(highGraphicsMode ? Math.min(window.devicePixelRatio || 1, 1.5) : 1.0);
                 renderer.setSize(window.innerWidth, window.innerHeight);
                 btnPerfMode.innerHTML = `${highGraphicsMode ? '✨ Đồ họa Cao' : '⚡ Siêu mượt'} • <span id="fps-counter">60</span> FPS`;
             });
 
             // =========================================================================
-            // 19. 1 MÁY CHỦ CHUNG DUY NHẤT (500 BẠN), CHAT, SỔ LƯU BÚT & CHIA SẺ LINK
+            // 19. 1 MÁY CHỦ CHUNG TỰ ĐỘNG ĐA THIẾT BỊ (KHÔNG CẦN CẤU HÌNH), CHAT & LƯU BÚT
             // =========================================================================
             const remotePlayers = new Map();
             const chatHistory = [
                 { sender: '🏫 Hệ thống', text: 'Chào mừng các bạn đến với máy chủ chung Trường THPT Nguyễn Khuyến (tối đa 500 bạn cùng 1 sân trường)!' }
             ];
-            const defaultGuestbookEntries = [
+            const guestbookEntries = [
                 {
+                    id: 'default_1',
                     tag: '🌸 Tuổi học trò',
                     author: 'Ban Quản Trị',
                     cohort: 'THPT Nguyễn Khuyến',
                     text: 'Nơi lưu giữ kỷ niệm đẹp dưới mái trường THPT Nguyễn Khuyến - Vĩnh Bảo, Hải Phòng!'
                 },
                 {
+                    id: 'default_2',
                     tag: '🎓 Tri ân thầy cô',
                     author: 'Cựu học sinh 12A1',
                     cohort: 'Khóa 2018 - 2021',
                     text: 'Mỗi lần quay lại thăm cổng trường xanh và hàng cau vua lại nhớ biết bao kỷ niệm tuổi 17!'
                 }
             ];
-            let guestbookEntries = [...defaultGuestbookEntries];
+            const guestbookIds = new Set(guestbookEntries.map(g => g.id));
 
             function renderChat() {
                 const box = document.getElementById('chat-messages');
@@ -3634,6 +3464,15 @@
             function addChatMessage(sender, text) {
                 chatHistory.push({ sender, text });
                 renderChat();
+            }
+
+            function addGuestbookEntryLocal(entry) {
+                if (!entry || !entry.text) return;
+                const eid = entry.id || `${entry.author}_${entry.text}`;
+                if (guestbookIds.has(eid)) return;
+                guestbookIds.add(eid);
+                guestbookEntries.push(entry);
+                renderGuestbook();
             }
 
             function renderGuestbook() {
@@ -3692,7 +3531,6 @@
                 }[s]));
             }
 
-            // Kiểm tra xem đang chạy ở link xem trước nội bộ (gây lỗi 404 khi gửi Zalo) hay tên miền web công khai
             function isSandboxPreviewUrl(urlStr) {
                 return /googleusercontent\.com|scf\.usercontent\.goog|about:srcdoc|^blob:|^file:/i.test(urlStr);
             }
@@ -3723,7 +3561,7 @@
                     const urlInput = document.getElementById('share-url-input');
                     if (urlInput) urlInput.value = currentUrl;
                     copyTextFallback(currentUrl);
-                    showToast('🔗 Đã sao chép link trường! Bạn có thể dán gửi ngay lên nhóm Zalo.');
+                    showToast('🔗 Đã sao chép link trường! Dán gửi ngay lên nhóm Zalo để gặp nhau.');
                 }
                 document.getElementById('panel-share').classList.remove('hidden');
             });
@@ -3747,9 +3585,9 @@
                         false
                     );
                     mesh.add(label);
-                    mesh.position.set(data.x || -4.6, data.y || 0, data.z || 44.5);
+                    mesh.position.set(data.x ?? -4.6, data.y ?? 0, data.z ?? 44.5);
                     scene.add(mesh);
-                    rp = { ...data, mesh, labelSprite: label, lastSeen: Date.now() };
+                    rp = { ...data, mesh, labelSprite: label, lastSeen: performance.now() };
                     remotePlayers.set(data.id, rp);
                     renderOnlineList();
                 } else {
@@ -3780,189 +3618,147 @@
                     rp.y = data.y;
                     rp.z = data.z;
                     rp.yaw = data.yaw;
-                    rp.lastSeen = Date.now();
+                    rp.lastSeen = performance.now();
                 }
             }
 
-            // Kết nối Máy chủ Đám mây Trực tuyến (Firestore)
-            let cloudDb = null;
-            let cloudUser = null;
-            let cloudAppId = 'thpt-nguyen-khuyen-vb';
-            let lastCloudSyncTime = 0;
-            let lastSyncedPos = { x: 999, y: 999, z: 999, yaw: 999 };
+            // Kết nối Máy chủ Trực tuyến Tự động (WSS Real-Time Multiplayer) — Hai điện thoại khác nhau tự gặp nhau ngay!
+            const ROOM_TOPIC = 'thptnk-vinhbao-hp/v1';
+            let mqttClient = null;
+            let lastNetSyncTime = 0;
 
-            async function initCloudMultiplayer() {
+            function initRealtimeNetwork() {
                 const statusEl = document.getElementById('server-status-text');
-                try {
-                    let fbConfig = CUSTOM_FIREBASE_CONFIG;
-                    if (!fbConfig && typeof __firebase_config !== 'undefined' && __firebase_config) {
-                        fbConfig = JSON.parse(__firebase_config);
-                    }
-                    if (!fbConfig || !fbConfig.apiKey) {
-                        if (statusEl) {
-                            statusEl.textContent = 'Chế độ cục bộ (Gắn cấu hình Cloud để nối nhiều thiết bị)';
-                        }
-                        return;
-                    }
+                if (typeof window.mqtt === 'undefined') {
+                    if (statusEl) statusEl.textContent = '● Máy chủ cục bộ (Đang hoạt động)';
+                    return;
+                }
 
-                    if (typeof __app_id !== 'undefined' && __app_id) {
-                        cloudAppId = __app_id;
-                    }
+                const brokers = [
+                    'wss://broker.emqx.io:8084/mqtt',
+                    'wss://broker.hivemq.com:8884/mqtt'
+                ];
+                let brokerIdx = 0;
 
-                    const fbApp = initializeApp(fbConfig);
-                    const fbAuth = getAuth(fbApp);
-                    cloudDb = getFirestore(fbApp);
-
-                    if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-                        await signInWithCustomToken(fbAuth, __initial_auth_token);
-                    } else {
-                        await signInAnonymously(fbAuth);
-                    }
-                    cloudUser = fbAuth.currentUser;
-                    if (!cloudUser) return;
-
-                    if (statusEl) {
-                        statusEl.textContent = '🟢 Máy chủ Trực tuyến đang hoạt động (Tối đa 500 bạn)';
-                    }
-
-                    const playersCol = collection(cloudDb, 'artifacts', cloudAppId, 'public', 'data', 'nk_players');
-                    onSnapshot(playersCol, (snapshot) => {
-                        const nowMs = Date.now();
-                        const activeIds = new Set();
-                        snapshot.forEach((docSnap) => {
-                            const d = docSnap.data();
-                            if (!d || docSnap.id === playerProfile.id) return;
-                            if (d.updatedAt && nowMs - d.updatedAt > 25000) return;
-                            activeIds.add(docSnap.id);
-                            upsertRemotePlayer({ id: docSnap.id, ...d });
+                function connectBroker() {
+                    try {
+                        const url = brokers[brokerIdx % brokers.length];
+                        mqttClient = window.mqtt.connect(url, {
+                            clientId: 'thptnk_' + playerProfile.id + '_' + Math.random().toString(16).slice(2, 6),
+                            clean: true,
+                            connectTimeout: 6000,
+                            reconnectPeriod: 3500
                         });
 
-                        let removedAny = false;
-                        remotePlayers.forEach((rp, id) => {
-                            if (rp.isCloud && !activeIds.has(id)) {
-                                scene.remove(rp.mesh);
-                                remotePlayers.delete(id);
-                                removedAny = true;
+                        mqttClient.on('connect', () => {
+                            if (statusEl) {
+                                statusEl.className = 'text-[11px] text-emerald-400 font-semibold';
+                                statusEl.textContent = '🟢 Đã nối 1 Máy chủ chung (Tối đa 500 bạn cùng sân trường)';
                             }
+                            mqttClient.subscribe(`${ROOM_TOPIC}/pos/+`);
+                            mqttClient.subscribe(`${ROOM_TOPIC}/leave`);
+                            mqttClient.subscribe(`${ROOM_TOPIC}/chat`);
+                            mqttClient.subscribe(`${ROOM_TOPIC}/gb/+`);
+                            if (playerProfile.loggedIn) publishPositionToNetwork(true);
                         });
-                        activeIds.forEach((id) => {
-                            const rp = remotePlayers.get(id);
-                            if (rp) rp.isCloud = true;
-                        });
-                        if (removedAny) renderOnlineList();
-                    }, (err) => {
-                        console.warn('Players sync warning:', err);
-                    });
 
-                    const chatCol = collection(cloudDb, 'artifacts', cloudAppId, 'public', 'data', 'nk_chat');
-                    onSnapshot(chatCol, (snapshot) => {
-                        const msgs = [];
-                        snapshot.forEach((docSnap) => {
-                            const d = docSnap.data();
-                            if (d && d.sender && d.text) msgs.push(d);
+                        mqttClient.on('error', () => {
+                            brokerIdx++;
                         });
-                        msgs.sort((a, b) => (a.createdAt || 0) - (b.createdAt || 0));
-                        chatHistory.length = 0;
-                        chatHistory.push({
-                            sender: '🏫 Hệ thống',
-                            text: 'Chào mừng các bạn đến với máy chủ chung Trường THPT Nguyễn Khuyến (tối đa 500 bạn cùng 1 sân trường)!'
-                        });
-                        msgs.slice(-45).forEach((m) => chatHistory.push({ sender: m.sender, text: m.text }));
-                        renderChat();
-                    }, (err) => {
-                        console.warn('Chat sync warning:', err);
-                    });
 
-                    const gbCol = collection(cloudDb, 'artifacts', cloudAppId, 'public', 'data', 'nk_guestbook');
-                    onSnapshot(gbCol, (snapshot) => {
-                        const entries = [];
-                        snapshot.forEach((docSnap) => {
-                            const d = docSnap.data();
-                            if (d && d.author && d.text) entries.push(d);
+                        mqttClient.on('message', (topic, payload) => {
+                            try {
+                                const msg = JSON.parse(payload.toString());
+                                if (!msg) return;
+                                if (topic.startsWith(`${ROOM_TOPIC}/pos/`)) {
+                                    if (msg.id && msg.id !== playerProfile.id) {
+                                        upsertRemotePlayer(msg);
+                                    }
+                                } else if (topic === `${ROOM_TOPIC}/leave`) {
+                                    if (msg.id && remotePlayers.has(msg.id)) {
+                                        const rp = remotePlayers.get(msg.id);
+                                        scene.remove(rp.mesh);
+                                        remotePlayers.delete(msg.id);
+                                        renderOnlineList();
+                                    }
+                                } else if (topic === `${ROOM_TOPIC}/chat`) {
+                                    if (msg.id !== playerProfile.id && msg.sender && msg.text) {
+                                        addChatMessage(msg.sender, msg.text);
+                                    }
+                                } else if (topic.startsWith(`${ROOM_TOPIC}/gb/`)) {
+                                    addGuestbookEntryLocal(msg);
+                                }
+                            } catch (e) {}
                         });
-                        entries.sort((a, b) => (a.createdAt || 0) - (b.createdAt || 0));
-                        guestbookEntries = [...defaultGuestbookEntries, ...entries];
-                        renderGuestbook();
-                    }, (err) => {
-                        console.warn('Guestbook sync warning:', err);
-                    });
+                    } catch (e) {}
+                }
 
-                    if (playerProfile.loggedIn) {
-                        syncPlayerToCloud(true);
-                    }
-                } catch (err) {
-                    console.warn('Cloud init fallback:', err);
+                connectBroker();
+            }
+
+            function publishPositionToNetwork(force = false) {
+                const now = performance.now();
+                if (!force && now - lastNetSyncTime < 180) return;
+                lastNetSyncTime = now;
+
+                const payloadObj = {
+                    id: playerProfile.id,
+                    name: playerProfile.name,
+                    className: playerProfile.className,
+                    cohort: playerProfile.cohort,
+                    gender: playerProfile.gender,
+                    outfit: playerProfile.outfit,
+                    x: Number(playerState.x.toFixed(2)),
+                    y: Number(playerState.y.toFixed(2)),
+                    z: Number(playerState.z.toFixed(2)),
+                    yaw: Number(playerState.yaw.toFixed(2))
+                };
+
+                if (mqttClient && mqttClient.connected) {
+                    mqttClient.publish(`${ROOM_TOPIC}/pos/${playerProfile.id}`, JSON.stringify(payloadObj), { qos: 0 });
+                }
+                if (channel) {
+                    channel.postMessage({ type: 'pos', ...payloadObj });
                 }
             }
 
-            async function syncPlayerToCloud(force = false) {
-                if (!cloudDb || !cloudUser || !playerProfile.loggedIn) return;
-                const nowMs = Date.now();
-                const movedDist = Math.hypot(playerState.x - lastSyncedPos.x, playerState.z - lastSyncedPos.z);
-                const yawDiff = Math.abs(playerState.yaw - lastSyncedPos.yaw);
-                if (!force && nowMs - lastCloudSyncTime < 650) return;
-                if (!force && movedDist < 0.08 && yawDiff < 0.08 && nowMs - lastCloudSyncTime < 4500) return;
-
-                lastCloudSyncTime = nowMs;
-                lastSyncedPos = { x: playerState.x, y: playerState.y, z: playerState.z, yaw: playerState.yaw };
-
-                try {
-                    const playerDocRef = doc(cloudDb, 'artifacts', cloudAppId, 'public', 'data', 'nk_players', playerProfile.id);
-                    await setDoc(playerDocRef, {
-                        name: playerProfile.name,
-                        className: playerProfile.className,
-                        cohort: playerProfile.cohort,
-                        gender: playerProfile.gender,
-                        outfit: playerProfile.outfit,
-                        x: Number(playerState.x.toFixed(2)),
-                        y: Number(playerState.y.toFixed(2)),
-                        z: Number(playerState.z.toFixed(2)),
-                        yaw: Number(playerState.yaw.toFixed(2)),
-                        updatedAt: nowMs
-                    }, { merge: true });
-                } catch (e) {}
+            function publishChatToNetwork(sender, text) {
+                const msg = { id: playerProfile.id, sender, text };
+                if (mqttClient && mqttClient.connected) {
+                    mqttClient.publish(`${ROOM_TOPIC}/chat`, JSON.stringify(msg), { qos: 0 });
+                }
+                if (channel) {
+                    channel.postMessage({ type: 'chat', ...msg });
+                }
             }
 
-            async function publishChatToCloud(sender, text) {
-                if (!cloudDb || !cloudUser) return;
-                try {
-                    const chatCol = collection(cloudDb, 'artifacts', cloudAppId, 'public', 'data', 'nk_chat');
-                    await addDoc(chatCol, { sender, text, createdAt: Date.now() });
-                } catch (e) {}
-            }
-
-            async function publishGuestbookToCloud(entry) {
-                if (!cloudDb || !cloudUser) return;
-                try {
-                    const gbCol = collection(cloudDb, 'artifacts', cloudAppId, 'public', 'data', 'nk_guestbook');
-                    await addDoc(gbCol, { ...entry, createdAt: Date.now() });
-                } catch (e) {}
+            function publishGuestbookToNetwork(entry) {
+                if (mqttClient && mqttClient.connected) {
+                    mqttClient.publish(`${ROOM_TOPIC}/gb/${entry.id}`, JSON.stringify(entry), { qos: 0, retain: true });
+                }
+                if (channel) {
+                    channel.postMessage({ type: 'guestbook', id: playerProfile.id, entry });
+                }
             }
 
             window.addEventListener('beforeunload', () => {
-                if (cloudDb && cloudUser && playerProfile.loggedIn) {
-                    const playerDocRef = doc(cloudDb, 'artifacts', cloudAppId, 'public', 'data', 'nk_players', playerProfile.id);
-                    deleteDoc(playerDocRef).catch(() => {});
+                if (mqttClient && mqttClient.connected) {
+                    mqttClient.publish(`${ROOM_TOPIC}/leave`, JSON.stringify({ id: playerProfile.id }));
                 }
             });
-
-            initCloudMultiplayer();
 
             const channel = typeof BroadcastChannel !== 'undefined' ? new BroadcastChannel('thpt_nk_single_server') : null;
             if (channel) {
                 channel.onmessage = (ev) => {
                     const msg = ev.data;
                     if (!msg || msg.id === playerProfile.id) return;
-                    if (msg.type === 'pos') {
-                        upsertRemotePlayer(msg);
-                    } else if (msg.type === 'chat') {
-                        addChatMessage(msg.sender, msg.text);
-                    } else if (msg.type === 'guestbook') {
-                        guestbookEntries.push(msg.entry);
-                        renderGuestbook();
-                    }
+                    if (msg.type === 'pos') upsertRemotePlayer(msg);
+                    else if (msg.type === 'chat') addChatMessage(msg.sender, msg.text);
+                    else if (msg.type === 'guestbook') addGuestbookEntryLocal(msg.entry);
                 };
             }
+
+            initRealtimeNetwork();
 
             document.getElementById('chat-form').addEventListener('submit', e => {
                 e.preventDefault();
@@ -3971,8 +3767,7 @@
                 if (!text) return;
                 const sender = `${playerProfile.name} • Lớp ${playerProfile.className} (${playerProfile.cohort})`;
                 addChatMessage(sender, text);
-                if (channel) channel.postMessage({ type: 'chat', id: playerProfile.id, sender, text });
-                publishChatToCloud(sender, text);
+                publishChatToNetwork(sender, text);
                 input.value = '';
             });
 
@@ -3983,16 +3778,15 @@
                 const text = input.value.trim();
                 if (!text) return;
                 const entry = {
+                    id: 'gb_' + Date.now() + '_' + Math.random().toString(36).slice(2, 6),
                     tag: tagSelect ? tagSelect.value : '🌸 Tuổi học trò',
                     author: `${playerProfile.name} (${playerProfile.className})`,
                     cohort: playerProfile.cohort,
                     text,
                     createdAt: Date.now()
                 };
-                guestbookEntries.push(entry);
-                renderGuestbook();
-                if (channel) channel.postMessage({ type: 'guestbook', id: playerProfile.id, entry });
-                publishGuestbookToCloud(entry);
+                addGuestbookEntryLocal(entry);
+                publishGuestbookToNetwork(entry);
                 input.value = '';
                 showToast('📖 Đã ghi kỷ niệm vào Sổ Lưu Bút chung!');
             });
@@ -4067,7 +3861,7 @@
                 document.getElementById('login-overlay').classList.add('hidden');
                 document.getElementById('hud-root').classList.remove('hidden');
                 renderOnlineList();
-                syncPlayerToCloud(true);
+                publishPositionToNetwork(true);
                 showToast(`🎓 Chào mừng ${playerProfile.name} • Lớp ${playerProfile.className} (${playerProfile.cohort}) đến với Trường THPT Nguyễn Khuyến!`);
             });
 
@@ -4127,9 +3921,6 @@
                     Math.PI * 2
                 );
                 miniCtx.fill();
-                miniCtx.strokeStyle = '#cbd5e1';
-                miniCtx.lineWidth = 1.2;
-                miniCtx.stroke();
 
                 miniCtx.fillStyle = '#fef3c7';
                 miniCtx.fillRect(toMapX(-27.1), toMapY(16.0), (9.2 / 88) * w, (12.4 / 136) * h);
@@ -4148,6 +3939,14 @@
                     miniCtx.arc(toMapX(s.x), toMapY(s.z), 2.1, 0, Math.PI * 2);
                     miniCtx.fill();
                 }
+
+                // Chấm xanh dương cho các bạn bè đang cùng ở sân trường
+                miniCtx.fillStyle = '#38bdf8';
+                remotePlayers.forEach(rp => {
+                    miniCtx.beginPath();
+                    miniCtx.arc(toMapX(rp.x || 0), toMapY(rp.z || 0), 3.2, 0, Math.PI * 2);
+                    miniCtx.fill();
+                });
 
                 const px = toMapX(playerState.x);
                 const py = toMapY(playerState.z);
@@ -4174,7 +3973,7 @@
             let fpsTimer = 0;
             let lastLocationText = '';
             let minimapTick = 0;
-            let broadcastTick = 0;
+            let heartbeatTick = 0;
 
             function animate(now) {
                 requestAnimationFrame(animate);
@@ -4337,6 +4136,14 @@
                             limbs.rightArm.rotation.x *= 0.82;
                         }
                     }
+
+                    heartbeatTick += dt;
+                    if (isMoving) {
+                        publishPositionToNetwork(false);
+                    } else if (heartbeatTick >= 2.2) {
+                        heartbeatTick = 0;
+                        publishPositionToNetwork(true);
+                    }
                 } else {
                     camYaw = Math.PI + Math.sin(now * 0.00035) * 0.26;
                 }
@@ -4423,16 +4230,19 @@
                 }
 
                 const nearbyPlayers = [];
+                let listChanged = false;
                 remotePlayers.forEach((rp, id) => {
-                    if (!rp.isCloud && now - rp.lastSeen > 12000) {
+                    if (now - rp.lastSeen > 12000) {
                         scene.remove(rp.mesh);
                         remotePlayers.delete(id);
-                        renderOnlineList();
+                        listChanged = true;
                         return;
                     }
                     const dist = Math.hypot((rp.x || 0) - playerState.x, (rp.z || 0) - playerState.z);
                     nearbyPlayers.push({ rp, dist });
                 });
+                if (listChanged) renderOnlineList();
+
                 nearbyPlayers.sort((a, b) => a.dist - b.dist);
                 for (let idx = 0; idx < nearbyPlayers.length; idx++) {
                     const { rp } = nearbyPlayers[idx];
@@ -4441,26 +4251,6 @@
                         rp.mesh.position.lerp(new THREE.Vector3(rp.x, rp.y || 0, rp.z), 0.25);
                         rp.mesh.rotation.y = rp.yaw || 0;
                     }
-                }
-
-                syncPlayerToCloud(false);
-
-                broadcastTick += dt;
-                if (channel && broadcastTick >= 0.12) {
-                    broadcastTick = 0;
-                    channel.postMessage({
-                        type: 'pos',
-                        id: playerProfile.id,
-                        name: playerProfile.name,
-                        className: playerProfile.className,
-                        cohort: playerProfile.cohort,
-                        gender: playerProfile.gender,
-                        outfit: playerProfile.outfit,
-                        x: playerState.x,
-                        y: playerState.y,
-                        z: playerState.z,
-                        yaw: playerState.yaw
-                    });
                 }
 
                 minimapTick++;
