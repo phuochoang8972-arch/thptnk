@@ -590,7 +590,7 @@
                 if (/^[^a-zA-ZÀ-ỹ]+$/.test(cleaned)) {
                     return { valid: false, reason: '⚠️ Tên không được chỉ chứa số hoặc ký tự đặc biệt!' };
                 }
-                if (containsProfanity(cleaned)) {
+                if (!allowAdminTitle && containsProfanity(cleaned)) {
                     return { valid: false, reason: '🚫 Tên chứa từ ngữ không phù hợp với môi trường học đường! Vui lòng đặt tên lịch sự.' };
                 }
                 if (!allowAdminTitle && (IMPERSONATION_PATTERN.test(normalizeVietnameseText(cleaned)) || IMPERSONATION_PATTERN.test(normalizeNoPunctVietnamese(cleaned)))) {
@@ -2274,14 +2274,14 @@
                 const bldgGroup = new THREE.Group();
 
                 function createClassroomSign(label, x, y, z, rotY) {
-                    const sign = makeSignPlane(1.48, 0.36, (ctx, w, h) => {
+                    const sign = makeSignPlane(1.68, 0.42, (ctx, w, h) => {
                         ctx.fillStyle = '#0284c7';
                         ctx.fillRect(0, 0, w, h);
                         ctx.strokeStyle = '#ffffff';
                         ctx.lineWidth = 5;
                         ctx.strokeRect(3, 3, w - 6, h - 6);
                         ctx.fillStyle = '#ffffff';
-                        ctx.font = 'extrabold 25px Inter, sans-serif';
+                        ctx.font = 'extrabold 28px Inter, sans-serif';
                         ctx.textAlign = 'center';
                         ctx.textBaseline = 'middle';
                         ctx.fillText(label, w / 2, h / 2);
@@ -2291,347 +2291,290 @@
                     return sign;
                 }
 
-                // --- A. KHU HIỆU BỘ 2 TẦNG (Bên trái cổng vào: x = -26.8..-18.2, z = 16.0..28.4) ---
-                const hbX1 = -26.8, hbX2 = -18.2, hbZ1 = 16.0, hbZ2 = 28.4;
+                // --- A. KHU HIỆU BỘ 2 TẦNG (Phóng to rộng rãi & cao thoáng) ---
+                const hbX1 = -28.2, hbX2 = -18.2, hbZ1 = 15.0, hbZ2 = 29.4;
                 const hbW = hbX2 - hbX1, hbD = hbZ2 - hbZ1;
                 const hbCX = (hbX1 + hbX2) / 2, hbCZ = (hbZ1 + hbZ2) / 2;
 
-                // Sàn tầng 1 & tầng 2 Khu Hiệu bộ
-                const hbFloor1 = new THREE.Mesh(new THREE.BoxGeometry(hbW, 0.2, hbD), matFloorTile);
+                const hbFloor1 = new THREE.Mesh(new THREE.BoxGeometry(hbW, 0.22, hbD), matFloorTile);
                 hbFloor1.position.set(hbCX, 0.1, hbCZ);
                 bldgGroup.add(hbFloor1);
 
-                const hbFloor2 = new THREE.Mesh(new THREE.BoxGeometry(hbW + 1.4, 0.26, hbD), matWhite);
-                hbFloor2.position.set(hbCX + 0.7, 3.35, hbCZ);
+                const hbFloor2 = new THREE.Mesh(new THREE.BoxGeometry(hbW + 1.8, 0.28, hbD), matWhite);
+                hbFloor2.position.set(hbCX + 0.9, 3.65, hbCZ);
                 bldgGroup.add(hbFloor2);
-                floorZones.push({ minX: hbX1, maxX: hbX2 + 1.4, minZ: hbZ1, maxZ: hbZ2, y: 3.48 });
+                floorZones.push({ minX: hbX1, maxX: hbX2 + 1.8, minZ: hbZ1, maxZ: hbZ2, y: 3.78 });
 
-                const hbRoof = new THREE.Mesh(new THREE.BoxGeometry(hbW + 1.8, 0.45, hbD + 0.6), matRedTile);
-                hbRoof.position.set(hbCX + 0.7, 6.95, hbCZ);
+                const hbRoof = new THREE.Mesh(new THREE.BoxGeometry(hbW + 2.2, 0.48, hbD + 0.8), matRedTile);
+                hbRoof.position.set(hbCX + 0.9, 7.45, hbCZ);
                 bldgGroup.add(hbRoof);
 
-                // Tường bao Khu Hiệu bộ (mở cửa chính ở z = 20.6..23.2 hướng ra sân)
-                const hbBackWall = new THREE.Mesh(new THREE.BoxGeometry(0.32, 6.8, hbD), matCream);
-                hbBackWall.position.set(hbX1, 3.4, hbCZ);
+                const hbBackWall = new THREE.Mesh(new THREE.BoxGeometry(0.32, 7.3, hbD), matCream);
+                hbBackWall.position.set(hbX1, 3.65, hbCZ);
                 bldgGroup.add(hbBackWall);
-                addWallCollider(hbX1 - 0.2, hbX1 + 0.2, hbZ1, hbZ2, 0, 7.0);
+                addWallCollider(hbX1 - 0.2, hbX1 + 0.2, hbZ1, hbZ2, 0, 7.6);
 
                 [hbZ1, hbZ2].forEach(wz => {
-                    const sideW = new THREE.Mesh(new THREE.BoxGeometry(hbW, 6.8, 0.32), matCream);
-                    sideW.position.set(hbCX, 3.4, wz);
+                    const sideW = new THREE.Mesh(new THREE.BoxGeometry(hbW, 7.3, 0.32), matCream);
+                    sideW.position.set(hbCX, 3.65, wz);
                     bldgGroup.add(sideW);
-                    addWallCollider(hbX1, hbX2, wz - 0.2, wz + 0.2, 0, 7.0);
+                    addWallCollider(hbX1, hbX2, wz - 0.2, wz + 0.2, 0, 7.6);
                 });
 
-                // Tường mặt tiền Khu Hiệu bộ (chừa cửa rộng ở z = 20.6..23.2)
-                const hbFrontLeft = new THREE.Mesh(new THREE.BoxGeometry(0.32, 6.8, 4.6), matCream);
-                hbFrontLeft.position.set(hbX2, 3.4, 18.3);
+                const hbFrontLeft = new THREE.Mesh(new THREE.BoxGeometry(0.32, 7.3, 4.4), matCream);
+                hbFrontLeft.position.set(hbX2, 3.65, 17.2);
                 bldgGroup.add(hbFrontLeft);
-                addWallCollider(hbX2 - 0.2, hbX2 + 0.2, 16.0, 20.6, 0, 7.0);
+                addWallCollider(hbX2 - 0.2, hbX2 + 0.2, 15.0, 19.4, 0, 7.6);
 
-                const hbFrontRight = new THREE.Mesh(new THREE.BoxGeometry(0.32, 6.8, 5.2), matCream);
-                hbFrontRight.position.set(hbX2, 3.4, 25.8);
+                const hbFrontRight = new THREE.Mesh(new THREE.BoxGeometry(0.32, 7.3, 4.8), matCream);
+                hbFrontRight.position.set(hbX2, 3.65, 27.0);
                 bldgGroup.add(hbFrontRight);
-                addWallCollider(hbX2 - 0.2, hbX2 + 0.2, 23.2, 28.4, 0, 7.0);
+                addWallCollider(hbX2 - 0.2, hbX2 + 0.2, 24.6, 29.4, 0, 7.6);
 
-                // Cột hành lang Khu Hiệu bộ & Biển tên
-                for (let pz = 16.6; pz <= 28.0; pz += 3.8) {
-                    const col = new THREE.Mesh(new THREE.BoxGeometry(0.34, 6.8, 0.34), matStripedPillar);
-                    col.position.set(hbX2 + 1.25, 3.4, pz);
+                for (let pz = 15.6; pz <= 28.8; pz += 4.2) {
+                    const col = new THREE.Mesh(new THREE.BoxGeometry(0.38, 7.3, 0.38), matStripedPillar);
+                    col.position.set(hbX2 + 1.45, 3.65, pz);
                     bldgGroup.add(col);
                 }
-                const hbRail2 = new THREE.Mesh(new THREE.BoxGeometry(0.1, 0.9, hbD), matIron);
-                hbRail2.position.set(hbX2 + 1.28, 3.95, hbCZ);
+                const hbRail2 = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.95, hbD), matIron);
+                hbRail2.position.set(hbX2 + 1.5, 4.2, hbCZ);
                 bldgGroup.add(hbRail2);
-                addWallCollider(hbX2 + 1.15, hbX2 + 1.4, hbZ1, hbZ2, 3.48, 4.5);
+                addWallCollider(hbX2 + 1.35, hbX2 + 1.65, hbZ1, hbZ2, 3.78, 4.8);
 
-                const hbSign = makeSignPlane(4.8, 0.72, (ctx, w, h) => {
+                const hbSign = makeSignPlane(5.4, 0.82, (ctx, w, h) => {
                     ctx.fillStyle = '#0284c7';
                     ctx.fillRect(0, 0, w, h);
                     ctx.strokeStyle = '#ffffff';
                     ctx.lineWidth = 6;
                     ctx.strokeRect(4, 4, w - 8, h - 8);
                     ctx.fillStyle = '#ffffff';
-                    ctx.font = 'extrabold 30px Inter, sans-serif';
+                    ctx.font = 'extrabold 32px Inter, sans-serif';
                     ctx.textAlign = 'center';
-                    ctx.fillText('KHU HIỆU BỘ & PHÒNG TRUYỀN THỐNG', w / 2, 46);
+                    ctx.fillText('KHU HIỆU BỘ & PHÒNG TRUYỀN THỐNG', w / 2, 50);
                 });
                 hbSign.rotation.y = Math.PI / 2;
-                hbSign.position.set(hbX2 + 1.44, 3.35, hbCZ);
+                hbSign.position.set(hbX2 + 1.66, 3.6, hbCZ);
                 bldgGroup.add(hbSign);
 
-                bldgGroup.add(createClassroomSign('PHÒNG HIỆU BỘ', hbX2 + 0.18, 2.65, 21.9, Math.PI / 2));
-                bldgGroup.add(createClassroomSign('PHÒNG TRUYỀN THỐNG', hbX2 + 0.18, 2.65 + 3.48, 21.9, Math.PI / 2));
+                bldgGroup.add(createClassroomSign('PHÒNG HIỆU BỘ', hbX2 + 0.18, 2.85, 22.2, Math.PI / 2));
+                bldgGroup.add(createClassroomSign('PHÒNG TRUYỀN THỐNG', hbX2 + 0.18, 2.85 + 3.78, 22.2, Math.PI / 2));
 
-                populateClassroomFurniture(bldgGroup, -22.5, 0.2, 22.2, 7.6, 11.2, 'north');
-                roomLabels.push({ floor: 1, minX: hbX1, maxX: hbX2 + 1.4, minZ: hbZ1, maxZ: hbZ2, name: 'Khu Hiệu Bộ - Tầng 1' });
-                roomLabels.push({ floor: 2, minX: hbX1, maxX: hbX2 + 1.4, minZ: hbZ1, maxZ: hbZ2, name: 'Phòng Truyền Thống - Tầng 2' });
+                populateClassroomFurniture(bldgGroup, -23.2, 0.2, 22.2, 8.4, 12.0, 'north');
+                roomLabels.push({ floor: 1, minX: hbX1, maxX: hbX2 + 1.8, minZ: hbZ1, maxZ: hbZ2, name: 'Khu Hiệu Bộ - Tầng 1' });
+                roomLabels.push({ floor: 2, minX: hbX1, maxX: hbX2 + 1.8, minZ: hbZ1, maxZ: hbZ2, name: 'Phòng Truyền Thống - Tầng 2' });
 
-                // --- B. GÓC SỔ LƯU BÚT TRƯỚC KHU HIỆU BỘ (x = -12.2, z = 25.5) ---
-                const gbTable = new THREE.Mesh(new THREE.BoxGeometry(1.5, 0.78, 0.85), matWood);
-                gbTable.position.set(-12.2, 0.39, 25.5);
-                bldgGroup.add(gbTable);
-                addWallCollider(-13.0, -11.4, 25.0, 26.0, 0, 1.0);
-
-                const openBook = new THREE.Mesh(
-                    new THREE.BoxGeometry(0.56, 0.06, 0.42),
-                    new THREE.MeshLambertMaterial({ color: 0xdc2626 })
-                );
-                openBook.position.set(-12.3, 0.81, 25.5);
-                bldgGroup.add(openBook);
-
-                const bookPages = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.07, 0.36), matWhite);
-                bookPages.position.set(-12.3, 0.82, 25.5);
-                bldgGroup.add(bookPages);
-
-                const vase = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.11, 0.26, 10), matRoyalBlue);
-                vase.position.set(-11.75, 0.91, 25.45);
-                bldgGroup.add(vase);
-
-                const flower = new THREE.Mesh(
-                    new THREE.SphereGeometry(0.14, 8, 8),
-                    new THREE.MeshLambertMaterial({ color: 0xf43f5e })
-                );
-                flower.position.set(-11.75, 1.08, 25.45);
-                bldgGroup.add(flower);
-
-                const gbSprite = makeTextSprite('📖 SỔ LƯU BÚT', '#78350f', '#fef08a', '#f59e0b');
-                gbSprite.scale.set(2.1, 0.46, 1);
-                gbSprite.position.set(-12.2, 1.68, 25.5);
-                bldgGroup.add(gbSprite);
-
-                interactables.push({
-                    id: 'guestbook_stand',
-                    x: -11.0,
-                    y: 0,
-                    z: 25.5,
-                    radius: 2.6,
-                    label: 'Mở Sổ Lưu Bút THPT Nguyễn Khuyến',
-                    action: () => {
-                        closeAllPanels();
-                        document.getElementById('panel-guestbook').classList.remove('hidden');
-                        switchGuestbookTab('messages');
-                    }
-                });
-
-                // --- C. DÃY B (BÊN TRÁI SÂN TRƯỜNG - KHỐI 11B, 2 TẦNG) ---
-                const bX1 = -26.5, bX2 = -19.5, bZ1 = -12.0, bZ2 = 12.0;
+                // --- B. DÃY B (KHỐI 11B - Rộng & cao thoáng) ---
+                const bX1 = -28.0, bX2 = -19.5, bZ1 = -13.0, bZ2 = 13.0;
                 const bW = bX2 - bX1, bD = bZ2 - bZ1, bCX = (bX1 + bX2) / 2, bCZ = (bZ1 + bZ2) / 2;
 
-                const bSlab2 = new THREE.Mesh(new THREE.BoxGeometry(bW + 1.6, 0.26, bD), matWhite);
-                bSlab2.position.set(bCX + 0.8, 3.35, bCZ);
+                const bSlab2 = new THREE.Mesh(new THREE.BoxGeometry(bW + 1.8, 0.28, bD), matWhite);
+                bSlab2.position.set(bCX + 0.9, 3.65, bCZ);
                 bldgGroup.add(bSlab2);
-                floorZones.push({ minX: bX1, maxX: bX2 + 1.6, minZ: bZ1, maxZ: bZ2, y: 3.48 });
+                floorZones.push({ minX: bX1, maxX: bX2 + 1.8, minZ: bZ1, maxZ: bZ2, y: 3.78 });
 
-                const bRoof = new THREE.Mesh(new THREE.BoxGeometry(bW + 2.0, 0.45, bD + 0.6), matRedTile);
-                bRoof.position.set(bCX + 0.8, 6.95, bCZ);
+                const bRoof = new THREE.Mesh(new THREE.BoxGeometry(bW + 2.2, 0.48, bD + 0.8), matRedTile);
+                bRoof.position.set(bCX + 0.9, 7.45, bCZ);
                 bldgGroup.add(bRoof);
 
-                // Tường sau & 2 đầu hồi Dãy B
-                const bBack = new THREE.Mesh(new THREE.BoxGeometry(0.32, 6.8, bD), matCream);
-                bBack.position.set(bX1, 3.4, bCZ);
+                const bBack = new THREE.Mesh(new THREE.BoxGeometry(0.32, 7.3, bD), matCream);
+                bBack.position.set(bX1, 3.65, bCZ);
                 bldgGroup.add(bBack);
-                addWallCollider(bX1 - 0.2, bX1 + 0.2, bZ1, bZ2, 0, 7.0);
+                addWallCollider(bX1 - 0.2, bX1 + 0.2, bZ1, bZ2, 0, 7.6);
 
                 [bZ1, bZ2].forEach(wz => {
-                    const endW = new THREE.Mesh(new THREE.BoxGeometry(bW, 6.8, 0.32), matCream);
-                    endW.position.set(bCX, 3.4, wz);
+                    const endW = new THREE.Mesh(new THREE.BoxGeometry(bW, 7.3, 0.32), matCream);
+                    endW.position.set(bCX, 3.65, wz);
                     bldgGroup.add(endW);
-                    addWallCollider(bX1, bX2, wz - 0.2, wz + 0.2, 0, 7.0);
+                    addWallCollider(bX1, bX2, wz - 0.2, wz + 0.2, 0, 7.6);
                 });
 
-                // 3 phòng học Dãy B mỗi tầng (z = -12..-4, -4..4, 4..12) có cửa mở rộng ở giữa mỗi phòng
                 const bRooms = ['11B1', '11B2', '11B3'];
                 const bRooms2 = ['11B4', '11B5', '11B6'];
                 bRooms.forEach((rName, idx) => {
-                    const rz1 = -12 + idx * 8;
-                    const rz2 = rz1 + 8;
+                    const rz1 = -13 + idx * 8.66;
+                    const rz2 = rz1 + 8.66;
                     const rMid = (rz1 + rz2) / 2;
 
                     if (idx > 0) {
-                        const partWall = new THREE.Mesh(new THREE.BoxGeometry(bW, 6.8, 0.24), matWhite);
-                        partWall.position.set(bCX, 3.4, rz1);
+                        const partWall = new THREE.Mesh(new THREE.BoxGeometry(bW, 7.3, 0.26), matWhite);
+                        partWall.position.set(bCX, 3.65, rz1);
                         bldgGroup.add(partWall);
-                        addWallCollider(bX1, bX2, rz1 - 0.15, rz1 + 0.15, 0, 7.0);
+                        addWallCollider(bX1, bX2, rz1 - 0.15, rz1 + 0.15, 0, 7.6);
                     }
 
-                    // Tường hành lang chừa cửa rộng 2.4m
-                    const wSeg1 = new THREE.Mesh(new THREE.BoxGeometry(0.28, 6.8, 2.8), matCream);
-                    wSeg1.position.set(bX2, 3.4, rz1 + 1.4);
+                    const wSeg1 = new THREE.Mesh(new THREE.BoxGeometry(0.28, 7.3, 2.8), matCream);
+                    wSeg1.position.set(bX2, 3.65, rz1 + 1.4);
                     bldgGroup.add(wSeg1);
-                    addWallCollider(bX2 - 0.18, bX2 + 0.18, rz1, rz1 + 2.8, 0, 7.0);
+                    addWallCollider(bX2 - 0.18, bX2 + 0.18, rz1, rz1 + 2.8, 0, 7.6);
 
-                    const wSeg2 = new THREE.Mesh(new THREE.BoxGeometry(0.28, 6.8, 2.8), matCream);
-                    wSeg2.position.set(bX2, 3.4, rz2 - 1.4);
+                    const wSeg2 = new THREE.Mesh(new THREE.BoxGeometry(0.28, 7.3, 2.8), matCream);
+                    wSeg2.position.set(bX2, 3.65, rz2 - 1.4);
                     bldgGroup.add(wSeg2);
-                    addWallCollider(bX2 - 0.18, bX2 + 0.18, rz2 - 2.8, rz2, 0, 7.0);
+                    addWallCollider(bX2 - 0.18, bX2 + 0.18, rz2 - 2.8, rz2, 0, 7.6);
 
-                    bldgGroup.add(createClassroomSign(`LỚP ${rName}`, bX2 + 0.16, 2.65, rMid, Math.PI / 2));
-                    bldgGroup.add(createClassroomSign(`LỚP ${bRooms2[idx]}`, bX2 + 0.16, 2.65 + 3.48, rMid, Math.PI / 2));
+                    bldgGroup.add(createClassroomSign(`LỚP ${rName}`, bX2 + 0.18, 2.85, rMid, Math.PI / 2));
+                    bldgGroup.add(createClassroomSign(`LỚP ${bRooms2[idx]}`, bX2 + 0.18, 2.85 + 3.78, rMid, Math.PI / 2));
 
-                    populateClassroomFurniture(bldgGroup, bCX, 0.0, rMid, bW - 0.6, 7.4, 'north');
-                    populateClassroomFurniture(bldgGroup, bCX, 3.48, rMid, bW - 0.6, 7.4, 'north');
+                    populateClassroomFurniture(bldgGroup, bCX, 0.0, rMid, bW - 0.6, 8.0, 'north');
+                    populateClassroomFurniture(bldgGroup, bCX, 3.78, rMid, bW - 0.6, 8.0, 'north');
 
-                    roomLabels.push({ floor: 1, minX: bX1, maxX: bX2 + 1.6, minZ: rz1, maxZ: rz2, name: `Dãy B - Lớp ${rName} (Tầng 1)` });
-                    roomLabels.push({ floor: 2, minX: bX1, maxX: bX2 + 1.6, minZ: rz1, maxZ: rz2, name: `Dãy B - Lớp ${bRooms2[idx]} (Tầng 2)` });
+                    roomLabels.push({ floor: 1, minX: bX1, maxX: bX2 + 1.8, minZ: rz1, maxZ: rz2, name: `Dãy B - Lớp ${rName} (Tầng 1)` });
+                    roomLabels.push({ floor: 2, minX: bX1, maxX: bX2 + 1.8, minZ: rz1, maxZ: rz2, name: `Dãy B - Lớp ${bRooms2[idx]} (Tầng 2)` });
                 });
 
-                for (let pz = bZ1; pz <= bZ2 + 0.1; pz += 4.0) {
-                    const col = new THREE.Mesh(new THREE.BoxGeometry(0.34, 6.8, 0.34), matStripedPillar);
-                    col.position.set(bX2 + 1.45, 3.4, pz);
+                for (let pz = bZ1; pz <= bZ2 + 0.1; pz += 4.3) {
+                    const col = new THREE.Mesh(new THREE.BoxGeometry(0.38, 7.3, 0.38), matStripedPillar);
+                    col.position.set(bX2 + 1.65, 3.65, pz);
                     bldgGroup.add(col);
                 }
-                const bRail2 = new THREE.Mesh(new THREE.BoxGeometry(0.1, 0.9, bD), matIron);
-                bRail2.position.set(bX2 + 1.48, 3.95, bCZ);
+                const bRail2 = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.95, bD), matIron);
+                bRail2.position.set(bX2 + 1.7, 4.2, bCZ);
                 bldgGroup.add(bRail2);
-                addWallCollider(bX2 + 1.35, bX2 + 1.6, bZ1, bZ2, 3.48, 4.5);
+                addWallCollider(bX2 + 1.5, bX2 + 1.85, bZ1, bZ2, 3.78, 4.8);
 
-                // Cầu thang chữ U Dãy B ở z = -15.8 .. -12.0
-                buildUStaircase(bldgGroup, -19.4, -15.6, -12.0, 3.48);
+                buildUStaircase(bldgGroup, -19.2, -16.8, -13.0, 3.78);
 
-                // --- D. DÃY C (BÊN PHẢI SÂN TRƯỜNG - KHỐI 10C, 2 TẦNG) ---
-                const cX1 = 20.5, cX2 = 27.5, cZ1 = -12.0, cZ2 = 20.0;
+                // --- C. DÃY C (KHỐI 10C - Rộng & cao thoáng) ---
+                const cX1 = 19.5, cX2 = 28.5, cZ1 = -13.0, cZ2 = 21.0;
                 const cW = cX2 - cX1, cD = cZ2 - cZ1, cCX = (cX1 + cX2) / 2, cCZ = (cZ1 + cZ2) / 2;
 
-                const cSlab2 = new THREE.Mesh(new THREE.BoxGeometry(cW + 1.6, 0.26, cD), matWhite);
-                cSlab2.position.set(cCX - 0.8, 3.35, cCZ);
+                const cSlab2 = new THREE.Mesh(new THREE.BoxGeometry(cW + 1.8, 0.28, cD), matWhite);
+                cSlab2.position.set(cCX - 0.9, 3.65, cCZ);
                 bldgGroup.add(cSlab2);
-                floorZones.push({ minX: cX1 - 1.6, maxX: cX2, minZ: cZ1, maxZ: cZ2, y: 3.48 });
+                floorZones.push({ minX: cX1 - 1.8, maxX: cX2, minZ: cZ1, maxZ: cZ2, y: 3.78 });
 
-                const cRoof = new THREE.Mesh(new THREE.BoxGeometry(cW + 2.0, 0.45, cD + 0.6), matRedTile);
-                cRoof.position.set(cCX - 0.8, 6.95, cCZ);
+                const cRoof = new THREE.Mesh(new THREE.BoxGeometry(cW + 2.2, 0.48, cD + 0.8), matRedTile);
+                cRoof.position.set(cCX - 0.9, 7.45, cCZ);
                 bldgGroup.add(cRoof);
 
-                const cBack = new THREE.Mesh(new THREE.BoxGeometry(0.32, 6.8, cD), matCream);
-                cBack.position.set(cX2, 3.4, cCZ);
+                const cBack = new THREE.Mesh(new THREE.BoxGeometry(0.32, 7.3, cD), matCream);
+                cBack.position.set(cX2, 3.65, cCZ);
                 bldgGroup.add(cBack);
-                addWallCollider(cX2 - 0.2, cX2 + 0.2, cZ1, cZ2, 0, 7.0);
+                addWallCollider(cX2 - 0.2, cX2 + 0.2, cZ1, cZ2, 0, 7.6);
 
                 [cZ1, cZ2].forEach(wz => {
-                    const endW = new THREE.Mesh(new THREE.BoxGeometry(cW, 6.8, 0.32), matCream);
-                    endW.position.set(cCX, 3.4, wz);
+                    const endW = new THREE.Mesh(new THREE.BoxGeometry(cW, 7.3, 0.32), matCream);
+                    endW.position.set(cCX, 3.65, wz);
                     bldgGroup.add(endW);
-                    addWallCollider(cX1, cX2, wz - 0.2, wz + 0.2, 0, 7.0);
+                    addWallCollider(cX1, cX2, wz - 0.2, wz + 0.2, 0, 7.6);
                 });
 
                 const cRooms1 = ['10C1', '10C2', '10C3', '10C4'];
                 const cRooms2 = ['10C5', '10C6', '10C7', '10C8'];
                 cRooms1.forEach((rName, idx) => {
-                    const rz1 = -12 + idx * 8;
-                    const rz2 = rz1 + 8;
+                    const rz1 = -13 + idx * 8.5;
+                    const rz2 = rz1 + 8.5;
                     const rMid = (rz1 + rz2) / 2;
 
                     if (idx > 0) {
-                        const partWall = new THREE.Mesh(new THREE.BoxGeometry(cW, 6.8, 0.24), matWhite);
-                        partWall.position.set(cCX, 3.4, rz1);
+                        const partWall = new THREE.Mesh(new THREE.BoxGeometry(cW, 7.3, 0.26), matWhite);
+                        partWall.position.set(cCX, 3.65, rz1);
                         bldgGroup.add(partWall);
-                        addWallCollider(cX1, cX2, rz1 - 0.15, rz1 + 0.15, 0, 7.0);
+                        addWallCollider(cX1, cX2, rz1 - 0.15, rz1 + 0.15, 0, 7.6);
                     }
 
-                    const wSeg1 = new THREE.Mesh(new THREE.BoxGeometry(0.28, 6.8, 2.8), matCream);
-                    wSeg1.position.set(cX1, 3.4, rz1 + 1.4);
+                    const wSeg1 = new THREE.Mesh(new THREE.BoxGeometry(0.28, 7.3, 2.8), matCream);
+                    wSeg1.position.set(cX1, 3.65, rz1 + 1.4);
                     bldgGroup.add(wSeg1);
-                    addWallCollider(cX1 - 0.18, cX1 + 0.18, rz1, rz1 + 2.8, 0, 7.0);
+                    addWallCollider(cX1 - 0.18, cX1 + 0.18, rz1, rz1 + 2.8, 0, 7.6);
 
-                    const wSeg2 = new THREE.Mesh(new THREE.BoxGeometry(0.28, 6.8, 2.8), matCream);
-                    wSeg2.position.set(cX1, 3.4, rz2 - 1.4);
+                    const wSeg2 = new THREE.Mesh(new THREE.BoxGeometry(0.28, 7.3, 2.8), matCream);
+                    wSeg2.position.set(cX1, 3.65, rz2 - 1.4);
                     bldgGroup.add(wSeg2);
-                    addWallCollider(cX1 - 0.18, cX1 + 0.18, rz2 - 2.8, rz2, 0, 7.0);
+                    addWallCollider(cX1 - 0.18, cX1 + 0.18, rz2 - 2.8, rz2, 0, 7.6);
 
-                    bldgGroup.add(createClassroomSign(`LỚP ${rName}`, cX1 - 0.16, 2.65, rMid, -Math.PI / 2));
-                    bldgGroup.add(createClassroomSign(`LỚP ${cRooms2[idx]}`, cX1 - 0.16, 2.65 + 3.48, rMid, -Math.PI / 2));
+                    bldgGroup.add(createClassroomSign(`LỚP ${rName}`, cX1 - 0.18, 2.85, rMid, -Math.PI / 2));
+                    bldgGroup.add(createClassroomSign(`LỚP ${cRooms2[idx]}`, cX1 - 0.18, 2.85 + 3.78, rMid, -Math.PI / 2));
 
-                    populateClassroomFurniture(bldgGroup, cCX, 0.0, rMid, cW - 0.6, 7.4, 'north');
-                    populateClassroomFurniture(bldgGroup, cCX, 3.48, rMid, cW - 0.6, 7.4, 'north');
+                    populateClassroomFurniture(bldgGroup, cCX, 0.0, rMid, cW - 0.6, 7.8, 'north');
+                    populateClassroomFurniture(bLink = bldgGroup, cCX, 3.78, rMid, cW - 0.6, 7.8, 'north');
 
-                    roomLabels.push({ floor: 1, minX: cX1 - 1.6, maxX: cX2, minZ: rz1, maxZ: rz2, name: `Dãy C - Lớp ${rName} (Tầng 1)` });
-                    roomLabels.push({ floor: 2, minX: cX1 - 1.6, maxX: cX2, minZ: rz1, maxZ: rz2, name: `Dãy C - Lớp ${cRooms2[idx]} (Tầng 2)` });
+                    roomLabels.push({ floor: 1, minX: cX1 - 1.8, maxX: cX2, minZ: rz1, maxZ: rz2, name: `Dãy C - Lớp ${rName} (Tầng 1)` });
+                    roomLabels.push({ floor: 2, minX: cX1 - 1.8, maxX: cX2, minZ: rz1, maxZ: rz2, name: `Dãy C - Lớp ${cRooms2[idx]} (Tầng 2)` });
                 });
 
-                for (let pz = cZ1; pz <= cZ2 + 0.1; pz += 4.0) {
-                    const col = new THREE.Mesh(new THREE.BoxGeometry(0.34, 6.8, 0.34), matStripedPillar);
-                    col.position.set(cX1 - 1.45, 3.4, pz);
+                for (let pz = cZ1; pz <= cZ2 + 0.1; pz += 4.3) {
+                    const col = new THREE.Mesh(new THREE.BoxGeometry(0.38, 7.3, 0.38), matStripedPillar);
+                    col.position.set(cX1 - 1.65, 3.65, pz);
                     bldgGroup.add(col);
                 }
-                const cRail2 = new THREE.Mesh(new THREE.BoxGeometry(0.1, 0.9, cD), matIron);
-                cRail2.position.set(cX1 - 1.48, 3.95, cCZ);
+                const cRail2 = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.95, cD), matIron);
+                cRail2.position.set(cX1 - 1.7, 4.2, cCZ);
                 bldgGroup.add(cRail2);
-                addWallCollider(cX1 - 1.6, cX1 - 1.35, cZ1, cZ2, 3.48, 4.5);
+                addWallCollider(cX1 - 1.85, cX1 - 1.5, cZ1, cZ2, 3.78, 4.8);
 
-                // Cầu thang chữ U Dãy C ở z = -15.6 .. -12.0
-                buildUStaircase(bldgGroup, 19.6, -15.6, -12.0, 3.48);
+                buildUStaircase(bldgGroup, 19.3, -16.8, -13.0, 3.78);
 
-                // --- E. DÃY A (PHÍA BẮC SAU LỄ ĐÀI - KHỐI 12A, 2 TẦNG) ---
-                const aX1 = -12.0, aX2 = 16.0, aZ1 = -26.8, aZ2 = -20.2;
+                // --- D. DÃY A (KHỐI 12A - Rộng & cao thoáng) ---
+                const aX1 = -13.0, aX2 = 17.0, aZ1 = -28.0, aZ2 = -20.5;
                 const aW = aX2 - aX1, aD = aZ2 - aZ1, aCX = (aX1 + aX2) / 2, aCZ = (aZ1 + aZ2) / 2;
 
-                const aSlab2 = new THREE.Mesh(new THREE.BoxGeometry(aW, 0.26, aD + 1.6), matWhite);
-                aSlab2.position.set(aCX, 3.35, aCZ + 0.8);
+                const aSlab2 = new THREE.Mesh(new THREE.BoxGeometry(aW, 0.28, aD + 1.8), matWhite);
+                aSlab2.position.set(aCX, 3.65, aCZ + 0.9);
                 bldgGroup.add(aSlab2);
-                floorZones.push({ minX: aX1, maxX: aX2, minZ: aZ1, maxZ: aZ2 + 1.6, y: 3.48 });
+                floorZones.push({ minX: aX1, maxX: aX2, minZ: aZ1, maxZ: aZ2 + 1.8, y: 3.78 });
 
-                const aRoof = new THREE.Mesh(new THREE.BoxGeometry(aW + 0.6, 0.45, aD + 2.0), matRedTile);
-                aRoof.position.set(aCX, 6.95, aCZ + 0.8);
+                const aRoof = new THREE.Mesh(new THREE.BoxGeometry(aW + 0.8, 0.48, aD + 2.2), matRedTile);
+                aRoof.position.set(aCX, 7.45, aCZ + 0.9);
                 bldgGroup.add(aRoof);
 
-                const aBack = new THREE.Mesh(new THREE.BoxGeometry(aW, 6.8, 0.32), matCream);
-                aBack.position.set(aCX, 3.4, aZ1);
+                const aBack = new THREE.Mesh(new THREE.BoxGeometry(aW, 7.3, 0.32), matCream);
+                aBack.position.set(aCX, 3.65, aZ1);
                 bldgGroup.add(aBack);
-                addWallCollider(aX1, aX2, aZ1 - 0.2, aZ1 + 0.2, 0, 7.0);
+                addWallCollider(aX1, aX2, aZ1 - 0.2, aZ1 + 0.2, 0, 7.6);
 
                 [aX1, aX2].forEach(wx => {
-                    const endW = new THREE.Mesh(new THREE.BoxGeometry(0.32, 6.8, aD), matCream);
-                    endW.position.set(wx, 3.4, aCZ);
+                    const endW = new THREE.Mesh(new THREE.BoxGeometry(0.32, 7.3, aD), matCream);
+                    endW.position.set(wx, 3.65, aCZ);
                     bldgGroup.add(endW);
-                    addWallCollider(wx - 0.2, wx + 0.2, aZ1, aZ2, 0, 7.0);
+                    addWallCollider(wx - 0.2, wx + 0.2, aZ1, aZ2, 0, 7.6);
                 });
 
                 const aRooms1 = ['12A1', '12A2', '12A3', '12A4'];
                 const aRooms2 = ['12A5', '12A6', '12A7', '12A8'];
                 aRooms1.forEach((rName, idx) => {
-                    const rx1 = -12 + idx * 7;
-                    const rx2 = rx1 + 7;
+                    const rx1 = -13 + idx * 7.5;
+                    const rx2 = rx1 + 7.5;
                     const rMid = (rx1 + rx2) / 2;
 
                     if (idx > 0) {
-                        const partWall = new THREE.Mesh(new THREE.BoxGeometry(0.24, 6.8, aD), matWhite);
-                        partWall.position.set(rx1, 3.4, aCZ);
+                        const partWall = new THREE.Mesh(new THREE.BoxGeometry(0.26, 7.3, aD), matWhite);
+                        partWall.position.set(rx1, 3.65, aCZ);
                         bldgGroup.add(partWall);
-                        addWallCollider(rx1 - 0.15, rx1 + 0.15, aZ1, aZ2, 0, 7.0);
+                        addWallCollider(rx1 - 0.15, rx1 + 0.15, aZ1, aZ2, 0, 7.6);
                     }
 
-                    const wSeg1 = new THREE.Mesh(new THREE.BoxGeometry(2.3, 6.8, 0.28), matCream);
-                    wSeg1.position.set(rx1 + 1.15, 3.4, aZ2);
+                    const wSeg1 = new THREE.Mesh(new THREE.BoxGeometry(2.4, 7.3, 0.28), matCream);
+                    wSeg1.position.set(rx1 + 1.2, 3.65, aZ2);
                     bldgGroup.add(wSeg1);
-                    addWallCollider(rx1, rx1 + 2.3, aZ2 - 0.18, aZ2 + 0.18, 0, 7.0);
+                    addWallCollider(rx1, rx1 + 2.4, aZ2 - 0.18, aZ2 + 0.18, 0, 7.6);
 
-                    const wSeg2 = new THREE.Mesh(new THREE.BoxGeometry(2.3, 6.8, 0.28), matCream);
-                    wSeg2.position.set(rx2 - 1.15, 3.4, aZ2);
+                    const wSeg2 = new THREE.Mesh(new THREE.BoxGeometry(2.4, 7.3, 0.28), matCream);
+                    wSeg2.position.set(rx2 - 1.2, 3.65, aZ2);
                     bldgGroup.add(wSeg2);
-                    addWallCollider(rx2 - 2.3, rx2, aZ2 - 0.18, aZ2 + 0.18, 0, 7.0);
+                    addWallCollider(rx2 - 2.4, rx2, aZ2 - 0.18, aZ2 + 0.18, 0, 7.6);
 
-                    bldgGroup.add(createClassroomSign(`LỚP ${rName}`, rMid, 2.65, aZ2 + 0.16, 0));
-                    bldgGroup.add(createClassroomSign(`LỚP ${aRooms2[idx]}`, rMid, 2.65 + 3.48, aZ2 + 0.16, 0));
+                    bldgGroup.add(createClassroomSign(`LỚP ${rName}`, rMid, 2.85, aZ2 + 0.18, 0));
+                    bldgGroup.add(createClassroomSign(`LỚP ${aRooms2[idx]}`, rMid, 2.85 + 3.78, aZ2 + 0.18, 0));
 
-                    populateClassroomFurniture(bldgGroup, rMid, 0.0, aCZ, 6.4, aD - 0.6, 'north');
-                    populateClassroomFurniture(bldgGroup, rMid, 3.48, aCZ, 6.4, aD - 0.6, 'north');
+                    populateClassroomFurniture(bldgGroup, rMid, 0.0, aCZ, 6.8, aD - 0.6, 'north');
+                    populateClassroomFurniture(bldgGroup, rMid, 3.78, aCZ, 6.8, aD - 0.6, 'north');
 
-                    roomLabels.push({ floor: 1, minX: rx1, maxX: rx2, minZ: aZ1, maxZ: aZ2 + 1.6, name: `Dãy A - Lớp ${rName} (Tầng 1)` });
-                    roomLabels.push({ floor: 2, minX: rx1, maxX: rx2, minZ: aZ1, maxZ: aZ2 + 1.6, name: `Dãy A - Lớp ${aRooms2[idx]} (Tầng 2)` });
+                    roomLabels.push({ floor: 1, minX: rx1, maxX: rx2, minZ: aZ1, maxZ: aZ2 + 1.8, name: `Dãy A - Lớp ${rName} (Tầng 1)` });
+                    roomLabels.push({ floor: 2, minX: rx1, maxX: rx2, minZ: aZ1, maxZ: aZ2 + 1.8, name: `Dãy A - Lớp ${aRooms2[idx]} (Tầng 2)` });
                 });
 
-                for (let px = aX1; px <= aX2 + 0.1; px += 3.5) {
-                    const col = new THREE.Mesh(new THREE.BoxGeometry(0.34, 6.8, 0.34), matStripedPillar);
-                    col.position.set(px, 3.4, aZ2 + 1.45);
+                for (let px = aX1; px <= aX2 + 0.1; px += 3.75) {
+                    const col = new THREE.Mesh(new THREE.BoxGeometry(0.38, 7.3, 0.38), matStripedPillar);
+                    col.position.set(px, 3.65, aZ2 + 1.65);
                     bldgGroup.add(col);
                 }
-                const aRail2 = new THREE.Mesh(new THREE.BoxGeometry(aW, 0.9, 0.1), matIron);
-                aRail2.position.set(aCX, 3.95, aZ2 + 1.48);
+                const aRail2 = new THREE.Mesh(new THREE.BoxGeometry(aW, 0.95, 0.12), matIron);
+                aRail2.position.set(aCX, 4.2, aZ2 + 1.7);
                 bldgGroup.add(aRail2);
-                addWallCollider(aX1, aX2, aZ2 + 1.35, aZ2 + 1.6, 3.48, 4.5);
+                addWallCollider(aX1, aX2, aZ2 + 1.5, aZ2 + 1.85, 3.78, 4.8);
 
-                // Cầu thang chữ U Dãy A ở x = -13.6, z = -16.8 .. -20.2
-                buildUStaircase(bldgGroup, -13.6, -16.8, -20.2, 3.48);
+                buildUStaircase(bldgGroup, -14.2, -16.8, -21.2, 3.78);
 
                 enableShadowRecursive(bldgGroup, true, true);
                 scene.add(bldgGroup);
@@ -4466,11 +4409,11 @@
                                 } else if (topic === `${ROOM_TOPIC}/chat`) {
                                     if (msg.id !== playerProfile.id && msg.sender && msg.text) {
                                         if (msg.id && (mutedPlayers.has(msg.id) || bannedPlayers.has(msg.id))) return;
-                                        if (containsProfanity(msg.text)) return;
+                                        if (!msg.isAdmin && containsProfanity(msg.text)) return;
                                         addChatMessage(msg.sender, msg.text, msg.id, msg.senderName || msg.sender, Boolean(msg.isAdmin));
                                     }
                                 } else if (topic.startsWith(`${ROOM_TOPIC}/gb/`)) {
-                                    if (!containsProfanity(msg.text || '')) {
+                                    if (msg.isAdmin || !containsProfanity(msg.text || '')) {
                                         addGuestbookEntryLocal(msg);
                                     }
                                 } else if (topic.startsWith(`${ROOM_TOPIC}/admin/ban/`)) {
@@ -4571,10 +4514,10 @@
                     if (msg.type === 'pos') upsertRemotePlayer(msg);
                     else if (msg.type === 'chat') {
                         if (msg.id && (mutedPlayers.has(msg.id) || bannedPlayers.has(msg.id))) return;
-                        if (containsProfanity(msg.text || '')) return;
+                        if (!msg.isAdmin && containsProfanity(msg.text || '')) return;
                         addChatMessage(msg.sender, msg.text, msg.id, msg.senderName || msg.sender, Boolean(msg.isAdmin));
                     } else if (msg.type === 'guestbook') {
-                        if (!containsProfanity(msg.entry?.text || '')) addGuestbookEntryLocal(msg.entry);
+                        if (msg.entry?.isAdmin || !containsProfanity(msg.entry?.text || '')) addGuestbookEntryLocal(msg.entry);
                     } else if (msg.type === 'admin_ban') handleIncomingBanState(msg);
                     else if (msg.type === 'admin_mute') handleIncomingMuteState(msg);
                     else if (msg.type === 'admin_clear_chat') {
@@ -4602,7 +4545,7 @@
                 const input = document.getElementById('chat-input');
                 const text = input.value.trim();
                 if (!text) return;
-                if (containsProfanity(text)) {
+                if (!isAdminUser && containsProfanity(text)) {
                     showToast('🚫 Tin nhắn chứa từ ngữ không phù hợp với môi trường học đường! Vui lòng giao tiếp văn minh.');
                     input.value = '';
                     return;
@@ -4625,7 +4568,7 @@
                 const tagSelect = document.getElementById('guestbook-tag');
                 const text = input.value.trim();
                 if (!text) return;
-                if (containsProfanity(text)) {
+                if (!isAdminUser && containsProfanity(text)) {
                     showToast('🚫 Nội dung lưu bút chứa từ ngữ không phù hợp!');
                     input.value = '';
                     return;
@@ -4636,6 +4579,7 @@
                     tag: tagSelect ? tagSelect.value : '🌸 Tuổi học trò',
                     author: `${adminPrefix}${playerProfile.name} (${playerProfile.className})`,
                     cohort: playerProfile.cohort,
+                    isAdmin: isAdminUser,
                     text,
                     createdAt: Date.now()
                 };
