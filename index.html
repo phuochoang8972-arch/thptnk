@@ -85,9 +85,9 @@
                 </div>
                 <div class="min-w-0 flex-1">
                     <div class="flex items-center gap-1.5 flex-wrap">
-                        <h2 class="text-sm font-extrabold uppercase tracking-wide text-slate-900">THẺ HỌC SINH THPT NGUYỄN KHUYẾN</h2>
+                        <h2 id="login-card-title" class="text-sm font-extrabold uppercase tracking-wide text-slate-900">THẺ NGƯỜI THAM GIA THPT NGUYỄN KHUYẾN</h2>
                         <span id="login-admin-badge" class="hidden px-2 py-0.5 rounded-full bg-amber-500 text-slate-950 text-[10px] font-extrabold shadow-sm">
-                            👑 QUYỀN ADMIN
+                            👑 LINK QUẢN TRỊ (ADMIN)
                         </span>
                     </div>
                     <p class="text-[11px] text-sky-600 font-semibold">Vĩnh Bảo - Hải Phòng</p>
@@ -95,31 +95,31 @@
             </div>
 
             <div id="login-admin-notice" class="hidden mb-3 px-3 py-2 rounded-xl bg-amber-50 border border-amber-300 text-amber-900 text-[11px] font-semibold">
-                👑 Bạn đang truy cập bằng <strong>Link Quản Trị Viên (Admin)</strong>: Có quyền Ban (đuổi & khóa truy cập), cấm chat học sinh vi phạm & xóa lưu bút xấu.
+                👑 Bạn đang truy cập bằng <strong>Link Quản Trị Viên (Admin)</strong>: Được chọn chức vụ Giáo viên / Ban Giám Hiệu / Admin, Ban & cấm chat người vi phạm.
             </div>
 
             <div id="login-error-msg" class="hidden mb-3 px-3 py-2 rounded-xl bg-red-50 border border-red-300 text-red-700 text-[11px] font-bold">
             </div>
 
             <div class="space-y-3.5 text-xs">
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div id="name-role-grid" class="grid grid-cols-1 gap-3">
                     <div>
                         <label class="block text-xs font-bold text-slate-700 mb-1">Họ và tên (văn minh, lịch sự)</label>
                         <input id="input-name" type="text" placeholder="Ví dụ: Nguyễn Văn An" value="Nguyễn Văn An" maxlength="30"
                             class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 bg-slate-50 text-slate-900 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-sky-500">
                     </div>
-                    <div>
-                        <label class="block text-xs font-bold text-slate-700 mb-1">Chức vụ / Vai trò trong trường</label>
+                    <div id="role-field-wrapper" class="hidden">
+                        <label class="block text-xs font-bold text-amber-800 mb-1">👑 Chức vụ (Chỉ có trên Link Admin)</label>
                         <select id="select-role"
                             class="w-full px-3 py-2.5 rounded-xl border border-amber-400 bg-amber-50/70 text-slate-900 text-sm font-bold focus:outline-none focus:ring-2 focus:ring-amber-500">
-                            <option value="Học sinh">🎒 Học sinh</option>
-                            <option value="Giáo viên Bộ môn">👨‍🏫 Giáo viên Bộ môn</option>
-                            <option value="Giáo viên Chủ nhiệm">📚 Giáo viên Chủ nhiệm</option>
+                            <option value="Quản trị viên">👑 Quản trị viên (Admin)</option>
                             <option value="Hiệu trưởng">🎓 Hiệu trưởng</option>
                             <option value="Phó Hiệu trưởng">🏛️ Phó Hiệu trưởng</option>
+                            <option value="Giáo viên Chủ nhiệm">📚 Giáo viên Chủ nhiệm</option>
+                            <option value="Giáo viên Bộ môn">👨‍🏫 Giáo viên Bộ môn</option>
                             <option value="Bí thư Đoàn trường">🌟 Bí thư Đoàn trường</option>
                             <option value="Cán bộ Giám thị">📋 Cán bộ Giám thị</option>
-                            <option value="Quản trị viên">👑 Quản trị viên (Admin)</option>
+                            <option value="Học sinh">🎒 Học sinh</option>
                         </select>
                     </div>
                 </div>
@@ -172,12 +172,12 @@
                             class="outfit-btn px-3 py-2 rounded-xl border border-slate-200 bg-slate-50 text-slate-700 text-xs font-semibold text-left transition cursor-pointer">
                             🧥 Áo khoác mùa đông
                         </button>
-                        <button type="button" data-outfit="teacher_suit"
-                            class="outfit-btn px-3 py-2 rounded-xl border border-slate-200 bg-slate-50 text-slate-700 text-xs font-semibold text-left transition cursor-pointer">
+                        <button type="button" data-outfit="teacher_suit" data-staff-only="true"
+                            class="outfit-btn hidden px-3 py-2 rounded-xl border border-amber-300 bg-amber-50/60 text-slate-800 text-xs font-semibold text-left transition cursor-pointer">
                             🤵 Vest Giáo viên / Cán bộ
                         </button>
-                        <button type="button" data-outfit="teacher_aodai"
-                            class="outfit-btn px-3 py-2 rounded-xl border border-slate-200 bg-slate-50 text-slate-700 text-xs font-semibold text-left transition cursor-pointer">
+                        <button type="button" data-outfit="teacher_aodai" data-staff-only="true"
+                            class="outfit-btn hidden px-3 py-2 rounded-xl border border-amber-300 bg-amber-50/60 text-slate-800 text-xs font-semibold text-left transition cursor-pointer">
                             👘 Áo dài Giáo viên / Cô giáo
                         </button>
                     </div>
@@ -240,7 +240,7 @@
                         🔗 Mời bạn
                     </button>
                     <button id="btn-admin-panel"
-                        class="px-2.5 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-400 border border-amber-200 text-[11px] font-extrabold text-slate-950 shadow cursor-pointer">
+                        class="hidden px-2.5 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-400 border border-amber-200 text-[11px] font-extrabold text-slate-950 shadow cursor-pointer">
                         👑 Quản trị & Chức vụ
                     </button>
                     <button id="btn-perf-mode"
@@ -442,34 +442,53 @@
             </div>
         </div>
 
-        <!-- 5. Bảng Chia Sẻ Link Mời Bạn Bè -->
+        <!-- 5. Bảng Chia Sẻ Link Mời Bạn Bè & Link Quản Trị (Tách biệt 2 Link) -->
         <div id="panel-share" class="modal-panel hidden pointer-events-auto fixed inset-x-0 bottom-16 mx-auto w-[94vw] max-w-md rounded-3xl bg-slate-900/95 border border-emerald-400/40 p-4 shadow-2xl backdrop-blur-md z-30">
             <div class="flex items-center justify-between mb-2">
                 <div>
-                    <h3 class="text-sm font-extrabold text-emerald-300">🔗 Mời bạn bè vào Trường THPT Nguyễn Khuyến</h3>
-                    <p class="text-[11px] text-slate-400">Gửi link học sinh lên nhóm Zalo (giữ riêng link Admin cho bạn)</p>
+                    <h3 id="share-panel-title" class="text-sm font-extrabold text-emerald-300">🔗 Link Tham Gia Trường THPT Nguyễn Khuyến</h3>
+                    <p id="share-panel-subtitle" class="text-[11px] text-slate-400">Gửi link này cho học sinh và bạn bè cùng vào sân trường</p>
                 </div>
                 <button class="close-panel-btn px-2.5 py-1 rounded-lg bg-white/10 text-xs font-bold cursor-pointer">✕</button>
             </div>
 
-            <div id="share-sandbox-notice" class="hidden space-y-2.5 text-xs">
-                <div class="p-3 rounded-2xl bg-amber-500/15 border border-amber-400/40 text-amber-200 leading-relaxed">
-                    <strong>⚠️ Bạn đang mở ở khung xem trước tạm thời:</strong><br>
-                    Hãy tải file <code>index.html</code> này lên GitHub Pages của bạn (<code>https://phuochoang8972-arch.github.io/thptnk/</code>) rồi chia sẻ đường link đó cho học sinh nhé!
-                </div>
+            <div id="share-sandbox-notice" class="hidden mb-2.5 p-2.5 rounded-xl bg-amber-500/15 border border-amber-400/40 text-amber-200 text-[11px] leading-relaxed">
+                <strong>ℹ️ Đang ở khung xem trước:</strong> Hệ thống hiển thị sẵn cấu trúc đường dẫn triển khai (GitHub Pages) để bạn sao chép sử dụng ngay.
             </div>
 
-            <div id="share-public-box" class="hidden space-y-2.5 text-xs">
-                <div class="p-2.5 rounded-xl bg-emerald-500/15 border border-emerald-400/40 text-emerald-200">
-                    🟢 Link dành cho <strong>Học sinh</strong> (không kèm quyền Admin):
+            <div class="space-y-3 text-xs">
+                <!-- LINK 1: NGƯỜI THAM GIA (HỌC SINH) -->
+                <div class="p-3 rounded-2xl bg-emerald-950/50 border border-emerald-400/40 space-y-2">
+                    <div class="flex items-center justify-between">
+                        <span class="font-extrabold text-emerald-300">🎒 Link 1: Người tham gia (Học sinh)</span>
+                        <span class="px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-200 text-[10px] font-bold">Gửi nhóm lớp</span>
+                    </div>
+                    <p class="text-[11px] text-slate-300">Chỉ có quyền học sinh tham quan, giao lưu, không có quyền Admin.</p>
+                    <div class="flex gap-2">
+                        <input id="share-url-input" type="text" readonly
+                            class="flex-1 px-3 py-2 rounded-xl bg-slate-950 border border-white/15 text-sky-300 text-[11px] font-mono">
+                        <button id="btn-copy-public-url" type="button"
+                            class="px-3.5 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-extrabold text-xs cursor-pointer shrink-0">
+                            Sao chép
+                        </button>
+                    </div>
                 </div>
-                <div class="flex gap-2">
-                    <input id="share-url-input" type="text" readonly
-                        class="flex-1 px-3 py-2 rounded-xl bg-slate-950 border border-white/15 text-sky-300 text-xs font-mono">
-                    <button id="btn-copy-public-url" type="button"
-                        class="px-3.5 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-extrabold text-xs cursor-pointer">
-                        Sao chép
-                    </button>
+
+                <!-- LINK 2: QUẢN TRỊ VIÊN (ADMIN) - CHỈ HIỆN KHI ĐANG MỞ BẰNG LINK ADMIN -->
+                <div id="share-admin-box" class="hidden p-3 rounded-2xl bg-amber-950/50 border border-amber-400/50 space-y-2">
+                    <div class="flex items-center justify-between">
+                        <span class="font-extrabold text-amber-300">👑 Link 2: Quản trị viên (Admin / Giáo viên)</span>
+                        <span class="px-2 py-0.5 rounded-full bg-amber-500 text-slate-950 text-[10px] font-extrabold">Giữ bí mật</span>
+                    </div>
+                    <p class="text-[11px] text-amber-100/90">Dành riêng cho Admin & Thầy Cô (có quyền chọn chức vụ, Ban/Gỡ Ban, Cấm chat).</p>
+                    <div class="flex gap-2">
+                        <input id="share-admin-url-input" type="text" readonly
+                            class="flex-1 px-3 py-2 rounded-xl bg-slate-950 border border-amber-400/30 text-amber-300 text-[11px] font-mono">
+                        <button id="btn-copy-share-admin-url" type="button"
+                            class="px-3.5 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-extrabold text-xs cursor-pointer shrink-0">
+                            Sao chép
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -488,7 +507,7 @@
                 <div class="p-3 rounded-2xl bg-sky-950/70 border border-sky-400/40 space-y-2">
                     <div class="flex items-center justify-between">
                         <span class="font-extrabold text-sky-300">👨‍🏫 Chức vụ hiện tại của bạn:</span>
-                        <span id="admin-current-role-badge" class="px-2 py-0.5 rounded-full bg-amber-500 text-slate-950 text-[10px] font-extrabold">Học sinh</span>
+                        <span id="admin-current-role-badge" class="px-2 py-0.5 rounded-full bg-amber-500 text-slate-950 text-[10px] font-extrabold">Quản trị viên</span>
                     </div>
                     <div class="grid grid-cols-2 gap-1.5" id="admin-role-grid">
                         <button type="button" data-role="Giáo viên Bộ môn" data-outfit="teacher_suit"
@@ -500,11 +519,11 @@
                             📚 Giáo viên Chủ nhiệm
                         </button>
                         <button type="button" data-role="Hiệu trưởng" data-outfit="teacher_suit"
-                            class="admin-role-btn p-2 rounded-xl bg-amber-500/25 hover:bg-amber-500 hover:text-slate-950 border border-amber-400/40 text-left font-extrabold text-[11px] text-amber-200 transition cursor-pointer">
+                            class="admin-role-btn p-2 rounded-xl bg-white/10 hover:bg-sky-600 text-left font-bold text-[11px] text-white transition cursor-pointer">
                             🎓 Hiệu trưởng
                         </button>
                         <button type="button" data-role="Phó Hiệu trưởng" data-outfit="teacher_suit"
-                            class="admin-role-btn p-2 rounded-xl bg-amber-500/20 hover:bg-amber-500 hover:text-slate-950 border border-amber-400/30 text-left font-bold text-[11px] text-amber-200 transition cursor-pointer">
+                            class="admin-role-btn p-2 rounded-xl bg-white/10 hover:bg-sky-600 text-left font-bold text-[11px] text-white transition cursor-pointer">
                             🏛️ Phó Hiệu trưởng
                         </button>
                         <button type="button" data-role="Bí thư Đoàn trường" data-outfit="youth"
@@ -516,13 +535,39 @@
                             📋 Cán bộ Giám thị
                         </button>
                         <button type="button" data-role="Quản trị viên" data-outfit="teacher_suit"
-                            class="admin-role-btn p-2 rounded-xl bg-white/10 hover:bg-sky-600 text-left font-bold text-[11px] text-white transition cursor-pointer">
+                            class="admin-role-btn p-2 rounded-xl bg-amber-500/25 hover:bg-amber-500 text-left font-bold text-[11px] text-amber-200 hover:text-slate-950 transition cursor-pointer">
                             👑 Quản trị viên (Admin)
                         </button>
                         <button type="button" data-role="Học sinh" data-outfit="uniform"
                             class="admin-role-btn p-2 rounded-xl bg-white/10 hover:bg-sky-600 text-left font-bold text-[11px] text-white transition cursor-pointer">
                             🎒 Học sinh
                         </button>
+                    </div>
+                </div>
+
+                <div class="p-2.5 rounded-xl bg-amber-500/15 border border-amber-400/35 text-amber-200 space-y-2">
+                    <div class="font-bold">🔐 2 Đường Link Phân Quyền Riêng Biệt:</div>
+                    <div>
+                        <div class="text-[10px] text-emerald-300 font-bold mb-0.5">1. Link Người tham gia (Học sinh):</div>
+                        <div class="flex gap-1.5">
+                            <input id="admin-panel-public-url" type="text" readonly
+                                class="flex-1 px-2.5 py-1.5 rounded-lg bg-slate-950 border border-white/15 text-emerald-300 text-[11px] font-mono">
+                            <button id="btn-copy-admin-panel-public" type="button"
+                                class="px-2.5 py-1.5 rounded-lg bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-extrabold text-[11px] cursor-pointer shrink-0">
+                                Copy
+                            </button>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="text-[10px] text-amber-300 font-bold mb-0.5">2. Link Quản trị viên (Admin / Giáo viên):</div>
+                        <div class="flex gap-1.5">
+                            <input id="admin-secret-url-input" type="text" readonly
+                                class="flex-1 px-2.5 py-1.5 rounded-lg bg-slate-950 border border-amber-400/30 text-amber-300 text-[11px] font-mono">
+                            <button id="btn-copy-admin-url" type="button"
+                                class="px-2.5 py-1.5 rounded-lg bg-amber-500 hover:bg-amber-400 text-slate-950 font-extrabold text-[11px] cursor-pointer shrink-0">
+                                Copy
+                            </button>
+                        </div>
                     </div>
                 </div>
 
@@ -535,18 +580,6 @@
                         <button id="btn-send-broadcast" type="button"
                             class="px-3 py-1.5 rounded-lg bg-sky-600 hover:bg-sky-500 text-white font-extrabold text-[11px] cursor-pointer shrink-0">
                             Phát loa
-                        </button>
-                    </div>
-                </div>
-
-                <div class="p-2.5 rounded-xl bg-amber-500/15 border border-amber-400/35 text-amber-200">
-                    <div class="font-bold mb-1">🔐 Link riêng của Admin / Giáo viên (có sẵn quyền Quản trị):</div>
-                    <div class="flex gap-2">
-                        <input id="admin-secret-url-input" type="text" readonly
-                            class="flex-1 px-2.5 py-1.5 rounded-lg bg-slate-950 border border-white/15 text-amber-300 text-[11px] font-mono">
-                        <button id="btn-copy-admin-url" type="button"
-                            class="px-3 py-1.5 rounded-lg bg-amber-500 hover:bg-amber-400 text-slate-950 font-extrabold text-[11px] cursor-pointer">
-                            Lưu link
                         </button>
                     </div>
                 </div>
@@ -571,7 +604,7 @@
     <script>
         window.addEventListener('load', () => {
             // =========================================================================
-            // 1. NHẬN DIỆN QUYỀN ADMIN & CHỨC VỤ GIÁO VIÊN / BAN GIÁM HIỆU
+            // 1. PHÂN TÁCH CHẶT CHẼ 2 LINK: LINK ADMIN (?admin=thptnk2026) & LINK NGƯỜI THAM GIA
             // =========================================================================
             const ADMIN_SECRET_KEY = 'thptnk2026';
             const urlParams = new URLSearchParams(window.location.search);
@@ -579,9 +612,21 @@
             if (hasAdminQuery) {
                 try { sessionStorage.setItem('thptnk_is_admin', '1'); } catch (e) {}
             }
-            let isAdminUser = hasAdminQuery || (() => {
+            // Chỉ khi mở bằng Link Admin (?admin=thptnk2026) mới có quyền Quản trị & Giáo viên
+            const isAdminSession = hasAdminQuery || (() => {
                 try { return sessionStorage.getItem('thptnk_is_admin') === '1'; } catch (e) { return false; }
             })();
+            const isAdminUser = isAdminSession;
+
+            function getSeparatedLinks() {
+                const rawHref = window.location.href.split('#')[0];
+                const isSandbox = /googleusercontent\.com|scf\.usercontent\.goog|about:srcdoc|^blob:|^file:/i.test(rawHref);
+                const publicUrl = isSandbox
+                    ? 'https://phuochoang8972-arch.github.io/thptnk/'
+                    : rawHref.split('?')[0];
+                const adminUrl = `${publicUrl}?admin=${ADMIN_SECRET_KEY}`;
+                return { publicUrl, adminUrl, isSandbox };
+            }
 
             const STAFF_ROLES = new Set([
                 'Giáo viên Bộ môn',
@@ -705,12 +750,12 @@
             const playerProfile = {
                 id: persistentPlayerId,
                 name: 'Nguyễn Văn An',
-                roleTitle: isAdminUser ? 'Quản trị viên' : 'Học sinh',
+                roleTitle: isAdminSession ? 'Quản trị viên' : 'Học sinh',
                 cohort: 'Học sinh đang học',
                 className: '12A1',
                 gender: 'male',
                 outfit: 'uniform',
-                isAdmin: isAdminUser,
+                isAdmin: isAdminSession,
                 loggedIn: false
             };
 
@@ -720,26 +765,54 @@
             const classSelect = document.getElementById('select-class');
 
             function syncAdminUIState() {
-                const hasStaffPower = playerProfile.isAdmin || STAFF_ROLES.has(playerProfile.roleTitle);
-                isAdminUser = hasStaffPower;
-                playerProfile.isAdmin = hasStaffPower;
+                // Quyền Admin gắn chặt với Link Admin (isAdminSession), người tham gia thường không bao giờ tự nâng quyền được
+                playerProfile.isAdmin = isAdminSession;
+                if (!isAdminSession) {
+                    playerProfile.roleTitle = 'Học sinh';
+                    if (playerProfile.outfit === 'teacher_suit' || playerProfile.outfit === 'teacher_aodai') {
+                        playerProfile.outfit = 'uniform';
+                    }
+                }
 
-                document.getElementById('login-admin-badge').classList.toggle('hidden', !hasStaffPower);
-                document.getElementById('login-admin-notice').classList.toggle('hidden', !hasStaffPower);
+                const cardTitleEl = document.getElementById('login-card-title');
+                if (cardTitleEl) {
+                    cardTitleEl.textContent = isAdminSession
+                        ? 'THẺ QUẢN TRỊ VIÊN / GIÁO VIÊN'
+                        : 'THẺ NGƯỜI THAM GIA THPT NGUYỄN KHUYẾN';
+                }
+                document.getElementById('login-admin-badge').classList.toggle('hidden', !isAdminSession);
+                document.getElementById('login-admin-notice').classList.toggle('hidden', !isAdminSession);
+
+                const roleWrapper = document.getElementById('role-field-wrapper');
+                const nameRoleGrid = document.getElementById('name-role-grid');
+                if (roleWrapper) roleWrapper.classList.toggle('hidden', !isAdminSession);
+                if (nameRoleGrid) {
+                    nameRoleGrid.className = isAdminSession ? 'grid grid-cols-1 sm:grid-cols-2 gap-3' : 'grid grid-cols-1 gap-3';
+                }
+
+                // Ẩn trang phục dành riêng cho Giáo viên/Cán bộ trên Link Người tham gia
+                document.querySelectorAll('[data-staff-only="true"]').forEach(el => {
+                    el.classList.toggle('hidden', !isAdminSession);
+                });
+
+                const btnAdminPanel = document.getElementById('btn-admin-panel');
+                if (btnAdminPanel) btnAdminPanel.classList.toggle('hidden', !isAdminSession);
+
+                const btnCopyLink = document.getElementById('btn-copy-link');
+                if (btnCopyLink) {
+                    btnCopyLink.textContent = isAdminSession ? '🔗 2 Link (Admin/HS)' : '🔗 Mời bạn';
+                }
 
                 const hudPill = document.getElementById('hud-admin-pill');
                 if (hudPill) {
-                    if (playerProfile.roleTitle !== 'Học sinh') {
-                        hudPill.textContent = getRoleBadgeIcon(playerProfile.roleTitle) || `👑 ${playerProfile.roleTitle}`;
-                        hudPill.classList.remove('hidden');
-                    } else if (hasStaffPower) {
-                        hudPill.textContent = '👑 ADMIN';
+                    if (isAdminSession) {
+                        hudPill.textContent = getRoleBadgeIcon(playerProfile.roleTitle) || '👑 ADMIN';
                         hudPill.classList.remove('hidden');
                     } else {
                         hudPill.classList.add('hidden');
                     }
                 }
-                document.getElementById('btn-clear-chat-admin').classList.toggle('hidden', !hasStaffPower);
+                document.getElementById('btn-clear-chat-admin').classList.toggle('hidden', !isAdminSession);
 
                 const roleBadgeEl = document.getElementById('admin-current-role-badge');
                 if (roleBadgeEl) roleBadgeEl.textContent = playerProfile.roleTitle;
@@ -772,6 +845,10 @@
             if (roleSelect) {
                 roleSelect.value = playerProfile.roleTitle;
                 roleSelect.addEventListener('change', () => {
+                    if (!isAdminSession) {
+                        playerProfile.roleTitle = 'Học sinh';
+                        return;
+                    }
                     playerProfile.roleTitle = roleSelect.value;
                     if (STAFF_ROLES.has(playerProfile.roleTitle)) {
                         if (playerProfile.roleTitle === 'Hiệu trưởng' || playerProfile.roleTitle === 'Phó Hiệu trưởng') {
@@ -5384,41 +5461,73 @@
 
             document.getElementById('btn-copy-link').addEventListener('click', () => {
                 closeAllPanels();
-                const currentUrl = window.location.href.split('?')[0];
-                const isSandbox = isSandboxPreviewUrl(currentUrl);
+                const { publicUrl, adminUrl, isSandbox } = getSeparatedLinks();
                 document.getElementById('share-sandbox-notice').classList.toggle('hidden', !isSandbox);
-                document.getElementById('share-public-box').classList.toggle('hidden', isSandbox);
 
-                if (!isSandbox) {
-                    const urlInput = document.getElementById('share-url-input');
-                    if (urlInput) urlInput.value = currentUrl;
-                    copyTextFallback(currentUrl);
-                    showToast('🔗 Đã sao chép link dành cho Học sinh! Dán gửi lên nhóm Zalo.');
+                const titleEl = document.getElementById('share-panel-title');
+                const subEl = document.getElementById('share-panel-subtitle');
+                if (titleEl && subEl) {
+                    if (isAdminSession) {
+                        titleEl.textContent = '🔗 Phân Chia 2 Link: Admin & Người Tham Gia';
+                        subEl.textContent = 'Gửi Link 1 cho học sinh • Giữ riêng Link 2 cho Quản trị viên';
+                    } else {
+                        titleEl.textContent = '🔗 Mời Bạn Bè Vào Trường THPT Nguyễn Khuyến';
+                        subEl.textContent = 'Sao chép đường link người tham gia bên dưới gửi cho bạn bè';
+                    }
                 }
+
+                const publicInput = document.getElementById('share-url-input');
+                if (publicInput) publicInput.value = publicUrl;
+
+                const adminShareBox = document.getElementById('share-admin-box');
+                const adminShareInput = document.getElementById('share-admin-url-input');
+                if (adminShareBox) adminShareBox.classList.toggle('hidden', !isAdminSession);
+                if (adminShareInput && isAdminSession) adminShareInput.value = adminUrl;
+
+                copyTextFallback(publicUrl);
+                showToast('🔗 Đã sao chép Link Người tham gia (Học sinh)!');
                 document.getElementById('panel-share').classList.remove('hidden');
             });
 
             document.getElementById('btn-copy-public-url').addEventListener('click', () => {
                 const urlInput = document.getElementById('share-url-input');
                 if (urlInput && copyTextFallback(urlInput.value)) {
-                    showToast('🔗 Đã sao chép link học sinh!');
+                    showToast('🎒 Đã sao chép Link Người tham gia (Học sinh)!');
+                }
+            });
+
+            document.getElementById('btn-copy-share-admin-url').addEventListener('click', () => {
+                if (!isAdminSession) return;
+                const adminInput = document.getElementById('share-admin-url-input');
+                if (adminInput && copyTextFallback(adminInput.value)) {
+                    showToast('👑 Đã sao chép Link Quản trị viên (Admin)!');
                 }
             });
 
             document.getElementById('btn-admin-panel').addEventListener('click', () => {
+                if (!isAdminSession) return;
                 closeAllPanels();
-                const baseUrl = window.location.href.split('?')[0];
-                const adminUrl = `${baseUrl}?admin=${ADMIN_SECRET_KEY}`;
+                const { publicUrl, adminUrl } = getSeparatedLinks();
+                const pubInput = document.getElementById('admin-panel-public-url');
                 const adminInput = document.getElementById('admin-secret-url-input');
+                if (pubInput) pubInput.value = publicUrl;
                 if (adminInput) adminInput.value = adminUrl;
                 syncAdminUIState();
                 renderAdminModerationLists();
                 document.getElementById('panel-admin').classList.remove('hidden');
             });
 
+            document.getElementById('btn-copy-admin-panel-public').addEventListener('click', () => {
+                const pubInput = document.getElementById('admin-panel-public-url');
+                if (pubInput && copyTextFallback(pubInput.value)) {
+                    showToast('🎒 Đã sao chép Link Người tham gia (Học sinh)!');
+                }
+            });
+
             // Chọn nhanh chức vụ Giáo viên / Hiệu trưởng / Phó Hiệu trưởng / Bí thư Đoàn / Admin ngay trong Bảng Quản Trị
             document.querySelectorAll('.admin-role-btn').forEach(btn => {
                 btn.addEventListener('click', () => {
+                    if (!isAdminSession) return;
                     const newRole = btn.dataset.role;
                     const suggestedOutfit = btn.dataset.outfit;
                     playerProfile.roleTitle = newRole;
@@ -5460,6 +5569,7 @@
             });
 
             document.getElementById('btn-send-broadcast').addEventListener('click', () => {
+                if (!isAdminSession) return;
                 const bInput = document.getElementById('admin-broadcast-input');
                 const text = bInput ? bInput.value.trim() : '';
                 if (!text) return;
@@ -5472,6 +5582,7 @@
             });
 
             document.getElementById('btn-copy-admin-url').addEventListener('click', () => {
+                if (!isAdminSession) return;
                 const adminInput = document.getElementById('admin-secret-url-input');
                 if (adminInput && copyTextFallback(adminInput.value)) {
                     showToast('👑 Đã sao chép Link Quyền Admin riêng của bạn!');
@@ -5927,13 +6038,13 @@
             });
 
             document.getElementById('btn-enter-school').addEventListener('click', () => {
-                if (isSelfBanned && !isAdminUser) {
+                if (isSelfBanned && !isAdminSession) {
                     enforceSelfBannedState('Tài khoản của bạn đã bị Quản trị viên (Admin) Ban khỏi Trường THPT Nguyễn Khuyến 3D.');
                     return;
                 }
 
-                const selectedRole = roleSelect ? roleSelect.value : 'Học sinh';
-                const allowStaffTitle = isAdminUser || STAFF_ROLES.has(selectedRole);
+                const selectedRole = (isAdminSession && roleSelect) ? roleSelect.value : 'Học sinh';
+                const allowStaffTitle = isAdminSession;
 
                 const loginErrBox = document.getElementById('login-error-msg');
                 const check = validatePlayerName(nameInput.value, allowStaffTitle);
