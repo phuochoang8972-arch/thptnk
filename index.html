@@ -126,13 +126,13 @@
 
                 <div class="grid grid-cols-2 gap-3">
                     <div>
-                        <label class="block text-xs font-bold text-slate-700 mb-1">Niên khóa / Đơn vị</label>
+                        <label id="label-select-cohort" class="block text-xs font-bold text-slate-700 mb-1">Học sinh / Niên khóa</label>
                         <select id="select-cohort"
                             class="w-full px-3 py-2.5 rounded-xl border border-slate-300 bg-slate-50 text-slate-900 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-sky-500">
                         </select>
                     </div>
                     <div>
-                        <label class="block text-xs font-bold text-slate-700 mb-1">Lớp học / Phòng ban</label>
+                        <label id="label-select-class" class="block text-xs font-bold text-slate-700 mb-1">Lớp học</label>
                         <select id="select-class"
                             class="w-full px-3 py-2.5 rounded-xl border border-slate-300 bg-slate-50 text-slate-900 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-sky-500">
                         </select>
@@ -773,20 +773,31 @@
                 document.getElementById('login-admin-badge').classList.remove('hidden');
                 document.getElementById('login-admin-notice').classList.remove('hidden');
                 document.getElementById('login-role-wrapper').classList.remove('hidden');
+                document.getElementById('label-select-cohort').textContent = 'Niên khóa / Đơn vị';
+                document.getElementById('label-select-class').textContent = 'Lớp học / Phòng ban';
                 document.getElementById('hud-role-pill').classList.remove('hidden');
                 document.getElementById('btn-admin-panel').classList.remove('hidden');
                 document.getElementById('btn-clear-chat-admin').classList.remove('hidden');
                 document.querySelectorAll('.admin-only-outfit').forEach(el => el.classList.remove('hidden'));
+            } else {
+                // Đảm bảo link người tham gia hoàn toàn không thấy và không chọn được chức vụ
+                document.getElementById('login-role-wrapper').remove();
+                document.querySelectorAll('.admin-only-outfit').forEach(el => el.remove());
             }
 
-            const cohortOptions = ['Học sinh đang học', 'Cán bộ - Giáo viên'];
+            // Link người tham gia chỉ có lựa chọn Học sinh đang học hoặc Niên khóa (1999 - 2026)
+            const cohortOptions = isAdminUser
+                ? ['Cán bộ - Giáo viên', 'Học sinh đang học']
+                : ['Học sinh đang học'];
             for (let y = 2026; y >= 1999; y--) {
-                cohortOptions.push(`Khóa ${y} - ${y + 3}`);
+                cohortOptions.push(`Cựu học sinh • Khóa ${y} - ${y + 3}`);
             }
             cohortSelect.innerHTML = cohortOptions.map(c => `<option value="${c}">${c}</option>`).join('');
 
-            // Đủ 36 lớp học: 12A1-12A12, 11B1-11B12, 10C1-10C12 + Phòng ban
-            const classOptions = ['Ban Giám Hiệu', 'Phòng Giáo Viên', 'Đoàn Thanh Niên'];
+            // Link người tham gia chỉ có 36 lớp học (12A1-12A12, 11B1-11B12, 10C1-10C12), không có phòng ban cán bộ
+            const classOptions = isAdminUser
+                ? ['Ban Giám Hiệu', 'Phòng Giáo Viên', 'Đoàn Thanh Niên']
+                : [];
             ['12A', '11B', '10C'].forEach(prefix => {
                 for (let n = 1; n <= 12; n++) {
                     classOptions.push(`${prefix}${n}`);
@@ -794,7 +805,7 @@
             });
             classSelect.innerHTML = classOptions.map(cl => `<option value="${cl}">${cl.startsWith('1') ? 'Lớp ' + cl : cl}</option>`).join('');
             classSelect.value = isAdminUser ? 'Ban Giám Hiệu' : '12A1';
-            if (isAdminUser) cohortSelect.value = 'Cán bộ - Giáo viên';
+            cohortSelect.value = isAdminUser ? 'Cán bộ - Giáo viên' : 'Học sinh đang học';
 
             function highlightSelectedOutfit(outfitCode) {
                 document.querySelectorAll('.outfit-btn').forEach(b => {
