@@ -7,7 +7,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/mqtt@5.10.1/dist/mqtt.min.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
     <style>
         * {
             box-sizing: border-box;
@@ -47,12 +47,36 @@
         .smoking-alert-anim {
             animation: pulseWarning 1.2s infinite ease-in-out;
         }
+        @keyframes baKhiMarquee {
+            0% { transform: translateX(100vw); }
+            100% { transform: translateX(-100%); }
+        }
+        .ba-khi-marquee-track {
+            display: inline-block;
+            white-space: nowrap;
+            animation: baKhiMarquee 13s linear infinite;
+        }
     </style>
 </head>
 <body class="relative w-full h-full overflow-hidden text-slate-100">
 
     <!-- Khung hiển thị 3D toàn màn hình -->
     <canvas id="game-canvas"></canvas>
+
+    <!-- ===================================================================== -->
+    <!-- DÒNG THÔNG BÁO ĐỎ TOÀN SERVER 2 PHÚT KHI ĐẠT DANH HIỆU SIÊU BÁ KHÍ   -->
+    <!-- ===================================================================== -->
+    <div id="server-marquee-banner" class="hidden fixed top-0 inset-x-0 z-[55] bg-gradient-to-r from-red-800 via-red-600 to-red-800 border-b-2 border-yellow-300 shadow-2xl py-1.5 overflow-hidden pointer-events-none">
+        <div class="flex items-center justify-between px-3 text-[10px] sm:text-xs font-extrabold text-yellow-200 mb-0.5">
+            <span>🔥 THÔNG BÁO TOÀN MÁY CHỦ • DANH HIỆU SIÊU BÁ KHÍ (12/12 NHIỆM VỤ)</span>
+            <span id="server-marquee-timer" class="font-mono bg-red-950/90 px-2 py-0.5 rounded border border-yellow-300/60 text-yellow-300">02:00</span>
+        </div>
+        <div class="w-full overflow-hidden">
+            <div id="server-marquee-text" class="ba-khi-marquee-track text-sm sm:text-base font-black text-white tracking-wide drop-shadow">
+                🔥 CHÚC MỪNG HỌC SINH NGUYỄN VĂN AN (LỚP 12A1) ĐÃ HOÀN THÀNH 12/12 NHIỆM VỤ VÀ ĐẠT DANH HIỆU TỐI CAO [SIÊU BÁ KHÍ] TOÀN TRƯỜNG THPT NGUYỄN KHUYẾN! 🔥
+            </div>
+        </div>
+    </div>
 
     <!-- ===================================================================== -->
     <!-- MÀN HÌNH KHÓA TÀI KHOẢN KHI BỊ ADMIN BAN (CẤM TRUY CẬP TRƯỜNG)        -->
@@ -95,7 +119,7 @@
             </div>
 
             <div id="login-admin-notice" class="hidden mb-3 px-3 py-2 rounded-xl bg-amber-50 border border-amber-300 text-amber-900 text-[11px] font-semibold">
-                👑 Bạn đang mở <strong>Link Quản Trị Viên (Admin / Giáo viên / BGH)</strong>: Có quyền chọn chức vụ nhà trường, Ban/Cấm chat học sinh vi phạm & phát loa toàn trường.
+                👑 Bạn đang mở <strong>Link Quản Trị Viên (Admin / Giáo viên / BGH)</strong>: Có quyền chọn chức vụ nhà trường, Ban/Cấm chat học sinh vi phạm, xóa BXH/Lưu bút & phát loa toàn trường.
             </div>
 
             <div id="login-error-msg" class="hidden mb-3 px-3 py-2 rounded-xl bg-red-50 border border-red-300 text-red-700 text-[11px] font-bold">
@@ -103,7 +127,7 @@
 
             <div class="space-y-3 text-xs">
                 <div>
-                    <label class="block text-xs font-bold text-slate-700 mb-1">Họ và tên (vui lòng dùng tên văn minh)</label>
+                    <label class="block text-xs font-bold text-slate-700 mb-1">Họ và tên (vui lòng dùng tên văn minh, lịch sự)</label>
                     <input id="input-name" type="text" placeholder="Ví dụ: Nguyễn Văn An" value="Nguyễn Văn An" maxlength="30"
                         class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 bg-slate-50 text-slate-900 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-sky-500">
                 </div>
@@ -202,7 +226,7 @@
     <div id="hud-root" class="hidden pointer-events-none fixed inset-0 z-20">
 
         <!-- Thanh thông tin trên cùng -->
-        <div class="flex flex-wrap items-start justify-between gap-2 p-2.5 sm:p-3.5">
+        <div id="hud-top-bar" class="flex flex-wrap items-start justify-between gap-2 p-2.5 sm:p-3.5 transition-all duration-200">
             <!-- Thẻ học sinh / Giáo viên & Vị trí hiện tại -->
             <div class="pointer-events-auto flex flex-col gap-1.5 max-w-[68vw] sm:max-w-lg">
                 <div class="flex items-center gap-2 px-3 py-2 rounded-2xl bg-slate-900/85 backdrop-blur-md border border-white/15 shadow-lg">
@@ -213,6 +237,7 @@
                         <div class="flex flex-wrap items-center gap-1.5">
                             <span id="hud-player-name" class="font-bold text-xs sm:text-sm text-white truncate">Nguyễn Văn An</span>
                             <span id="hud-role-pill" class="hidden px-1.5 py-0.5 rounded-md bg-amber-500 text-slate-950 text-[10px] font-extrabold shrink-0">👑 ADMIN</span>
+                            <span id="hud-title-badge" class="hidden px-1.5 py-0.5 rounded-md bg-emerald-500/25 border border-emerald-400 text-emerald-300 text-[10px] font-extrabold shrink-0">🌟 Học Sinh Ngoan</span>
                             <span id="hud-player-tag" class="px-1.5 py-0.5 rounded-md bg-sky-500/25 text-sky-300 text-[10px] font-bold shrink-0">Lớp 12A1 • Học sinh đang học</span>
                         </div>
                         <div id="hud-location" class="text-[11px] text-amber-300 font-medium truncate">
@@ -225,8 +250,12 @@
                     </button>
                 </div>
 
-                <!-- Hàng nút chế độ góc nhìn, chia sẻ 2 link & hiệu năng -->
+                <!-- Hàng nút chế độ góc nhìn, nhiệm vụ, chia sẻ 2 link & hiệu năng -->
                 <div class="flex flex-wrap items-center gap-1.5">
+                    <button id="btn-missions-hud"
+                        class="px-2.5 py-1.5 rounded-xl bg-gradient-to-r from-red-600 to-amber-600 hover:from-red-500 hover:to-amber-500 border border-yellow-300/60 text-[11px] font-extrabold text-white shadow cursor-pointer">
+                        🎯 Nhiệm vụ: <span id="mission-count-hud">0/12</span>
+                    </button>
                     <button id="btn-cam-mode"
                         class="px-2.5 py-1.5 rounded-xl bg-slate-900/85 hover:bg-slate-800 backdrop-blur-md border border-white/15 text-[11px] font-bold text-white shadow cursor-pointer">
                         👁️ Góc nhìn 3
@@ -292,7 +321,7 @@
             </div>
         </div>
 
-        <!-- Màn hình Khóa Giờ Sinh Hoạt Nội Quy 5 Phút khi đủ 5 học sinh cùng lớp vào đúng lớp -->
+        <!-- Màn hình Khóa Giờ Sinh Hoạt Nội Quy 5 Phút khi có ĐÚNG 5 học sinh thật cùng lớp vào đúng lớp -->
         <div id="classroom-lockdown-overlay"
             class="hidden pointer-events-auto fixed inset-x-0 top-16 sm:top-20 z-40 mx-auto w-[95vw] max-w-2xl rounded-3xl bg-emerald-950/95 text-white border-4 border-amber-700 shadow-2xl p-4 sm:p-5 backdrop-blur-md">
             <div class="flex flex-wrap items-center justify-between gap-2 pb-2.5 mb-3 border-b border-emerald-700/80">
@@ -350,24 +379,19 @@
                         class="px-2.5 py-1 rounded-lg bg-emerald-800 hover:bg-emerald-700 text-amber-200 font-bold cursor-pointer">
                         🔄 Chuyển trang bảng
                     </button>
-                    <button id="btn-admin-unlock-lockdown" type="button"
-                        class="hidden px-2.5 py-1 rounded-lg bg-amber-500 hover:bg-amber-400 text-slate-950 font-extrabold cursor-pointer">
-                        👑 Admin mở khóa sớm
-                    </button>
                 </div>
             </div>
         </div>
 
-        <!-- Nút gọi nhanh đủ 5 học sinh cùng lớp để test tính năng khi đang đứng trong lớp của mình -->
+        <!-- Bảng theo dõi sĩ số thực tế & tiến độ ngồi học 5 phút Mốc 12 trong phòng học của lớp mình -->
         <div id="class-gather-test-bar"
             class="hidden pointer-events-auto fixed top-24 right-3 sm:right-5 z-30 max-w-xs p-2.5 rounded-2xl bg-slate-900/90 border border-sky-400/45 shadow-xl backdrop-blur-md text-xs space-y-1.5">
             <div id="class-gather-status" class="font-bold text-sky-300">
-                👥 Sĩ số lớp <span id="gather-class-name">12A1</span> trong phòng: <span id="gather-count-num">1/5</span>
+                👥 Học sinh lớp <span id="gather-class-name">12A1</span> trong phòng: <span id="gather-count-num">1</span> (Mốc khóa nội quy: 5 HS)
             </div>
-            <button id="btn-simulate-5-classmates" type="button"
-                class="w-full py-1.5 px-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-extrabold text-[11px] shadow cursor-pointer">
-                ⚡ Gọi đủ 5 bạn cùng lớp vào phòng (Test 5p)
-            </button>
+            <div id="mission12-study-status" class="font-bold text-amber-300 text-[11px]">
+                🔥 Mốc 12 [Siêu Bá Khí]: <span id="mission12-seated-num">0/12</span> bạn cùng lớp ngồi học • <span id="mission12-timer-text">00:00 / 05:00</span>
+            </div>
         </div>
 
         <!-- Thông báo nổi ngắn (Toast) -->
@@ -395,41 +419,143 @@
             </button>
         </div>
 
-        <!-- Cần điều khiển ảo bên trái (Cảm ứng & Chuột) -->
+        <!-- Cần điều khiển ảo bên trái (Cảm ứng & Chuột - Hỗ trợ đa điểm) -->
         <div id="joystick-zone"
-            class="pointer-events-auto fixed bottom-16 left-4 sm:bottom-16 sm:left-6 w-28 h-28 rounded-full bg-slate-900/45 border-2 border-white/25 backdrop-blur-sm flex items-center justify-center touch-none">
+            class="pointer-events-auto fixed bottom-16 left-4 sm:bottom-16 sm:left-6 w-32 h-32 sm:w-28 sm:h-28 rounded-full bg-slate-900/55 border-2 border-white/30 backdrop-blur-sm flex items-center justify-center touch-none shadow-xl">
             <div id="joystick-knob"
-                class="w-11 h-11 rounded-full bg-white/85 shadow-lg border border-sky-300 pointer-events-none transition-transform duration-75">
+                class="w-12 h-12 sm:w-11 sm:h-11 rounded-full bg-white/90 shadow-lg border-2 border-sky-400 pointer-events-none">
             </div>
         </div>
 
-        <!-- Nút Nhảy bên phải -->
-        <div class="pointer-events-auto fixed bottom-16 right-4 sm:bottom-16 sm:right-6 flex flex-col items-end gap-2.5">
+        <!-- Cụm nút Chạy nhanh & Nhảy bên phải cho điện thoại -->
+        <div class="pointer-events-auto fixed bottom-16 right-4 sm:bottom-16 sm:right-6 flex flex-col items-end gap-2.5 touch-none">
+            <button id="btn-sprint" type="button"
+                class="w-13 h-13 px-3 py-2.5 rounded-full bg-amber-500/85 hover:bg-amber-400 active:scale-90 border-2 border-white/35 text-slate-950 font-extrabold text-[11px] shadow-lg backdrop-blur-sm cursor-pointer">
+                🏃 CHẠY
+            </button>
             <button id="btn-jump" type="button"
-                class="w-14 h-14 rounded-full bg-sky-600/85 hover:bg-sky-500 active:scale-90 border-2 border-white/30 text-white font-extrabold text-xs shadow-lg backdrop-blur-sm cursor-pointer">
+                class="w-15 h-15 w-14 h-14 rounded-full bg-sky-600/85 hover:bg-sky-500 active:scale-90 border-2 border-white/35 text-white font-extrabold text-xs shadow-lg backdrop-blur-sm cursor-pointer">
                 NHẢY
             </button>
         </div>
 
         <!-- Thanh công cụ dưới cùng -->
-        <div class="pointer-events-auto fixed bottom-2.5 left-1/2 -translate-x-1/2 flex items-center gap-1.5 sm:gap-2 px-2.5 py-1.5 rounded-2xl bg-slate-900/85 backdrop-blur-md border border-white/15 shadow-2xl">
-            <button data-panel="panel-map" class="nav-panel-btn px-3 py-1.5 rounded-xl bg-white/10 hover:bg-sky-600 text-xs font-bold text-white transition cursor-pointer">
+        <div class="pointer-events-auto fixed bottom-2.5 left-1/2 -translate-x-1/2 flex items-center gap-1 sm:gap-2 px-2 py-1.5 rounded-2xl bg-slate-900/85 backdrop-blur-md border border-white/15 shadow-2xl max-w-[96vw] overflow-x-auto">
+            <button data-panel="panel-missions" class="nav-panel-btn px-2.5 sm:px-3 py-1.5 rounded-xl bg-red-600/30 hover:bg-red-600 border border-red-400/50 text-xs font-extrabold text-yellow-200 hover:text-white transition shrink-0 cursor-pointer">
+                🎯 Nhiệm vụ
+            </button>
+            <button data-panel="panel-leaderboard" class="nav-panel-btn px-2.5 sm:px-3 py-1.5 rounded-xl bg-yellow-500/25 hover:bg-yellow-500 border border-yellow-400/55 text-xs font-extrabold text-yellow-300 hover:text-slate-950 transition shrink-0 cursor-pointer">
+                🏆 Xếp hạng
+            </button>
+            <button data-panel="panel-map" class="nav-panel-btn px-2.5 sm:px-3 py-1.5 rounded-xl bg-white/10 hover:bg-sky-600 text-xs font-bold text-white transition shrink-0 cursor-pointer">
                 🗺️ Bản đồ
             </button>
-            <button data-panel="panel-online" class="nav-panel-btn px-3 py-1.5 rounded-xl bg-white/10 hover:bg-sky-600 text-xs font-bold text-white transition cursor-pointer">
+            <button data-panel="panel-online" class="nav-panel-btn px-2.5 sm:px-3 py-1.5 rounded-xl bg-white/10 hover:bg-sky-600 text-xs font-bold text-white transition shrink-0 cursor-pointer">
                 👥 Online
             </button>
-            <button data-panel="panel-chat" class="nav-panel-btn px-3 py-1.5 rounded-xl bg-white/10 hover:bg-sky-600 text-xs font-bold text-white transition cursor-pointer">
+            <button data-panel="panel-chat" class="nav-panel-btn px-2.5 sm:px-3 py-1.5 rounded-xl bg-white/10 hover:bg-sky-600 text-xs font-bold text-white transition shrink-0 cursor-pointer">
                 💬 Chat
             </button>
-            <button data-panel="panel-guestbook" class="nav-panel-btn px-3 py-1.5 rounded-xl bg-amber-500/25 hover:bg-amber-500 border border-amber-400/50 text-xs font-extrabold text-amber-200 hover:text-slate-950 transition cursor-pointer">
+            <button data-panel="panel-guestbook" class="nav-panel-btn px-2.5 sm:px-3 py-1.5 rounded-xl bg-amber-500/25 hover:bg-amber-500 border border-amber-400/50 text-xs font-extrabold text-amber-200 hover:text-slate-950 transition shrink-0 cursor-pointer">
                 📖 Lưu bút
             </button>
         </div>
 
+        <!-- Hộp thông báo lời mời Chat Riêng 1-1 -->
+        <div id="private-chat-invite-banner"
+            class="hidden pointer-events-auto fixed top-24 left-1/2 -translate-x-1/2 z-40 w-[92vw] max-w-md p-3.5 rounded-2xl bg-indigo-950/95 text-white border-2 border-indigo-400 shadow-2xl backdrop-blur-md space-y-2">
+            <div class="text-xs sm:text-sm font-extrabold text-indigo-200">
+                💌 Lời mời Chat Riêng Tư 1-1
+            </div>
+            <p id="private-invite-text" class="text-xs text-slate-200 leading-relaxed">
+                Bạn Nguyễn Văn A mời bạn trò chuyện riêng tư.
+            </p>
+            <div class="flex items-center justify-end gap-2 pt-1">
+                <button id="btn-decline-private-chat" type="button"
+                    class="px-3 py-1.5 rounded-xl bg-white/10 hover:bg-white/20 text-xs font-bold text-slate-200 cursor-pointer">
+                    Từ chối
+                </button>
+                <button id="btn-accept-private-chat" type="button"
+                    class="px-3.5 py-1.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 text-xs font-extrabold cursor-pointer">
+                    ✅ Đồng ý mở chat riêng
+                </button>
+            </div>
+        </div>
+
         <!-- ================================================================= -->
-        <!-- CÁC BẢNG CHỨC NĂNG NỔI (BẢN ĐỒ, ONLINE, CHAT, SỔ LƯU BÚT, ADMIN)  -->
+        <!-- CÁC BẢNG CHỨC NĂNG NỔI (NHIỆM VỤ, XẾP HẠNG, BẢN ĐỒ, CHAT RIÊNG...) -->
         <!-- ================================================================= -->
+
+        <!-- 0B. Bảng Xếp Hạng Lưu Trữ Vĩnh Viễn (Chỉ Admin mới có quyền xóa) -->
+        <div id="panel-leaderboard" class="modal-panel hidden pointer-events-auto fixed inset-x-0 bottom-16 mx-auto w-[94vw] max-w-lg rounded-3xl bg-slate-900/95 border border-yellow-400/50 p-4 shadow-2xl backdrop-blur-md z-30 max-h-[76vh] overflow-y-auto custom-scroll">
+            <div class="flex items-center justify-between mb-2">
+                <div>
+                    <h3 class="text-sm font-extrabold text-yellow-300">🏆 Bảng Xếp Hạng Học Sinh THPT Nguyễn Khuyến</h3>
+                    <p class="text-[11px] text-slate-300">Lưu giữ vĩnh viễn thành tích & danh hiệu đến khi Admin xóa</p>
+                </div>
+                <div class="flex items-center gap-1.5">
+                    <button id="btn-clear-leaderboard-admin" type="button"
+                        class="hidden px-2.5 py-1 rounded-lg bg-red-600/85 hover:bg-red-500 text-white text-[11px] font-bold cursor-pointer">
+                        🗑️ Xóa tất cả BXH
+                    </button>
+                    <button class="close-panel-btn px-2.5 py-1 rounded-lg bg-white/10 text-xs font-bold cursor-pointer">✕</button>
+                </div>
+            </div>
+            <div id="leaderboard-list" class="space-y-1.5 text-xs"></div>
+        </div>
+
+        <!-- 0C. Bảng Chat Riêng 1-1 Không Giới Hạn Ngôn Từ (Khi 2 người đã đồng ý) -->
+        <div id="panel-private-chat" class="modal-panel hidden pointer-events-auto fixed inset-x-0 bottom-16 mx-auto w-[94vw] max-w-md rounded-3xl bg-slate-900/95 border-2 border-indigo-400/70 p-4 shadow-2xl backdrop-blur-md z-30">
+            <div class="flex items-center justify-between mb-2">
+                <div class="min-w-0">
+                    <h3 id="private-chat-title" class="text-sm font-extrabold text-indigo-300 truncate">💌 Chat Riêng 1-1</h3>
+                    <p class="text-[11px] text-emerald-300 font-semibold">🔓 Đã đồng ý kết nối • Không giới hạn bộ lọc ngôn từ</p>
+                </div>
+                <div class="flex items-center gap-1.5 shrink-0">
+                    <button id="btn-end-private-chat" type="button"
+                        class="px-2 py-1 rounded-lg bg-rose-600/80 hover:bg-rose-500 text-white text-[11px] font-bold cursor-pointer">
+                        Rời phòng
+                    </button>
+                    <button class="close-panel-btn px-2.5 py-1 rounded-lg bg-white/10 text-xs font-bold cursor-pointer">✕</button>
+                </div>
+            </div>
+            <div id="private-chat-messages" class="h-44 overflow-y-auto custom-scroll space-y-1.5 p-2.5 rounded-2xl bg-slate-950/75 border border-indigo-400/25 mb-2.5 text-xs"></div>
+            <form id="private-chat-form" class="flex gap-2">
+                <input id="private-chat-input" type="text" maxlength="240" placeholder="Nhập tin nhắn riêng tư thoải mái..."
+                    class="flex-1 px-3 py-2 rounded-xl bg-slate-800 border border-indigo-400/35 text-white text-xs focus:outline-none focus:border-indigo-300">
+                <button type="submit" class="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs cursor-pointer">Gửi</button>
+            </form>
+        </div>
+
+        <!-- 0. Bảng 12 Nhiệm Vụ Học Sinh & Danh Hiệu -->
+        <div id="panel-missions" class="modal-panel hidden pointer-events-auto fixed inset-x-0 bottom-16 mx-auto w-[94vw] max-w-lg rounded-3xl bg-slate-900/95 border border-amber-400/50 p-4 shadow-2xl backdrop-blur-md z-30 max-h-[76vh] overflow-y-auto custom-scroll">
+            <div class="flex items-center justify-between mb-2">
+                <div>
+                    <h3 class="text-sm font-extrabold text-amber-300">🎯 Hệ Thống 12 Nhiệm Vụ Học Đường</h3>
+                    <p class="text-[11px] text-slate-300">Hoàn thành các mốc để mở khóa danh hiệu vinh danh toàn trường</p>
+                </div>
+                <button class="close-panel-btn px-2.5 py-1 rounded-lg bg-white/10 text-xs font-bold cursor-pointer">✕</button>
+            </div>
+
+            <!-- 3 Mốc Danh Hiệu -->
+            <div class="grid grid-cols-3 gap-1.5 mb-3 text-[10px] sm:text-[11px]">
+                <div id="milestone-5-card" class="p-2 rounded-xl bg-white/5 border border-white/15 text-center">
+                    <div class="font-extrabold text-emerald-300">Mốc 5/12 NV</div>
+                    <div class="font-bold text-white mt-0.5">🌟 Học Sinh Ngoan</div>
+                </div>
+                <div id="milestone-10-card" class="p-2 rounded-xl bg-white/5 border border-white/15 text-center">
+                    <div class="font-extrabold text-sky-300">Mốc 10/12 NV</div>
+                    <div class="font-bold text-white mt-0.5">🚩 Đoàn Viên Ưu Tú</div>
+                </div>
+                <div id="milestone-12-card" class="p-2 rounded-xl bg-white/5 border border-white/15 text-center">
+                    <div class="font-extrabold text-red-400">Mốc 12/12 NV</div>
+                    <div class="font-black text-yellow-300 mt-0.5">🔥 SIÊU BÁ KHÍ</div>
+                    <div class="text-[9px] text-red-200">Chạy chữ đỏ 2p</div>
+                </div>
+            </div>
+
+            <div id="mission-list-container" class="space-y-1.5 text-xs"></div>
+        </div>
 
         <!-- 1. Bảng Dịch Chuyển Nhanh (Bản đồ khu vực) -->
         <div id="panel-map" class="modal-panel hidden pointer-events-auto fixed inset-x-0 bottom-16 mx-auto w-[94vw] max-w-md rounded-3xl bg-slate-900/95 border border-white/20 p-4 shadow-2xl backdrop-blur-md z-30 max-h-[72vh] overflow-y-auto custom-scroll">
@@ -497,7 +623,7 @@
             <div class="flex items-center justify-between mb-2">
                 <div>
                     <h3 class="text-sm font-extrabold text-amber-300">📖 Sổ Lưu Bút THPT Nguyễn Khuyến</h3>
-                    <p class="text-[11px] text-slate-400">Gửi gắm kỷ niệm & sưu tầm đủ 12 mảnh lưu bút quanh trường</p>
+                    <p class="text-[11px] text-slate-400">Lưu giữ vĩnh viễn kỷ niệm đến khi Admin xóa & 12 mảnh lưu bút</p>
                 </div>
                 <button class="close-panel-btn px-2.5 py-1 rounded-lg bg-white/10 text-xs font-bold cursor-pointer">✕</button>
             </div>
@@ -724,6 +850,8 @@
             const WORD_LEVEL_PROFANITY = /\b(du|buom|chim|dm|dcm|dmm|vcl|vl|vkl|cc|cl|clmm|cmm|dit|lon|buoi|cac|deo|di|duma|du ma|du me|du cha|du ba|du con|du may|me may|cha may|bo lao|mat day|oc cho|cho chet|cho de|suc vat|suc sinh|thang ngu|con ngu|ngu vai|ngu vl|ngu vc|dai|ia|cut|fuck|shit|bitch|dick|pussy|porn|sex|xxx|hentai|jav|hitler)\b/i;
             const COMPACT_PROFANITY = /(duma|dume|dumay|ducha|duba|ducon|duhet|duroi|conbuom|buomto|buomxinh|buombe|conchim|chimto|chimnho|chimbe|concac|caiconcac|ditme|ditconme|ditba|duconme|thanglon|conlon|matlon|xamlon|buscu|bucu|vailon|vaicalon|vclon|occho|sucvat|sucsinh|chode|phandong|khungbo)/i;
             const IMPERSONATION_PATTERN = /\b(admin|quan tri vien|ban giam hieu|hieu truong|pho hieu truong|giao vien|giam thi|moderator|mod)\b/i;
+            const ARROGANT_NAME_WORDS = /\b(bo|bo la|bo may|bo m|tao|tao la|thang|thk|tk|con|con cho|ong noi|ba noi|cha|cha may|anh hai|dai ca|trum|ba chu|vua|chua)\b/i;
+            const ARROGANT_NAME_COMPACT = /(bola|bomay|taola|hieutruong|phohieutruong|giaovien|giamthi|quantri|thang|thk|ongnoi|banoi|daica|bachu)/i;
 
             function containsProfanity(text) {
                 if (!text) return false;
@@ -742,10 +870,17 @@
                 if (cleaned.length < 2) return { valid: false, reason: '⚠️ Họ và tên phải có ít nhất 2 ký tự!' };
                 if (cleaned.length > 30) return { valid: false, reason: '⚠️ Họ và tên tối đa 30 ký tự!' };
                 if (/^[^a-zA-ZÀ-ỹ]+$/.test(cleaned)) return { valid: false, reason: '⚠️ Tên không được chỉ chứa số hoặc ký tự đặc biệt!' };
+                const normSpaced = normalizeVietnameseText(cleaned);
+                const normNoPunct = normalizeNoPunctVietnamese(cleaned);
+                const compact = normNoPunct.replace(/\s+/g, '');
+
                 if (!allowAdminTitle && containsProfanity(cleaned)) {
                     return { valid: false, reason: '🚫 Tên chứa từ ngữ không phù hợp với môi trường học đường! Vui lòng đặt tên lịch sự.' };
                 }
-                if (!allowAdminTitle && (IMPERSONATION_PATTERN.test(normalizeVietnameseText(cleaned)) || IMPERSONATION_PATTERN.test(normalizeNoPunctVietnamese(cleaned)))) {
+                if (!allowAdminTitle && (ARROGANT_NAME_WORDS.test(normSpaced) || ARROGANT_NAME_WORDS.test(normNoPunct) || ARROGANT_NAME_COMPACT.test(compact))) {
+                    return { valid: false, reason: '🚫 Không được đặt tên xưng hô thiếu văn minh (như "Bố là...", "thằng", "thk", "bolahieutruong"...)!' };
+                }
+                if (!allowAdminTitle && (IMPERSONATION_PATTERN.test(normSpaced) || IMPERSONATION_PATTERN.test(normNoPunct) || /(hieutruong|giaovien|giamthi|bangiamhieu|quantrivien|admin)/i.test(compact))) {
                     return { valid: false, reason: '🚫 Link Người tham gia không được đặt tên giả danh Giáo viên, Ban Giám Hiệu hoặc Admin!' };
                 }
                 return { valid: true, name: cleaned };
@@ -755,6 +890,7 @@
                 id: persistentPlayerId,
                 name: 'Nguyễn Văn An',
                 role: isAdminUser ? 'Quản trị viên (Admin)' : 'Học sinh',
+                studentRank: '',
                 cohort: 'Học sinh đang học',
                 className: '12A1',
                 gender: 'male',
@@ -778,14 +914,13 @@
                 document.getElementById('hud-role-pill').classList.remove('hidden');
                 document.getElementById('btn-admin-panel').classList.remove('hidden');
                 document.getElementById('btn-clear-chat-admin').classList.remove('hidden');
+                document.getElementById('btn-clear-leaderboard-admin').classList.remove('hidden');
                 document.querySelectorAll('.admin-only-outfit').forEach(el => el.classList.remove('hidden'));
             } else {
-                // Đảm bảo link người tham gia hoàn toàn không thấy và không chọn được chức vụ
                 document.getElementById('login-role-wrapper').remove();
                 document.querySelectorAll('.admin-only-outfit').forEach(el => el.remove());
             }
 
-            // Link người tham gia chỉ có lựa chọn Học sinh đang học hoặc Niên khóa (1999 - 2026)
             const cohortOptions = isAdminUser
                 ? ['Cán bộ - Giáo viên', 'Học sinh đang học']
                 : ['Học sinh đang học'];
@@ -794,7 +929,6 @@
             }
             cohortSelect.innerHTML = cohortOptions.map(c => `<option value="${c}">${c}</option>`).join('');
 
-            // Link người tham gia chỉ có 36 lớp học (12A1-12A12, 11B1-11B12, 10C1-10C12), không có phòng ban cán bộ
             const classOptions = isAdminUser
                 ? ['Ban Giám Hiệu', 'Phòng Giáo Viên', 'Đoàn Thanh Niên']
                 : [];
@@ -844,7 +978,129 @@
             });
 
             // =========================================================================
-            // 2. KHỞI TẠO CẢNH 3D THREE.JS & TỶ LỆ MỞ RỘNG TOÀN TRƯỜNG (CAMPUS_SCALE)
+            // 2. HỆ THỐNG 12 NHIỆM VỤ HỌC ĐƯỜNG, 3 MỐC DANH HIỆU & BĂNG RÔN ĐỎ 2 PHÚT
+            // =========================================================================
+            const studentMissions = [
+                { id: 1, title: 'Bước qua Cổng chính vào sân trường', desc: 'Đi qua cổng chính THPT Nguyễn Khuyến vào khu vực sân gạch đỏ.', done: false },
+                { id: 2, title: 'Chào hỏi Bác Bảo Vệ tuần tra', desc: 'Lại gần Bác Lời, Bác Tâm hoặc Bác Hà và bấm [E] trò chuyện.', done: false },
+                { id: 3, title: 'Chào cờ dưới chân Cột cờ Tổ quốc', desc: 'Đứng nghiêm trang dưới chân Cột cờ trung tâm sân trường.', done: false },
+                { id: 4, title: 'Dâng hương Tượng Đài Nguyễn Bỉnh Khiêm', desc: 'Tới khu Tượng đài Danh nhân Nguyễn Bỉnh Khiêm và bấm [E].', done: false },
+                { id: 5, title: 'Ngắm đàn cá Koi bên Hồ đá hình elip', desc: 'Tới Hồ cá Koi phía Đông sân trường và bấm [E] ngắm cá.', done: false },
+                { id: 6, title: 'Ngồi vào bàn học trong lớp học', desc: 'Bước vào một phòng học và bấm [E] ngồi ngay ngắn vào bàn.', done: false },
+                { id: 7, title: 'Tham quan Phòng Truyền Thống & Hội Trường', desc: 'Lên tầng 2 Dãy Hiệu Bộ khám phá Phòng Truyền Thống.', done: false },
+                { id: 8, title: 'Tham quan & dắt xe tại Khu 6 Lán xe', desc: 'Tới khu 6 lán xe phía sau Dãy A hoặc dắt xe đạp đi bộ.', done: false },
+                { id: 9, title: 'Rèn luyện thể thao trên Sân bóng cỏ xanh', desc: 'Chạy tới sân bóng phía sau trường và chạm bóng lăn.', done: false },
+                { id: 10, title: 'Đứng bục phát biểu Khán đài Lễ Khai Giảng', desc: 'Lên sân khấu trung tâm và bấm [E] phát biểu chào mừng.', done: false },
+                { id: 11, title: 'Ký tên vào Sổ Lưu Bút THPT Nguyễn Khuyến', desc: 'Mở Sổ Lưu Bút và gửi một dòng kỷ niệm cho mái trường.', done: false },
+                { id: 12, title: '🔥 Tập hợp đủ 12 bạn cùng lớp ngồi học 5p (Mốc Bá Khí)', desc: 'Đủ 12 học sinh thật cùng lớp ngồi trên ghế trong phòng học của lớp mình suốt 5 phút thực tế.', done: false }
+            ];
+
+            let serverMarqueeEndTime = 0;
+
+            function triggerServerRedMarquee(studentName, className, broadcast = true) {
+                serverMarqueeEndTime = performance.now() + 2 * 60 * 1000;
+                const banner = document.getElementById('server-marquee-banner');
+                const textEl = document.getElementById('server-marquee-text');
+                const topBar = document.getElementById('hud-top-bar');
+                if (banner && textEl) {
+                    const clsLabel = className && className.startsWith('1') ? `LỚP ${className}` : (className || '');
+                    textEl.textContent = `🔥 CHÚC MỪNG HỌC SINH ${studentName.toUpperCase()} (${clsLabel}) ĐÃ HOÀN THÀNH 12/12 NHIỆM VỤ VÀ ĐẠT DANH HIỆU TỐI CAO [SIÊU BÁ KHÍ] TOÀN SERVER THPT NGUYỄN KHUYẾN! 🔥`;
+                    banner.classList.remove('hidden');
+                }
+                if (topBar) topBar.style.marginTop = '54px';
+
+                if (broadcast) {
+                    const payload = { id: playerProfile.id, name: studentName, className };
+                    if (mqttClient && mqttClient.connected) {
+                        mqttClient.publish(`${ROOM_TOPIC}/marquee`, JSON.stringify(payload), { qos: 0 });
+                    }
+                    if (channel) channel.postMessage({ type: 'server_marquee', ...payload });
+                }
+            }
+
+            function renderStudentMissionsUI() {
+                const doneCount = studentMissions.filter(m => m.done).length;
+                const countHud = document.getElementById('mission-count-hud');
+                if (countHud) countHud.textContent = `${doneCount}/12`;
+
+                const m5 = document.getElementById('milestone-5-card');
+                const m10 = document.getElementById('milestone-10-card');
+                const m12 = document.getElementById('milestone-12-card');
+                if (m5) m5.className = doneCount >= 5 ? 'p-2 rounded-xl bg-emerald-500/25 border-2 border-emerald-400 text-center shadow' : 'p-2 rounded-xl bg-white/5 border border-white/15 text-center opacity-75';
+                if (m10) m10.className = doneCount >= 10 ? 'p-2 rounded-xl bg-sky-500/25 border-2 border-sky-400 text-center shadow' : 'p-2 rounded-xl bg-white/5 border border-white/15 text-center opacity-75';
+                if (m12) m12.className = doneCount >= 12 ? 'p-2 rounded-xl bg-red-600/35 border-2 border-yellow-300 text-center shadow-lg' : 'p-2 rounded-xl bg-white/5 border border-white/15 text-center opacity-75';
+
+                const listEl = document.getElementById('mission-list-container');
+                if (!listEl) return;
+                listEl.innerHTML = studentMissions.map(m => `
+                    <div class="flex items-start justify-between gap-2 p-2.5 rounded-xl ${m.done ? 'bg-emerald-500/20 border border-emerald-400/45' : (m.id === 12 ? 'bg-red-950/40 border border-red-400/40' : 'bg-white/5 border border-white/10')}">
+                        <div class="min-w-0">
+                            <div class="font-bold ${m.done ? 'text-emerald-300' : (m.id === 12 ? 'text-yellow-300' : 'text-white')}">
+                                ${m.done ? '✅' : (m.id === 12 ? '🔥' : '⬜')} Nhiệm vụ #${m.id}: ${escapeHtml(m.title)}
+                            </div>
+                            <div class="text-[11px] text-slate-300 mt-0.5 leading-snug">${escapeHtml(m.desc)}</div>
+                        </div>
+                        <span class="px-2 py-0.5 rounded-md text-[10px] font-bold shrink-0 ${m.done ? 'bg-emerald-500/25 text-emerald-300' : 'bg-white/10 text-slate-300'}">
+                            ${m.done ? 'Xong' : 'Chưa xong'}
+                        </span>
+                    </div>
+                `).join('');
+            }
+
+            function completeStudentMission(id) {
+                if (!playerProfile.loggedIn) return;
+                const m = studentMissions.find(item => item.id === id);
+                if (!m || m.done) return;
+                m.done = true;
+
+                const doneCount = studentMissions.filter(item => item.done).length;
+                renderStudentMissionsUI();
+                showToast(`🎯 Hoàn thành Nhiệm vụ #${id} (${doneCount}/12): ${m.title}`);
+
+                let newRank = playerProfile.studentRank;
+                if (doneCount >= 12) {
+                    newRank = 'SIÊU BÁ KHÍ';
+                } else if (doneCount >= 10) {
+                    newRank = 'Đoàn Viên Ưu Tú';
+                } else if (doneCount >= 5) {
+                    newRank = 'Học Sinh Ngoan';
+                }
+
+                if (newRank !== playerProfile.studentRank) {
+                    playerProfile.studentRank = newRank;
+                    updateHudProfileDisplay();
+                    rebuildPlayerAvatar();
+                    renderOnlineList();
+                    publishPositionToNetwork(true);
+
+                    if (newRank === 'Học Sinh Ngoan') {
+                        showToast('🌟 Chúc mừng! Bạn đạt mốc 5/12 và nhận danh hiệu [HỌC SINH NGOAN]!');
+                    } else if (newRank === 'Đoàn Viên Ưu Tú') {
+                        showToast('🚩 Xuất sắc! Bạn đạt mốc 10/12 và nhận danh hiệu [ĐOÀN VIÊN ƯU TÚ]!');
+                    } else if (newRank === 'SIÊU BÁ KHÍ') {
+                        const announceMsg = `🔥 [VINH DANH TOÀN SERVER] Học sinh ${playerProfile.name} (${playerProfile.className}) đã hoàn thành 12/12 nhiệm vụ và đạt danh hiệu tối cao [SIÊU BÁ KHÍ]!`;
+                        addChatMessage('🔥 Hệ thống Vinh Danh', announceMsg, playerProfile.id, playerProfile.name, true);
+                        publishChatToNetwork('🔥 Hệ thống Vinh Danh', announceMsg);
+                        triggerServerRedMarquee(playerProfile.name, playerProfile.className, true);
+                    }
+                }
+                syncSelfToLeaderboard();
+            }
+
+            function resetStudentMissionsForNewStudent() {
+                studentMissions.forEach(m => { m.done = false; });
+                playerProfile.studentRank = '';
+                renderStudentMissionsUI();
+            }
+
+            document.getElementById('btn-missions-hud').addEventListener('click', () => {
+                closeAllPanels();
+                renderStudentMissionsUI();
+                document.getElementById('panel-missions').classList.remove('hidden');
+            });
+
+            // =========================================================================
+            // 3. KHỞI TẠO CẢNH 3D THREE.JS & TỶ LỆ MỞ RỘNG TOÀN TRƯỜNG (CAMPUS_SCALE)
             // =========================================================================
             const CAMPUS_SCALE = 1.88;
             const sc = v => v * CAMPUS_SCALE;
@@ -897,7 +1153,7 @@
             scene.add(fillLight);
 
             // =========================================================================
-            // 3. TIỆN ÍCH TEXTURE, BỘ NHỚ ĐỆM GEOMETRY & ĐÓNG BĂNG MA TRẬN TĨNH
+            // 4. TIỆN ÍCH TEXTURE, BỘ NHỚ ĐỆM GEOMETRY & ĐÓNG BĂNG MA TRẬN TĨNH
             // =========================================================================
             const maxAniso = Math.min(4, renderer.capabilities.getMaxAnisotropy ? renderer.capabilities.getMaxAnisotropy() : 1);
             const boxGeoCache = new Map();
@@ -907,6 +1163,16 @@
                 if (!g) {
                     g = new THREE.BoxGeometry(w, h, d);
                     boxGeoCache.set(key, g);
+                }
+                return g;
+            }
+            const planeGeoCache = new Map();
+            function getPlaneGeo(w, h) {
+                const key = `${w.toFixed(3)}_${h.toFixed(3)}`;
+                let g = planeGeoCache.get(key);
+                if (!g) {
+                    g = new THREE.PlaneGeometry(w, h);
+                    planeGeoCache.set(key, g);
                 }
                 return g;
             }
@@ -942,11 +1208,11 @@
             }
 
             function makeSignPlane(planeW, planeH, drawFn) {
-                const texW = Math.max(256, Math.round(planeW * 128));
-                const texH = Math.max(96, Math.round(planeH * 128));
+                const texW = Math.min(1024, Math.max(256, Math.round(planeW * 96)));
+                const texH = Math.min(512, Math.max(96, Math.round(planeH * 96)));
                 const tex = makeCanvasTexture(texW, texH, drawFn);
                 return new THREE.Mesh(
-                    new THREE.PlaneGeometry(planeW, planeH),
+                    getPlaneGeo(planeW, planeH),
                     new THREE.MeshBasicMaterial({ map: tex, side: THREE.DoubleSide, polygonOffset: true, polygonOffsetFactor: -1, polygonOffsetUnits: -1 })
                 );
             }
@@ -973,36 +1239,44 @@
                 return new THREE.Sprite(new THREE.SpriteMaterial({ map: tex, transparent: true, depthWrite: false }));
             }
 
-            function makeParticipantNameplate(name, className, cohort, isSelf = false, isAdmin = false, role = 'Học sinh') {
+            function makeParticipantNameplate(name, className, cohort, isSelf = false, isAdmin = false, role = 'Học sinh', studentRank = '') {
                 const hasSpecialRole = isAdmin || (role && role !== 'Học sinh');
-                const rolePrefix = hasSpecialRole ? `👑 [${role.toUpperCase()}] ` : '';
+                const isBaKhi = studentRank === 'SIÊU BÁ KHÍ';
+                const rankTag = isBaKhi
+                    ? '🔥 [SIÊU BÁ KHÍ] '
+                    : (studentRank === 'Đoàn Viên Ưu Tú'
+                        ? '🚩 [ĐOÀN VIÊN ƯU TÚ] '
+                        : (studentRank === 'Học Sinh Ngoan' ? '🌟 [HỌC SINH NGOAN] ' : ''));
+                const rolePrefix = hasSpecialRole ? `👑 [${role.toUpperCase()}] ` : rankTag;
                 const titleLine = `${rolePrefix}${name}`;
                 const unitLabel = className && className.startsWith('1') ? `Lớp ${className}` : (className || '');
                 const subLine = `${unitLabel}${unitLabel && cohort ? ' • ' : ''}${cohort || ''}`;
-                const tex = makeCanvasTexture(600, 128, (ctx, w, h) => {
+                const tex = makeCanvasTexture(640, 132, (ctx, w, h) => {
                     ctx.clearRect(0, 0, w, h);
-                    ctx.fillStyle = hasSpecialRole ? 'rgba(120, 53, 15, 0.94)' : 'rgba(15, 23, 42, 0.9)';
+                    ctx.fillStyle = isBaKhi
+                        ? 'rgba(153, 27, 27, 0.96)'
+                        : (hasSpecialRole ? 'rgba(120, 53, 15, 0.94)' : 'rgba(15, 23, 42, 0.9)');
                     ctx.beginPath();
                     ctx.roundRect(8, 8, w - 16, h - 16, 26);
                     ctx.fill();
-                    ctx.strokeStyle = hasSpecialRole ? '#facc15' : (isSelf ? '#38bdf8' : 'rgba(255,255,255,0.55)');
-                    ctx.lineWidth = 4.5;
+                    ctx.strokeStyle = isBaKhi ? '#fde047' : (hasSpecialRole ? '#facc15' : (isSelf ? '#38bdf8' : 'rgba(255,255,255,0.55)'));
+                    ctx.lineWidth = isBaKhi ? 5.5 : 4.5;
                     ctx.stroke();
 
                     ctx.textAlign = 'center';
                     ctx.textBaseline = 'middle';
                     ctx.shadowColor = 'rgba(0,0,0,0.5)';
                     ctx.shadowBlur = 4;
-                    ctx.fillStyle = hasSpecialRole ? '#fef08a' : '#ffffff';
-                    ctx.font = '800 28px Inter, sans-serif';
-                    ctx.fillText(titleLine, w / 2, 45, w - 36);
+                    ctx.fillStyle = (hasSpecialRole || isBaKhi) ? '#fef08a' : '#ffffff';
+                    ctx.font = '800 27px Inter, sans-serif';
+                    ctx.fillText(titleLine, w / 2, 46, w - 36);
 
-                    ctx.fillStyle = hasSpecialRole ? '#fde68a' : '#7dd3fc';
+                    ctx.fillStyle = isBaKhi ? '#fecaca' : (hasSpecialRole ? '#fde68a' : '#7dd3fc');
                     ctx.font = '700 21px Inter, sans-serif';
-                    ctx.fillText(subLine, w / 2, 86, w - 36);
+                    ctx.fillText(subLine, w / 2, 88, w - 36);
                 });
                 const sprite = new THREE.Sprite(new THREE.SpriteMaterial({ map: tex, transparent: true, depthWrite: false }));
-                sprite.scale.set(2.85, 0.64, 1);
+                sprite.scale.set(2.95, 0.66, 1);
                 sprite.position.set(0, 2.28, 0);
                 return sprite;
             }
@@ -1010,13 +1284,13 @@
             function enableShadowRecursive(obj, cast = true, receive = true) {
                 obj.traverse(child => {
                     if (child.isMesh) {
-                        child.castShadow = Boolean(cast);
+                        const skipCast = child.userData && child.userData.noShadowCast;
+                        child.castShadow = Boolean(cast && !skipCast);
                         child.receiveShadow = Boolean(receive);
                     }
                 });
             }
 
-            // Vật liệu kiến trúc chuẩn xác
             const matWhite = new THREE.MeshStandardMaterial({ color: 0xf8fafc, roughness: 0.65 });
             const matCream = new THREE.MeshStandardMaterial({ color: 0xfef3c7, roughness: 0.78 });
             const matRoyalBlue = new THREE.MeshStandardMaterial({ color: 0x0284c7, roughness: 0.55 });
@@ -1030,7 +1304,6 @@
             const matFloorTile = new THREE.MeshStandardMaterial({ color: 0xe2e8f0, roughness: 0.7 });
             const matWindowGlass = new THREE.MeshBasicMaterial({ color: 0x7dd3fc });
 
-            // Đá hoa cương (bậc tam cấp & nền nâng cao 0.56m)
             const texGranite = makeRepeatingTexture(128, 128, 12, 12, (ctx, w, h) => {
                 ctx.fillStyle = '#cbd5e1';
                 ctx.fillRect(0, 0, w, h);
@@ -1044,7 +1317,6 @@
             });
             const matGranite = new THREE.MeshStandardMaterial({ map: texGranite, roughness: 0.48, metalness: 0.08 });
 
-            // Gạch thẻ đỏ ốp mặt ngoài Dãy A (12A) và Dãy B (11B)
             const texRedBrickWall = makeRepeatingTexture(128, 128, 18, 8, (ctx, w, h) => {
                 ctx.fillStyle = '#991b1b';
                 ctx.fillRect(0, 0, w, h);
@@ -1077,7 +1349,6 @@
             });
             const matStripedPillar = new THREE.MeshStandardMaterial({ map: texStripedPillar, roughness: 0.65 });
 
-            // Hệ thống va chạm, bề mặt cao độ & danh sách ghế ngồi (tự động nhân CAMPUS_SCALE)
             const wallColliders = [];
             const floorZones = [];
             const stairRamps = [];
@@ -1173,7 +1444,7 @@
             }
 
             // =========================================================================
-            // 4. BẦU TRỜI CHUYỂN SẮC, MÂY TRÔI & CHIM BAY
+            // 5. BẦU TRỜI CHUYỂN SẮC, MÂY TRÔI & CHIM BAY
             // =========================================================================
             const streetLampHalos = [];
             const skyClouds = [];
@@ -1379,7 +1650,7 @@
             applySkyMood(0);
 
             // =========================================================================
-            // 5. MẶT SÂN GẠCH ĐỎ, ĐƯỜNG LÁT ĐÁ & HOA VĂN LA BÀN TRUNG TÂM
+            // 6. MẶT SÂN GẠCH ĐỎ, ĐƯỜNG LÁT ĐÁ & HOA VĂN LA BÀN TRUNG TÂM
             // =========================================================================
             function buildGroundAndRoads() {
                 const groundGroup = new THREE.Group();
@@ -1475,7 +1746,6 @@
                 courtyard.receiveShadow = true;
                 groundGroup.add(courtyard);
 
-                // Hoa văn ngôi sao la bàn giữa sân gạch đỏ trung tâm
                 const compassTex = makeCanvasTexture(256, 256, (ctx, w, h) => {
                     ctx.clearRect(0, 0, w, h);
                     ctx.strokeStyle = 'rgba(254, 243, 199, 0.55)';
@@ -1513,7 +1783,6 @@
                 entryWalkway.receiveShadow = true;
                 groundGroup.add(entryWalkway);
 
-                // Sân & đường lát đá hoa cương trước mặt tiền Dãy Hiệu Bộ (góc Tây Nam, quay mặt hướng Bắc)
                 const adminWalkway = new THREE.Mesh(
                     new THREE.PlaneGeometry(sc(21.6), sc(5.4)),
                     new THREE.MeshStandardMaterial({ map: texStonePaver, roughness: 0.72 })
@@ -1523,7 +1792,6 @@
                 adminWalkway.receiveShadow = true;
                 groundGroup.add(adminWalkway);
 
-                // 2 lối đi lát đá riêng biệt góc Tây Bắc (x = -22.5) và Đông Bắc (x = 23.5) ra 6 Lán xe & Sân bóng
                 [-22.5, 23.5].forEach(px => {
                     const nwPath = new THREE.Mesh(
                         new THREE.PlaneGeometry(sc(3.2), sc(22.0)),
@@ -1557,7 +1825,7 @@
             buildGroundAndRoads();
 
             // =========================================================================
-            // 6. CỔNG TRƯỜNG THPT NGUYỄN KHUYẾN, TƯỜNG RÀO & CỘT CỜ TỔ QUỐC
+            // 7. CỔNG TRƯỜNG THPT NGUYỄN KHUYẾN, TƯỜNG RÀO & CỘT CỜ TỔ QUỐC
             // =========================================================================
             let flagMesh = null;
             function buildFrontGateAndFences() {
@@ -1870,7 +2138,7 @@
             buildFrontGateAndFences();
 
             // =========================================================================
-            // 7. HỒ CÁ KOI HÌNH ELIP VIỀN ĐÁ TỰ NHIÊN & ỐNG TRE PHUN NƯỚC
+            // 8. HỒ CÁ KOI HÌNH ELIP VIỀN ĐÁ TỰ NHIÊN & ỐNG TRE PHUN NƯỚC
             // =========================================================================
             const koiFishList = [];
             const pondRipples = [];
@@ -2025,13 +2293,16 @@
                     z: 29.2,
                     radius: 4.5,
                     label: 'Ngắm đàn cá Koi bên hồ đá hình elip',
-                    action: () => showToast('🐟 Đàn cá Koi nhiều màu đang bơi lội trong hồ hình elip viền đá tự nhiên!')
+                    action: () => {
+                        completeStudentMission(5);
+                        showToast('🐟 Đàn cá Koi nhiều màu đang bơi lội trong hồ hình elip viền đá tự nhiên!');
+                    }
                 });
             }
             buildKoiPond();
 
             // =========================================================================
-            // 8. HÀNG CÂY CAU VUA, CÂY PHƯỢNG BÓNG MÁT, BƯỚM BAY & ĐÈN SÂN TRƯỜNG
+            // 9. HÀNG CÂY CAU VUA, CÂY PHƯỢNG BÓNG MÁT, BƯỚM BAY & ĐÈN SÂN TRƯỜNG
             // =========================================================================
             const flamboyantPetals = [];
             const gardenButterflies = [];
@@ -2190,7 +2461,6 @@
                     });
                     treeGroup.add(bench);
 
-                    // Đăng ký 2 vị trí ngồi trên mỗi chiếc ghế đá sân trường
                     const cosR = Math.cos(b.rot);
                     const sinR = Math.sin(b.rot);
                     [-0.52, 0.52].forEach((offsetLocalX, sIdx) => {
@@ -2234,7 +2504,7 @@
             buildTreesAndPlanters();
 
             // =========================================================================
-            // 9. KHÁN ĐÀI / SÂN KHẤU LỄ KHAI GIẢNG GIỮA SÂN TRƯỜNG
+            // 10. KHÁN ĐÀI / SÂN KHẤU LỄ KHAI GIẢNG GIỮA SÂN TRƯỜNG
             // =========================================================================
             function buildCeremonialStage() {
                 const stageGroup = new THREE.Group();
@@ -2383,6 +2653,7 @@
                     radius: 2.8,
                     label: 'Đứng bục phát biểu chào mừng toàn trường',
                     action: () => {
+                        completeStudentMission(10);
                         if (isSelfMuted && !isAdminUser) {
                             showToast('🔇 Bạn đang bị Admin cấm chat nên không thể phát biểu trên lễ đài!');
                             return;
@@ -2397,9 +2668,12 @@
             buildCeremonialStage();
 
             // =========================================================================
-            // 10. THÔNG SỐ CAO ĐỘ, QUẠT TRẦN, MÁI NGÓI KIẾN TRÚC & NỘI THẤT PHÒNG HỌC
+            // 11. THÔNG SỐ CAO ĐỘ, QUẠT TRẦN, MÁI NGÓI KIẾN TRÚC & NỘI THẤT PHÒNG HỌC
             // =========================================================================
             const ceilingFans = [];
+            const classroomFurnitureGroups = [];
+            const mottoBannerMatCache = new Map();
+            const classroomSignMatCache = new Map();
             let soccerBallMesh = null;
             const soccerBallVel = { x: 0, z: 0 };
             window.restroomZones = [];
@@ -2411,27 +2685,35 @@
             const WALL_H = ROOF_Y - BASE_Y1;
             const WALL_CENTER_Y = BASE_Y1 + WALL_H / 2;
 
+            const _fanRodGeo = new THREE.CylinderGeometry(0.03, 0.03, 0.42, 6);
+            const _fanHubGeo = new THREE.CylinderGeometry(0.14, 0.14, 0.08, 10);
+            const _fanBladeGeo = getBoxGeo(0.14, 0.016, 0.78);
+            const _fanBladeMat = new THREE.MeshLambertMaterial({ color: 0xf8fafc });
+
             function createCeilingFan(x, y, z) {
                 const fanGroup = new THREE.Group();
                 fanGroup.position.set(x, y, z);
 
-                const rod = new THREE.Mesh(new THREE.CylinderGeometry(0.03, 0.03, 0.42, 6), matWhite);
+                const rod = new THREE.Mesh(_fanRodGeo, matWhite);
                 rod.position.y = -0.21;
+                rod.userData.noShadowCast = true;
                 fanGroup.add(rod);
 
                 const rotor = new THREE.Group();
                 rotor.position.y = -0.44;
-                const hub = new THREE.Mesh(new THREE.CylinderGeometry(0.14, 0.14, 0.08, 10), matRoyalBlue);
+                const hub = new THREE.Mesh(_fanHubGeo, matRoyalBlue);
+                hub.userData.noShadowCast = true;
                 rotor.add(hub);
 
-                const bladeMat = new THREE.MeshLambertMaterial({ color: 0xf8fafc });
                 for (let i = 0; i < 3; i++) {
                     const a = (i / 3) * Math.PI * 2;
-                    const blade = new THREE.Mesh(getBoxGeo(0.14, 0.016, 0.78), bladeMat);
+                    const blade = new THREE.Mesh(_fanBladeGeo, _fanBladeMat);
                     blade.position.set(Math.sin(a) * 0.44, 0, Math.cos(a) * 0.44);
                     blade.rotation.y = a;
+                    blade.userData.noShadowCast = true;
                     rotor.add(blade);
                 }
+                rotor.userData = { wx: x, wz: z };
                 fanGroup.add(rotor);
                 ceilingFans.push(rotor);
                 return fanGroup;
@@ -2508,39 +2790,49 @@
                     });
                 }
 
-                // Bục giảng gỗ rộng rãi đặt sát tường bảng
+                const roomFurnGroup = new THREE.Group();
+                parentGroup.add(roomFurnGroup);
+                classroomFurnitureGroups.push({ group: roomFurnGroup, x: sx, y: baseY, z: sz });
+
                 const daisW = Math.min(w - 1.4, 7.6);
                 const daisD = 1.45;
                 const dais = new THREE.Mesh(getBoxGeo(daisW, 0.16, daisD), matWood);
                 dais.position.set(sx, baseY + 0.08, boardZ + rowDir * (daisD / 2 + 0.06));
-                parentGroup.add(dais);
+                dais.userData.noShadowCast = true;
+                roomFurnGroup.add(dais);
 
-                // Khung bảng xanh lớn cân đối với bề ngang phòng học
                 const boardW = Math.min(w - 2.6, 5.4);
                 const boardH = 1.52;
                 const boardFrame = new THREE.Mesh(getBoxGeo(boardW + 0.22, boardH + 0.18, 0.08), matWood);
                 boardFrame.position.set(sx, baseY + 1.72, boardZ);
                 boardFrame.rotation.y = boardRot;
+                boardFrame.userData.noShadowCast = true;
                 parentGroup.add(boardFrame);
 
-                // Khẩu hiệu "TIÊN HỌC LỄ - HẬU HỌC VĂN" phía trên bảng xanh
-                const mottoBanner = makeSignPlane(boardW + 0.2, 0.34, (ctx, mw, mh) => {
-                    ctx.fillStyle = '#b91c1c';
-                    ctx.fillRect(0, 0, mw, mh);
-                    ctx.strokeStyle = '#facc15';
-                    ctx.lineWidth = 5;
-                    ctx.strokeRect(4, 4, mw - 8, mh - 8);
-                    ctx.fillStyle = '#fef08a';
-                    ctx.font = '800 24px Inter, sans-serif';
-                    ctx.textAlign = 'center';
-                    ctx.textBaseline = 'middle';
-                    ctx.fillText('TIÊN HỌC LỄ - HẬU HỌC VĂN', mw / 2, mh / 2, mw - 20);
-                });
+                const mottoKey = (boardW + 0.2).toFixed(2);
+                let mottoMat = mottoBannerMatCache.get(mottoKey);
+                if (!mottoMat) {
+                    const mottoTex = makeCanvasTexture(512, 64, (ctx, mw, mh) => {
+                        ctx.fillStyle = '#b91c1c';
+                        ctx.fillRect(0, 0, mw, mh);
+                        ctx.strokeStyle = '#facc15';
+                        ctx.lineWidth = 5;
+                        ctx.strokeRect(4, 4, mw - 8, mh - 8);
+                        ctx.fillStyle = '#fef08a';
+                        ctx.font = '800 24px Inter, sans-serif';
+                        ctx.textAlign = 'center';
+                        ctx.textBaseline = 'middle';
+                        ctx.fillText('TIÊN HỌC LỄ - HẬU HỌC VĂN', mw / 2, mh / 2, mw - 20);
+                    });
+                    mottoMat = new THREE.MeshBasicMaterial({ map: mottoTex, side: THREE.DoubleSide, polygonOffset: true, polygonOffsetFactor: -1, polygonOffsetUnits: -1 });
+                    mottoBannerMatCache.set(mottoKey, mottoMat);
+                }
+                const mottoBanner = new THREE.Mesh(getPlaneGeo(boardW + 0.2, 0.34), mottoMat);
                 mottoBanner.position.set(sx, baseY + 2.74, boardZ + rowDir * 0.05);
                 mottoBanner.rotation.y = boardRot;
+                mottoBanner.userData.noShadowCast = true;
                 parentGroup.add(mottoBanner);
 
-                // Bảng xanh lớp học khắc rõ 5 Điều Bác Hồ Dạy & Nội quy nhà trường (Đi dép quai hậu)
                 const boardSign = makeSignPlane(boardW, boardH, (ctx, bw, bh) => {
                     ctx.fillStyle = '#064e3b';
                     ctx.fillRect(0, 0, bw, bh);
@@ -2553,7 +2845,6 @@
                     ctx.lineTo(bw / 2, bh - 14);
                     ctx.stroke();
 
-                    // Nửa trái bảng: 5 Điều Bác Hồ Dạy
                     ctx.fillStyle = '#fde047';
                     ctx.font = '800 20px Inter, sans-serif';
                     ctx.textAlign = 'center';
@@ -2573,7 +2864,6 @@
                         ctx.fillText(line, 20, 58 + idx * 23);
                     });
 
-                    // Nửa phải bảng: Nội quy nhà trường (Đi dép quai hậu)
                     ctx.fillStyle = '#7dd3fc';
                     ctx.font = '800 19px Inter, sans-serif';
                     ctx.textAlign = 'center';
@@ -2597,20 +2887,22 @@
                 boardSign.rotation.y = boardRot;
                 parentGroup.add(boardSign);
 
-                // Bàn & ghế Giáo viên đặt trên bục giảng góc trái
                 const tDeskZ = boardZ + rowDir * 1.08;
                 const tDeskX = sx - w * 0.33;
                 const tDesk = new THREE.Mesh(getBoxGeo(1.65, 0.76, 0.72), matWood);
                 tDesk.position.set(tDeskX, baseY + 0.16 + 0.38, tDeskZ);
-                parentGroup.add(tDesk);
+                tDesk.userData.noShadowCast = true;
+                roomFurnGroup.add(tDesk);
 
                 const tChairZ = tDeskZ - rowDir * 0.52;
                 const tChairSeat = new THREE.Mesh(getBoxGeo(0.56, 0.44, 0.52), matWood);
                 tChairSeat.position.set(tDeskX, baseY + 0.16 + 0.22, tChairZ);
-                parentGroup.add(tChairSeat);
+                tChairSeat.userData.noShadowCast = true;
+                roomFurnGroup.add(tChairSeat);
                 const tChairBack = new THREE.Mesh(getBoxGeo(0.56, 0.48, 0.08), matWood);
                 tChairBack.position.set(tDeskX, baseY + 0.16 + 0.66, tChairZ - rowDir * 0.22);
-                parentGroup.add(tChairBack);
+                tChairBack.userData.noShadowCast = true;
+                roomFurnGroup.add(tChairBack);
 
                 registerSeatSpot({
                     x: tDeskX,
@@ -2621,7 +2913,6 @@
                     isScaled: true
                 });
 
-                // Xếp 4 dãy × 5 hàng = 20 bộ bàn ghế đôi (40 chỗ ngồi) cân đối toàn bộ diện tích phòng học
                 const numCols = 4;
                 const numRows = 5;
                 const usableW = w - 2.1;
@@ -2633,6 +2924,13 @@
                 const lastRowOffset = d - 1.95;
                 const rowStep = numRows > 1 ? (lastRowOffset - firstRowOffset) / (numRows - 1) : 1.5;
 
+                const geoDeskTop = getBoxGeo(deskW, 0.06, deskD);
+                const geoDeskShelf = getBoxGeo(deskW - 0.08, 0.14, deskD - 0.08);
+                const geoDeskLeg = getBoxGeo(0.05, 0.68, deskD - 0.06);
+                const geoBenchSeat = getBoxGeo(deskW, 0.05, 0.32);
+                const geoBenchLeg = getBoxGeo(0.05, 0.42, 0.30);
+                const geoBenchBack = getBoxGeo(deskW, 0.34, 0.05);
+
                 for (let cIdx = 0; cIdx < numCols; cIdx++) {
                     const colOffset = (cIdx - (numCols - 1) / 2) * colSpan;
                     const deskX = sx + colOffset;
@@ -2640,39 +2938,41 @@
                     for (let r = 0; r < numRows; r++) {
                         const dz = boardZ + rowDir * (firstRowOffset + r * rowStep);
 
-                        // Mặt bàn & ngăn bàn học sinh
-                        const deskTop = new THREE.Mesh(getBoxGeo(deskW, 0.06, deskD), matWood);
+                        const deskTop = new THREE.Mesh(geoDeskTop, matWood);
                         deskTop.position.set(deskX, baseY + 0.69, dz);
-                        parentGroup.add(deskTop);
+                        deskTop.userData.noShadowCast = true;
+                        roomFurnGroup.add(deskTop);
 
-                        const deskShelf = new THREE.Mesh(getBoxGeo(deskW - 0.08, 0.14, deskD - 0.08), matWood);
+                        const deskShelf = new THREE.Mesh(geoDeskShelf, matWood);
                         deskShelf.position.set(deskX, baseY + 0.56, dz);
-                        parentGroup.add(deskShelf);
+                        deskShelf.userData.noShadowCast = true;
+                        roomFurnGroup.add(deskShelf);
 
-                        // Khung chân sắt bàn học
                         [-deskW * 0.44, deskW * 0.44].forEach(lx => {
-                            const dLeg = new THREE.Mesh(getBoxGeo(0.05, 0.68, deskD - 0.06), matIron);
+                            const dLeg = new THREE.Mesh(geoDeskLeg, matIron);
                             dLeg.position.set(deskX + lx, baseY + 0.34, dz);
-                            parentGroup.add(dLeg);
+                            dLeg.userData.noShadowCast = true;
+                            roomFurnGroup.add(dLeg);
                         });
 
-                        // Ghế băng đôi có tựa lưng đi kèm mỗi bàn
                         const benchZ = dz + rowDir * 0.50;
-                        const benchSeat = new THREE.Mesh(getBoxGeo(deskW, 0.05, 0.32), matWood);
+                        const benchSeat = new THREE.Mesh(geoBenchSeat, matWood);
                         benchSeat.position.set(deskX, baseY + 0.43, benchZ);
-                        parentGroup.add(benchSeat);
+                        benchSeat.userData.noShadowCast = true;
+                        roomFurnGroup.add(benchSeat);
 
                         [-deskW * 0.44, deskW * 0.44].forEach(lx => {
-                            const bLeg = new THREE.Mesh(getBoxGeo(0.05, 0.42, 0.30), matIron);
+                            const bLeg = new THREE.Mesh(geoBenchLeg, matIron);
                             bLeg.position.set(deskX + lx, baseY + 0.21, benchZ);
-                            parentGroup.add(bLeg);
+                            bLeg.userData.noShadowCast = true;
+                            roomFurnGroup.add(bLeg);
                         });
 
-                        const benchBack = new THREE.Mesh(getBoxGeo(deskW, 0.34, 0.05), matWood);
+                        const benchBack = new THREE.Mesh(geoBenchBack, matWood);
                         benchBack.position.set(deskX, baseY + 0.62, benchZ + rowDir * 0.14);
-                        parentGroup.add(benchBack);
+                        benchBack.userData.noShadowCast = true;
+                        roomFurnGroup.add(benchBack);
 
-                        // Đăng ký 2 chỗ ngồi (Trái & Phải) trên mỗi bàn học sinh (tổng 40 chỗ ngồi/phòng)
                         [-deskW * 0.24, deskW * 0.24].forEach((seatDx, sideIdx) => {
                             registerSeatSpot({
                                 x: deskX + seatDx,
@@ -2687,15 +2987,14 @@
                     }
                 }
 
-                // Tủ đựng sổ đầu bài & học liệu ở cuối lớp học
                 const backWallZ = boardSide === 'north' ? sz + d / 2 - 0.32 : sz - d / 2 + 0.32;
                 [-w * 0.28, w * 0.28].forEach(cabDx => {
                     const cabinet = new THREE.Mesh(getBoxGeo(1.75, 1.85, 0.46), matWood);
                     cabinet.position.set(sx + cabDx, baseY + 0.925, backWallZ);
-                    parentGroup.add(cabinet);
+                    cabinet.userData.noShadowCast = true;
+                    roomFurnGroup.add(cabinet);
                 });
 
-                // 2 quạt trần quay mát đều khắp lớp học rộng
                 parentGroup.add(createCeilingFan(sx - w * 0.22, baseY + 3.25, sz - d * 0.12));
                 parentGroup.add(createCeilingFan(sx + w * 0.22, baseY + 3.25, sz + d * 0.18));
             }
@@ -2719,7 +3018,6 @@
                         isScaled: true
                     });
 
-                    // Bộ bàn trà & 2 ghế sofa dài tiếp khách cân đối giữa phòng Hiệu trưởng
                     const teaTable = new THREE.Mesh(getBoxGeo(2.4, 0.48, 1.1), matWood);
                     teaTable.position.set(sx, baseY + 0.24, sz - 1.2);
                     parentGroup.add(teaTable);
@@ -2765,7 +3063,6 @@
                     safeCabinet.position.set(sx, baseY + 0.95, sz + 3.6);
                     parentGroup.add(safeCabinet);
                 } else {
-                    // Phòng Giáo Viên: Bàn họp hội đồng lớn + 10 ghế ngồi đối xứng 2 bên
                     const longTable = new THREE.Mesh(getBoxGeo(9.2, 0.78, 2.1), matWood);
                     longTable.position.set(sx, baseY + 0.39, sz);
                     parentGroup.add(longTable);
@@ -2816,7 +3113,6 @@
                 hallStage.position.set(sxHall, baseY + 0.19, sz + 3.2);
                 parentGroup.add(hallStage);
 
-                // 5 hàng ghế hội trường chia 2 dãy cân đối có lối đi ở giữa
                 const benchW = (sc(wingW) - 3.0) / 2;
                 for (let r = 0; r < 5; r++) {
                     const rowZ = sz + 1.1 - r * 1.25;
@@ -2845,7 +3141,6 @@
                 parentGroup.add(createCeilingFan(sxHall, baseY + 3.25, sz));
             }
 
-            // Cầu thang chữ U nằm gọn chính giữa bên trong từng tòa nhà (mở thông lên xuống mượt mà)
             function buildInteriorUStaircase(parentGroup, cfg) {
                 const { axis, xCenter, zCenter, entryCoord, backCoord, baseY, topY } = cfg;
                 const midY = (baseY + topY) / 2;
@@ -2859,7 +3154,6 @@
                     const len = Math.abs(zBack - zEntry);
                     const halfW = 1.18;
 
-                    // Vế 1 (trái): từ cửa hành lang (baseY) lên chiếu nghỉ (midY)
                     const x1 = cx - halfW;
                     for (let i = 0; i < stepCount; i++) {
                         const h = ((i + 1) / stepCount) * (midY - baseY);
@@ -2880,7 +3174,6 @@
                         endY: midY
                     });
 
-                    // Chiếu nghỉ giữa tầng
                     const landZ1 = zBack;
                     const landZ2 = zBack + dir * 2.35;
                     const landMidZ = (landZ1 + landZ2) / 2;
@@ -2896,7 +3189,6 @@
                         y: midY
                     });
 
-                    // Vế 2 (phải): từ chiếu nghỉ (midY) lên hành lang tầng 2 (topY)
                     const x2 = cx + halfW;
                     for (let i = 0; i < stepCount; i++) {
                         const h = (midY - baseY) + ((i + 1) / stepCount) * (topY - midY);
@@ -2917,7 +3209,6 @@
                         endY: topY
                     });
 
-                    // Vách ngăn & tay vịn giữa 2 vế thang
                     const midDiv = new THREE.Mesh(getBoxGeo(0.16, topY - baseY + 1.0, len), matWhite);
                     midDiv.position.set(cx, (baseY + topY + 1.0) / 2, (zEntry + zBack) / 2);
                     parentGroup.add(midDiv);
@@ -2930,7 +3221,6 @@
                         maxY: topY + 1.1
                     });
 
-                    // Lan can an toàn trên tầng 2 ở miệng vế 1 (tránh rơi xuống vế thang dưới)
                     const topGuardRail = new THREE.Mesh(getBoxGeo(2.2, 0.95, 0.12), matIron);
                     topGuardRail.position.set(x1, topY + 0.48, zEntry);
                     parentGroup.add(topGuardRail);
@@ -3073,12 +3363,10 @@
                 const frameThick = 0.14;
                 const frameDepth = 0.44;
 
-                // Khung bao gỗ trên & 2 trụ khung bao sát mép tường
                 const topFrame = new THREE.Mesh(getBoxGeo(doorW + 0.12, frameThick, frameDepth), matWood);
                 topFrame.position.set(0, doorH - frameThick / 2, 0);
                 dg.add(topFrame);
 
-                // Ô kính thông gió (transom) phía trên khung cửa
                 const transomGlass = new THREE.Mesh(new THREE.PlaneGeometry(doorW - 0.16, 0.28), matWindowGlass);
                 transomGlass.position.set(0, doorH - 0.22, 0);
                 dg.add(transomGlass);
@@ -3097,7 +3385,6 @@
                     post.position.set(postX, doorH / 2, 0);
                     dg.add(post);
 
-                    // Cánh cửa gỗ mở gọn vào phía trong phòng (xoay 95 độ quanh bản lề)
                     const hingePivot = new THREE.Group();
                     hingePivot.position.set(side * (doorW / 2 - frameThick), 0, -frameDepth * 0.25);
                     hingePivot.rotation.y = side < 0 ? 1.52 : -1.52;
@@ -3106,7 +3393,6 @@
                     leafBody.position.set(-side * (leafW / 2), leafH / 2, 0);
                     hingePivot.add(leafBody);
 
-                    // Ô kính trên cánh cửa lớp học
                     const glassPane = new THREE.Mesh(new THREE.PlaneGeometry(leafW * 0.66, leafH * 0.42), matWindowGlass);
                     glassPane.position.set(-side * (leafW / 2), leafH * 0.66, 0.036);
                     hingePivot.add(glassPane);
@@ -3116,7 +3402,6 @@
                     glassPaneBack.position.set(-side * (leafW / 2), leafH * 0.66, -0.036);
                     hingePivot.add(glassPaneBack);
 
-                    // Tay nắm cửa mạ vàng
                     const handle = new THREE.Mesh(getBoxGeo(0.04, 0.16, 0.12), handleMat);
                     handle.position.set(-side * (leafW * 0.84), leafH * 0.46, 0);
                     hingePivot.add(handle);
@@ -3176,7 +3461,6 @@
                     return sign;
                 }
 
-                // Tường 2 lớp: Mặt ngoài lát gạch thẻ đỏ, mặt trong phòng học sơn trắng kem (cho Dãy A & Dãy B)
                 function addDualLayerWallX(x1, x2, z, outerDirZ) {
                     const len = sc(Math.abs(x2 - x1));
                     const midX = sc((x1 + x2) / 2);
@@ -3205,7 +3489,6 @@
                     addWallCollider(x - 0.18, x + 0.18, z1, z2, 0, ROOF_Y);
                 }
 
-                // Tường lanh-tô phía trên khung cửa phòng học (lấp kín khoảng hở trên cửa để treo biển tên lớp)
                 function addDoorLintelDualX(midX, spanUnscaled, z, outerDirZ, doorH = 2.42) {
                     const w = sc(spanUnscaled);
                     const sz = sc(z);
@@ -3635,7 +3918,7 @@
                     bldgGroup.add(pSign);
                 });
 
-                // --- 5. DÃY HIỆU BỘ & PHÒNG TRUYỀN THỐNG SÁT CỔNG TRƯỜNG PHÍA TÂY NAM (QUAY MẶT HƯỚNG BẮC) ---
+                // --- 5. DÃY HIỆU BỘ & PHÒNG TRUYỀN THỐNG SÁT CỔNG TRƯỜNG PHÍA TÂY NAM ---
                 const hbX1 = -41.2, hbX2 = -20.8, hbZ1 = 29.4, hbZ2 = 35.8, hbCorrZ = 26.6;
                 const hbW = hbX2 - hbX1, hbD = hbZ2 - hbZ1, hbCX = (hbX1 + hbX2) / 2, hbCZ = (hbZ1 + hbZ2) / 2;
                 const hbTotalD = hbZ2 - hbCorrZ, hbTotalCZ = (hbCorrZ + hbZ2) / 2;
@@ -3811,7 +4094,6 @@
                 });
                 buildGraniteSteps(bldgGroup, hbCX, hbCorrZ - 0.75, 5.4, 1.5, '-z', BASE_Y1);
 
-                // Bàn ký Sổ Lưu Bút trước mặt tiền Dãy Hiệu Bộ
                 const gbTable = new THREE.Mesh(getBoxGeo(1.85, 0.82, 1.05), matWood);
                 gbTable.position.set(sc(-22.2), 0.41, sc(24.5));
                 bldgGroup.add(gbTable);
@@ -3839,7 +4121,7 @@
             buildSchoolBuildingsAndGuestbook();
 
             // =========================================================================
-            // 11. TƯỢNG ĐÀI DANH NHÂN VĂN HÓA NGUYỄN BỈNH KHIÊM
+            // 12. TƯỢNG ĐÀI DANH NHÂN VĂN HÓA NGUYỄN BỈNH KHIÊM
             // =========================================================================
             function buildNguyenBinhKhiemStatue() {
                 const stGroup = new THREE.Group();
@@ -3902,13 +4184,16 @@
                     z: -4.2,
                     radius: 3.8,
                     label: 'Dâng hương & tìm hiểu Danh nhân Nguyễn Bỉnh Khiêm',
-                    action: () => showToast('🗿 Danh nhân Văn hóa Trạng Trình Nguyễn Bỉnh Khiêm (1491–1585) – Niềm tự hào quê hương Vĩnh Bảo, Hải Phòng!')
+                    action: () => {
+                        completeStudentMission(4);
+                        showToast('🗿 Danh nhân Văn hóa Trạng Trình Nguyễn Bỉnh Khiêm (1491–1585) – Niềm tự hào quê hương Vĩnh Bảo, Hải Phòng!');
+                    }
                 });
             }
             buildNguyenBinhKhiemStatue();
 
             // =========================================================================
-            // 12. KHU 6 LÁN XE ĐẠP (12 XE ĐẠP), SÂN BÓNG CỎ XANH, CỔNG PHỤ & NHÀ VỆ SINH
+            // 13. KHU 6 LÁN XE ĐẠP (12 XE ĐẠP), SÂN BÓNG CỎ XANH, CỔNG PHỤ & NHÀ VỆ SINH
             // =========================================================================
             function createBicycleMesh(frameColor = 0x0284c7) {
                 const bike = new THREE.Group();
@@ -4006,7 +4291,6 @@
             function buildBikeShedsSoccerAndRestrooms() {
                 const backGroup = new THREE.Group();
 
-                // --- 1. KHU 6 LÁN XE ĐẠP (12 XE ĐẠP CHẠY ĐƯỢC) ---
                 const shedRoofMat = new THREE.MeshStandardMaterial({ color: 0x0369a1, roughness: 0.5 });
                 const bikeColors = [0x0284c7, 0xe11d48, 0x16a34a, 0xd97706, 0x7c3aed, 0x0d9488];
 
@@ -4053,7 +4337,6 @@
                     });
                 }
 
-                // --- 2. SÂN BÓNG CỎ XANH PHÍA SAU TRƯỜNG ---
                 const fieldCX = sc(6.5), fieldCZ = sc(-52.5), fieldW = sc(31.4), fieldD = sc(20.6);
                 const turfMesh = new THREE.Mesh(
                     new THREE.PlaneGeometry(fieldW, fieldD),
@@ -4107,7 +4390,6 @@
                 soccerBallMesh.position.set(fieldCX, 0.28, fieldCZ);
                 backGroup.add(soccerBallMesh);
 
-                // --- 3. CỔNG PHỤ MẶT TRƯỚC & NHÀ VỆ SINH NAM / NỮ GÓC CUỐI TRƯỜNG ---
                 const rrX = 42.2, rrZ = -74.5, rrW = 12.2, rrD = 5.0;
                 const frontSubGateX = 42.2, frontSubGateZ = 36.8;
 
@@ -4321,7 +4603,7 @@
             buildBikeShedsSoccerAndRestrooms();
 
             // =========================================================================
-            // 13. BỘ SƯU TẬP 12 MẢNH LƯU BÚT KÝ ỨC QUANH TRƯỜNG (ĐỘC LẬP TỪNG BẠN)
+            // 14. BỘ SƯU TẬP 12 MẢNH LƯU BÚT KÝ ỨC QUANH TRƯỜNG (ĐỘC LẬP TỪNG BẠN)
             // =========================================================================
             const shardDefinitions = [
                 { id: 1, title: 'Cổng Trường Xanh', hint: 'Ngay lối vào cổng chính THPT Nguyễn Khuyến', story: 'Mỗi sáng bước qua cổng trường xanh, tiếng trống trường giòn giã mở đầu một ngày học đầy ắp tiếng cười.', x: -4.6, y: 0.9, z: 34.5 },
@@ -4360,6 +4642,7 @@
                         sh.mesh.material.emissiveIntensity = 0.42;
                     }
                     updateShardCollectionUI();
+                    syncSelfToLeaderboard();
                     const totalFound = memoryShardObjs.filter(x => x.collected).length;
                     showToast(`📜 Bạn đã nhặt Mảnh lưu bút #${sh.id}: "${sh.title}" (${totalFound}/12)! Mảnh vẫn giữ nguyên cho các bạn khác.`);
                 } else if (isManualRead) {
@@ -4432,7 +4715,7 @@
             updateShardCollectionUI();
 
             // =========================================================================
-            // 14. NHÂN VẬT 3D KHỚP XƯƠNG ĐẦY ĐỦ (VAI, KHUỶU TAY, HÔNG, ĐẦU GỐI)
+            // 15. NHÂN VẬT 3D KHỚP XƯƠNG ĐẦY ĐỦ (VAI, KHUỶU TAY, HÔNG, ĐẦU GỐI)
             // =========================================================================
             const contactShadowTex = makeCanvasTexture(64, 64, (ctx, w, h) => {
                 const g = ctx.createRadialGradient(w / 2, h / 2, 4, w / 2, h / 2, w / 2);
@@ -4533,7 +4816,6 @@
                 collar.position.set(0, 0.66, 0.02);
                 upperBodyPivot.add(collar);
 
-                // Thẻ học sinh / Thẻ cán bộ đeo ngực trái
                 const badge = new THREE.Mesh(getBoxGeo(0.085, 0.055, 0.02), badgeMat);
                 badge.position.set(isFemale ? 0.11 : 0.13, 0.46, torsoD / 2 + 0.012);
                 upperBodyPivot.add(badge);
@@ -4547,7 +4829,6 @@
                     tie.position.set(0, 0.46, torsoD / 2 + 0.016);
                     upperBodyPivot.add(tie);
                 } else if (!isGuard && !isTeacher && outfitType !== 'aodai') {
-                    // Cặp sách học sinh đeo sau lưng
                     const backpack = new THREE.Mesh(getBoxGeo(0.34, 0.42, 0.14), new THREE.MeshLambertMaterial({ color: 0x1d4ed8 }));
                     backpack.position.set(0, 0.34, -torsoD / 2 - 0.07);
                     upperBodyPivot.add(backpack);
@@ -4567,7 +4848,6 @@
                 neck.position.set(0, 0.70, 0);
                 upperBodyPivot.add(neck);
 
-                // Tay có khớp Vai + Khuỷu tay đầy đủ
                 const armW = isFemale ? 0.12 : 0.14;
                 const armOffsetX = isFemale ? 0.28 : 0.34;
                 function buildArmWithElbow(shX) {
@@ -4601,7 +4881,6 @@
                 head.position.set(0, 0.91, 0);
                 upperBodyPivot.add(head);
 
-                // Tai & sống mũi
                 [-0.185, 0.185].forEach(earX => {
                     const ear = new THREE.Mesh(getBoxGeo(0.03, 0.09, 0.06), skinMat);
                     ear.position.set(earX, 0.91, 0);
@@ -4715,7 +4994,6 @@
                 solvePedalIK(limbs.rightHip, limbs.rightKnee, pedalAngle + Math.PI);
             }
 
-            // Tư thế ngồi ghế đá sân trường & ghế học sinh / giáo viên trong phòng học
             function applySittingPose(limbs, now = 0) {
                 if (!limbs || !limbs.upperBodyPivot) return;
                 limbs.upperBodyPivot.position.y = 0.52;
@@ -4758,19 +5036,12 @@
                 classLockdownRoom: '',
                 classLockdownBoardTarget: null,
                 classLockdownSlide: 0,
-                completedLockdownRooms: new Set()
+                completedLockdownRooms: new Set(),
+                mission12StudyStartTime: 0
             };
 
-            const simulatedClassmates = [];
-            function clearSimulatedClassmates() {
-                while (simulatedClassmates.length > 0) {
-                    const bot = simulatedClassmates.pop();
-                    if (bot.mesh) scene.remove(bot.mesh);
-                }
-            }
-
             let playerMesh = createHumanCharacter(playerProfile.outfit, false, playerProfile.gender);
-            let playerNameplate = makeParticipantNameplate(playerProfile.name, playerProfile.className, playerProfile.cohort, true, playerProfile.isAdmin, playerProfile.role);
+            let playerNameplate = makeParticipantNameplate(playerProfile.name, playerProfile.className, playerProfile.cohort, true, playerProfile.isAdmin, playerProfile.role, playerProfile.studentRank);
             playerMesh.add(playerNameplate);
             playerMesh.position.set(playerState.x, playerState.y, playerState.z);
             playerMesh.rotation.y = playerState.yaw;
@@ -4780,7 +5051,7 @@
                 const wasVisible = playerMesh ? playerMesh.visible : true;
                 if (playerMesh) scene.remove(playerMesh);
                 playerMesh = createHumanCharacter(playerProfile.outfit, false, playerProfile.gender);
-                playerNameplate = makeParticipantNameplate(playerProfile.name, playerProfile.className, playerProfile.cohort, true, playerProfile.isAdmin, playerProfile.role);
+                playerNameplate = makeParticipantNameplate(playerProfile.name, playerProfile.className, playerProfile.cohort, true, playerProfile.isAdmin, playerProfile.role, playerProfile.studentRank);
                 playerMesh.add(playerNameplate);
                 playerMesh.visible = wasVisible;
                 playerMesh.position.set(playerState.x, playerState.y, playerState.z);
@@ -4789,7 +5060,7 @@
             }
 
             // =========================================================================
-            // 15. NHÀ BẢO VỆ & 3 BÁC BẢO VỆ TUẦN TRA (BÁC LỜI, BÁC TÂM, BÁC HÀ)
+            // 16. NHÀ BẢO VỆ & 3 BÁC BẢO VỆ TUẦN TRA (BÁC LỜI, BÁC TÂM, BÁC HÀ)
             // =========================================================================
             function buildGuardPost() {
                 const postGroup = new THREE.Group();
@@ -4842,7 +5113,6 @@
             }
             buildGuardPost();
 
-            // Đúng 3 Bác Bảo Vệ: Bác Lời (Cổng chính), Bác Tâm (Khu trung tâm & Hiệu bộ), Bác Hà (Khu lán xe & Sân bóng)
             const securityGuards = [
                 {
                     name: 'Bác Lời',
@@ -4903,6 +5173,7 @@
                     radius: 3.4,
                     label: `Trò chuyện với ${g.name} (${g.role})`,
                     action: () => {
+                        completeStudentMission(2);
                         document.getElementById('dialogue-speaker').textContent = `${g.name} • ${g.role}`;
                         document.getElementById('dialogue-text').textContent = g.quote;
                         document.getElementById('dialogue-modal').classList.remove('hidden');
@@ -4933,7 +5204,7 @@
             }
 
             // =========================================================================
-            // 16. ĐIỀU KHIỂN XE ĐẠP (ĐẠP XE / DẮT XE KHI GẶP BẢO VỆ), VA CHẠM & CẦU THANG
+            // 17. ĐIỀU KHIỂN XE ĐẠP (ĐẠP XE / DẮT XE KHI GẶP BẢO VỆ), VA CHẠM & CẦU THANG
             // =========================================================================
             function toggleBicycle(bikeObj) {
                 if (playerState.sittingSeat) {
@@ -4958,6 +5229,7 @@
                     playerState.pushingBike = false;
                     showToast('🚲 Bạn đã dựng chân chống xe đạp và bước xuống.');
                 } else if (!playerState.ridingBike) {
+                    completeStudentMission(8);
                     playerState.ridingBike = bikeObj;
                     playerState.x = bikeObj.mesh.position.x;
                     playerState.z = bikeObj.mesh.position.z;
@@ -5018,7 +5290,7 @@
             }
 
             // =========================================================================
-            // 17. BÀN PHÍM, CẦN ĐIỀU KHIỂN CẢM ỨNG & XOAY CAMERA MƯỢT
+            // 18. BÀN PHÍM, CẦN ĐIỀU KHIỂN CẢM ỨNG & XOAY CAMERA MƯỢT
             // =========================================================================
             const keys = {};
             window.addEventListener('keydown', e => {
@@ -5060,6 +5332,9 @@
                 playerState.vy = 0;
                 playerState.grounded = true;
                 publishPositionToNetwork(true);
+                if (seat.roomCode) {
+                    completeStudentMission(6);
+                }
                 if (!playerState.classLockdownActive) {
                     showToast(`🪑 Bạn đang ${seat.label.toLowerCase()}. Bấm [E], phím Nhảy hoặc di chuyển để đứng dậy.`);
                 }
@@ -5073,6 +5348,7 @@
                 }
                 const seat = playerState.sittingSeat;
                 playerState.sittingSeat = null;
+                playerState.mission12StudyStartTime = 0;
                 resetStandingHeight(playerMesh.userData);
                 const stepOutX = seat.x - Math.sin(seat.yaw) * 0.42;
                 const stepOutZ = seat.z - Math.cos(seat.yaw) * 0.42;
@@ -5085,7 +5361,7 @@
             }
 
             // =========================================================================
-            // CƠ CHẾ KHI ĐỦ 5 HỌC SINH CÙNG LỚP VÀO ĐÚNG PHÒNG HỌC -> KHÓA NGỒI 5 PHÚT
+            // CƠ CHẾ KHI ĐỦ 5 HỌC SINH THẬT CÙNG LỚP VÀO ĐÚNG PHÒNG -> KHÓA NGỒI 5 PHÚT
             // =========================================================================
             function setLockdownSlideView(slideIdx) {
                 playerState.classLockdownSlide = slideIdx % 2;
@@ -5098,7 +5374,7 @@
                 setLockdownSlideView(playerState.classLockdownSlide + 1);
             });
 
-            function finishClassroomLockdown(isEarlyAdmin = false) {
+            function finishClassroomLockdown() {
                 if (!playerState.classLockdownActive) return;
                 const finishedRoom = playerState.classLockdownRoom;
                 playerState.classLockdownActive = false;
@@ -5107,23 +5383,14 @@
                 if (finishedRoom) playerState.completedLockdownRooms.add(finishedRoom);
 
                 document.getElementById('classroom-lockdown-overlay').classList.add('hidden');
-                clearSimulatedClassmates();
                 standUpFromSeat();
-                showToast(isEarlyAdmin
-                    ? `👑 Admin đã mở khóa sớm giờ sinh hoạt nội quy lớp ${finishedRoom}!`
-                    : `✅ Đã hoàn thành 5 phút đọc 5 Điều Bác Hồ Dạy & Nội quy nhà trường tại lớp ${finishedRoom}! Các bạn có thể di chuyển trở lại.`);
+                showToast(`✅ Đã hoàn thành 5 phút đọc 5 Điều Bác Hồ Dạy & Nội quy nhà trường tại lớp ${finishedRoom}! Các bạn có thể di chuyển trở lại.`);
             }
-
-            document.getElementById('btn-admin-unlock-lockdown').addEventListener('click', () => {
-                if (!isAdminUser) return;
-                finishClassroomLockdown(true);
-            });
 
             function startClassroomFiveMinLockdown(zone, classmatesList) {
                 if (!zone || playerState.classLockdownActive) return;
                 playerState.classLockdownActive = true;
                 playerState.classLockdownRoom = zone.roomCode;
-                // Đúng 5 phút = 300.000 ms
                 playerState.classLockdownEndTime = performance.now() + 5 * 60 * 1000;
                 playerState.classLockdownBoardTarget = {
                     x: zone.boardX,
@@ -5131,7 +5398,6 @@
                     z: zone.boardZ
                 };
 
-                // Sắp xếp thứ tự cố định theo ID để 5 bạn ngồi vào 5 ghế đầu tiên không trùng nhau
                 const sortedIds = classmatesList.map(p => p.id).sort();
                 const myIdx = Math.max(0, sortedIds.indexOf(playerProfile.id));
                 const assignedSeat = zone.seats[myIdx % zone.seats.length] || zone.seats[0];
@@ -5139,17 +5405,14 @@
                     sitOnSeat(assignedSeat);
                 }
 
-                // Khóa góc nhìn camera hướng thẳng vào bảng xanh
                 cameraMode = 'third';
                 playerMesh.visible = true;
                 camYaw = assignedSeat ? assignedSeat.yaw : Math.PI;
                 camPitch = 0.14;
 
                 setLockdownSlideView(0);
-                document.getElementById('lockdown-room-title').textContent = `LỚP ${zone.roomCode} • ĐỦ 5/5 HỌC SINH CÙNG LỚP`;
-                document.getElementById('btn-admin-unlock-lockdown').classList.toggle('hidden', !isAdminUser);
+                document.getElementById('lockdown-room-title').textContent = `LỚP ${zone.roomCode} • ĐỦ 5/5 HỌC SINH TRONG LỚP`;
                 document.getElementById('classroom-lockdown-overlay').classList.remove('hidden');
-                document.getElementById('class-gather-test-bar').classList.add('hidden');
                 closeAllPanels();
 
                 const msg = `📢 Lớp ${zone.roomCode} đã tập trung đúng 5/5 học sinh của lớp! Tất cả ngồi vào chỗ 5 phút đọc "5 Điều Bác Hồ Dạy" và "Nội quy nhà trường (Đi dép quai hậu)".`;
@@ -5157,49 +5420,27 @@
                 showToast(msg);
             }
 
-            // Nút tạo nhanh 4 bạn cùng lớp ngồi cùng trong phòng để test ngay 5 học sinh
-            document.getElementById('btn-simulate-5-classmates').addEventListener('click', () => {
-                const myClass = playerProfile.className;
-                const zone = classroomZonesMap.get(myClass);
-                if (!zone) return;
-
-                clearSimulatedClassmates();
-                const sampleNames = ['Trần Minh Hiếu', 'Lê Thảo Nguyên', 'Phạm Quốc Khánh', 'Vũ Ngọc Ánh'];
-                const sampleOutfits = ['uniform', 'aodai', 'youth', 'jacket'];
-                for (let i = 0; i < 4; i++) {
-                    const seat = zone.seats[(i + 1) % zone.seats.length];
-                    if (!seat) continue;
-                    const gender = i % 2 === 1 ? 'female' : 'male';
-                    const mesh = createHumanCharacter(sampleOutfits[i], false, gender);
-                    const plate = makeParticipantNameplate(sampleNames[i], myClass, playerProfile.cohort, false, false, 'Học sinh');
-                    mesh.add(plate);
-                    mesh.position.set(seat.x, seat.y, seat.z);
-                    mesh.rotation.y = seat.yaw;
-                    applySittingPose(mesh.userData, performance.now());
-                    scene.add(mesh);
-                    simulatedClassmates.push({
-                        id: `sim_${myClass}_${i}`,
-                        name: sampleNames[i],
-                        className: myClass,
-                        x: seat.x,
-                        y: seat.y,
-                        z: seat.z,
-                        mesh
-                    });
-                }
-                playerState.completedLockdownRooms.delete(myClass);
-            });
-
             const joyZone = document.getElementById('joystick-zone');
             const joyKnob = document.getElementById('joystick-knob');
+            const btnSprint = document.getElementById('btn-sprint');
             let joyActive = false;
+            let joyPointerId = null;
             let joyVec = { x: 0, y: 0 };
+            let touchSprintActive = false;
+
+            btnSprint.addEventListener('click', () => {
+                touchSprintActive = !touchSprintActive;
+                btnSprint.className = touchSprintActive
+                    ? 'px-3 py-2.5 rounded-full bg-emerald-400 border-2 border-white text-slate-950 font-black text-[11px] shadow-lg shadow-emerald-500/40 cursor-pointer'
+                    : 'px-3 py-2.5 rounded-full bg-amber-500/85 hover:bg-amber-400 active:scale-90 border-2 border-white/35 text-slate-950 font-extrabold text-[11px] shadow-lg backdrop-blur-sm cursor-pointer';
+                btnSprint.textContent = touchSprintActive ? '⚡ ĐANG CHẠY' : '🏃 CHẠY';
+            });
 
             function updateJoystick(clientX, clientY) {
                 const rect = joyZone.getBoundingClientRect();
                 const cx = rect.left + rect.width / 2;
                 const cy = rect.top + rect.height / 2;
-                const maxR = rect.width * 0.38;
+                const maxR = rect.width * 0.40;
                 let dx = clientX - cx;
                 let dy = clientY - cy;
                 const dist = Math.hypot(dx, dy);
@@ -5208,18 +5449,31 @@
                     dy = (dy / dist) * maxR;
                 }
                 joyKnob.style.transform = `translate(${dx}px, ${dy}px)`;
-                joyVec.x = dx / maxR;
-                joyVec.y = dy / maxR;
+                const deadzone = 0.14;
+                const normX = dx / maxR;
+                const normY = dy / maxR;
+                joyVec.x = Math.abs(normX) < deadzone ? 0 : normX;
+                joyVec.y = Math.abs(normY) < deadzone ? 0 : normY;
             }
 
             joyZone.addEventListener('pointerdown', e => {
+                if (joyActive) return;
+                e.stopPropagation();
                 joyActive = true;
+                joyPointerId = e.pointerId;
                 joyZone.setPointerCapture(e.pointerId);
                 updateJoystick(e.clientX, e.clientY);
             });
-            joyZone.addEventListener('pointermove', e => { if (joyActive) updateJoystick(e.clientX, e.clientY); });
-            const endJoy = () => {
+            joyZone.addEventListener('pointermove', e => {
+                if (joyActive && e.pointerId === joyPointerId) {
+                    e.stopPropagation();
+                    updateJoystick(e.clientX, e.clientY);
+                }
+            });
+            const endJoy = (e) => {
+                if (e && joyPointerId !== null && e.pointerId !== joyPointerId) return;
                 joyActive = false;
+                joyPointerId = null;
                 joyVec.x = 0;
                 joyVec.y = 0;
                 joyKnob.style.transform = 'translate(0px, 0px)';
@@ -5230,27 +5484,37 @@
             let camYaw = Math.PI;
             let camPitch = 0.28;
             let isDraggingCam = false;
+            let camPointerId = null;
             let lastPointerX = 0;
             let lastPointerY = 0;
 
             canvas.addEventListener('pointerdown', e => {
+                if (isDraggingCam || e.pointerId === joyPointerId) return;
                 isDraggingCam = true;
+                camPointerId = e.pointerId;
                 lastPointerX = e.clientX;
                 lastPointerY = e.clientY;
             });
             window.addEventListener('pointermove', e => {
-                if (!isDraggingCam) return;
+                if (!isDraggingCam || e.pointerId !== camPointerId) return;
                 const dx = e.clientX - lastPointerX;
                 const dy = e.clientY - lastPointerY;
                 lastPointerX = e.clientX;
                 lastPointerY = e.clientY;
-                camYaw -= dx * 0.0065;
-                camPitch = Math.max(0.05, Math.min(1.15, camPitch + dy * 0.005));
+                const touchSens = isMobileDevice ? 0.0085 : 0.0065;
+                camYaw -= dx * touchSens;
+                camPitch = Math.max(0.05, Math.min(1.15, camPitch + dy * (touchSens * 0.8)));
             });
-            window.addEventListener('pointerup', () => { isDraggingCam = false; });
+            const endCamDrag = (e) => {
+                if (e && camPointerId !== null && e.pointerId !== camPointerId) return;
+                isDraggingCam = false;
+                camPointerId = null;
+            };
+            window.addEventListener('pointerup', endCamDrag);
+            window.addEventListener('pointercancel', endCamDrag);
 
             // =========================================================================
-            // 18. CHẾ ĐỘ CAMERA (CHỐNG VA/KHUẤT TƯỜNG CẦU THANG) & HIỆU NĂNG 60 FPS
+            // 19. CHẾ ĐỘ CAMERA (CHỐNG VA/KHUẤT TƯỜNG CẦU THANG) & HIỆU NĂNG 60 FPS
             // =========================================================================
             let cameraMode = 'third';
             let flyAngle = 0;
@@ -5306,7 +5570,6 @@
                     const ty = pivotY + dirY * d;
                     const tz = pz + dirZ * d;
 
-                    // Chống đâm xuyên trần tầng 2 khi ở tầng 1 / cầu thang
                     if (py < BASE_Y2 - 0.2 && ty > BASE_Y2 - 0.35) {
                         const underUpperFloor = floorZones.some(f => f.y >= BASE_Y2 - 0.1 && tx >= f.minX && tx <= f.maxX && tz >= f.minZ && tz <= f.maxZ);
                         if (underUpperFloor) {
@@ -5315,7 +5578,6 @@
                         }
                     }
 
-                    // Chống khuất sau tường tòa nhà
                     let hitWall = false;
                     for (let i = 0; i < wallColliders.length; i++) {
                         const c = wallColliders[i];
@@ -5338,7 +5600,7 @@
             }
 
             // =========================================================================
-            // 19. 1 MÁY CHỦ CHUNG TỰ ĐỘNG, QUẢN TRỊ VIÊN BAN, CẤM CHAT & CHỨC VỤ
+            // 20. 1 MÁY CHỦ CHUNG TỰ ĐỘNG, QUẢN TRỊ VIÊN BAN, CẤM CHAT, BXH & CHAT RIÊNG
             // =========================================================================
             const remotePlayers = new Map();
             const mutedPlayers = new Map();
@@ -5526,25 +5788,10 @@
                 showToast(noticeText);
             };
 
-            window.adminDeleteGuestbook = (entryId) => {
-                if (!isAdminUser || !entryId) return;
-                const idx = guestbookEntries.findIndex(g => g.id === entryId);
-                if (idx !== -1) {
-                    guestbookEntries.splice(idx, 1);
-                    renderGuestbook();
-                }
-                if (mqttClient && mqttClient.connected) {
-                    mqttClient.publish(`${ROOM_TOPIC}/gb/${entryId}`, '', { qos: 0, retain: true });
-                    mqttClient.publish(`${ROOM_TOPIC}/admin/cmd`, JSON.stringify({ action: 'delete_gb', entryId }), { qos: 0 });
-                }
-                if (channel) channel.postMessage({ type: 'admin_delete_gb', id: playerProfile.id, entryId });
-                showToast('🗑️ Đã xóa dòng lưu bút vi phạm.');
-            };
-
             const chatHistory = [
-                { senderId: 'system', sender: '🏫 Hệ thống', text: 'Chào mừng thầy cô và các em học sinh đến với Trường THPT Nguyễn Khuyến 3D (đủ 36 phòng học 12A1–12A12, 11B1–11B12, 10C1–10C12)! Nhớ sơ vin, đeo thẻ và dắt xe trong sân trường nhé.' }
+                { senderId: 'system', sender: '🏫 Hệ thống', text: 'Chào mừng thầy cô và các em học sinh đến với Trường THPT Nguyễn Khuyến 3D (đủ 36 phòng học 12A1–12A12, 11B1–11B12, 10C1–10C12)! Hoàn thành 12 nhiệm vụ học đường để nhận danh hiệu [SIÊU BÁ KHÍ].' }
             ];
-            const guestbookEntries = [
+            const defaultGuestbookEntries = [
                 {
                     id: 'default_1',
                     tag: '🌸 Tuổi học trò',
@@ -5560,7 +5807,330 @@
                     text: 'Mỗi lần quay lại thăm cổng trường xanh và hàng cau vua lại nhớ biết bao kỷ niệm tuổi 17!'
                 }
             ];
-            const guestbookIds = new Set(guestbookEntries.map(g => g.id));
+            const guestbookEntries = [];
+            const guestbookIds = new Set();
+            const deletedGuestbookIds = new Set();
+
+            try {
+                const savedDelGb = JSON.parse(localStorage.getItem('thptnk_deleted_gb_v1') || '[]');
+                savedDelGb.forEach(id => deletedGuestbookIds.add(id));
+                const savedGb = JSON.parse(localStorage.getItem('thptnk_guestbook_v1') || 'null');
+                const initialGb = Array.isArray(savedGb) && savedGb.length > 0 ? savedGb : defaultGuestbookEntries;
+                initialGb.forEach(item => {
+                    if (item && item.id && !deletedGuestbookIds.has(item.id) && !guestbookIds.has(item.id)) {
+                        guestbookIds.add(item.id);
+                        guestbookEntries.push(item);
+                    }
+                });
+            } catch (e) {
+                defaultGuestbookEntries.forEach(item => {
+                    guestbookIds.add(item.id);
+                    guestbookEntries.push(item);
+                });
+            }
+
+            function saveGuestbookToStorage() {
+                try {
+                    localStorage.setItem('thptnk_guestbook_v1', JSON.stringify(guestbookEntries.slice(-200)));
+                    localStorage.setItem('thptnk_deleted_gb_v1', JSON.stringify(Array.from(deletedGuestbookIds)));
+                } catch (e) {}
+            }
+
+            window.adminDeleteGuestbook = (entryId) => {
+                if (!isAdminUser || !entryId) return;
+                deletedGuestbookIds.add(entryId);
+                const idx = guestbookEntries.findIndex(g => g.id === entryId);
+                if (idx !== -1) {
+                    guestbookEntries.splice(idx, 1);
+                }
+                saveGuestbookToStorage();
+                renderGuestbook();
+                if (mqttClient && mqttClient.connected) {
+                    mqttClient.publish(`${ROOM_TOPIC}/gb/${entryId}`, '', { qos: 0, retain: true });
+                    mqttClient.publish(`${ROOM_TOPIC}/admin/cmd`, JSON.stringify({ action: 'delete_gb', entryId }), { qos: 0 });
+                }
+                if (channel) channel.postMessage({ type: 'admin_delete_gb', id: playerProfile.id, entryId });
+                showToast('🗑️ Đã xóa dòng lưu bút vĩnh viễn.');
+            };
+
+            // =========================================================================
+            // BẢNG XẾP HẠNG LƯU GIỮ VĨNH VIỄN ĐẾN KHI ADMIN XÓA
+            // =========================================================================
+            const leaderboardMap = new Map();
+            const deletedLeaderboardIds = new Set();
+            try {
+                const savedDelLb = JSON.parse(localStorage.getItem('thptnk_deleted_lb_v1') || '[]');
+                savedDelLb.forEach(id => deletedLeaderboardIds.add(id));
+                const savedLb = JSON.parse(localStorage.getItem('thptnk_leaderboard_v1') || '[]');
+                if (Array.isArray(savedLb)) {
+                    savedLb.forEach(entry => {
+                        if (entry && entry.id && !deletedLeaderboardIds.has(entry.id)) {
+                            leaderboardMap.set(entry.id, entry);
+                        }
+                    });
+                }
+            } catch (e) {}
+
+            function saveLeaderboardToStorage() {
+                try {
+                    localStorage.setItem('thptnk_leaderboard_v1', JSON.stringify(Array.from(leaderboardMap.values())));
+                    localStorage.setItem('thptnk_deleted_lb_v1', JSON.stringify(Array.from(deletedLeaderboardIds)));
+                } catch (e) {}
+            }
+
+            function renderLeaderboard() {
+                const listEl = document.getElementById('leaderboard-list');
+                if (!listEl) return;
+                const rows = Array.from(leaderboardMap.values()).sort((a, b) => {
+                    if ((b.missionsDone || 0) !== (a.missionsDone || 0)) return (b.missionsDone || 0) - (a.missionsDone || 0);
+                    if ((b.shardsDone || 0) !== (a.shardsDone || 0)) return (b.shardsDone || 0) - (a.shardsDone || 0);
+                    return (a.updatedAt || 0) - (b.updatedAt || 0);
+                });
+
+                if (rows.length === 0) {
+                    listEl.innerHTML = '<div class="p-4 text-center text-slate-400">Chưa có học sinh nào ghi danh trên Bảng Xếp Hạng.</div>';
+                    return;
+                }
+
+                listEl.innerHTML = rows.map((item, idx) => {
+                    const medal = idx === 0 ? '🥇' : (idx === 1 ? '🥈' : (idx === 2 ? '🥉' : `#${idx + 1}`));
+                    const rankBadge = item.studentRank === 'SIÊU BÁ KHÍ'
+                        ? '<span class="px-1.5 py-0.5 rounded bg-red-600 border border-yellow-300 text-yellow-200 text-[10px] font-black">🔥 SIÊU BÁ KHÍ</span>'
+                        : (item.studentRank === 'Đoàn Viên Ưu Tú'
+                            ? '<span class="px-1.5 py-0.5 rounded bg-sky-600/45 border border-sky-400 text-sky-200 text-[10px] font-bold">🚩 Đoàn Viên Ưu Tú</span>'
+                            : (item.studentRank === 'Học Sinh Ngoan'
+                                ? '<span class="px-1.5 py-0.5 rounded bg-emerald-500/25 border border-emerald-400 text-emerald-300 text-[10px] font-bold">🌟 Học Sinh Ngoan</span>'
+                                : '<span class="px-1.5 py-0.5 rounded bg-white/10 text-slate-300 text-[10px]">🎒 Học sinh</span>'));
+                    const adminDelBtn = isAdminUser
+                        ? `<button onclick="window.adminDeleteLeaderboardEntry('${escapeHtml(item.id)}')" class="px-2 py-1 rounded-lg bg-red-600/85 hover:bg-red-500 text-white text-[10px] font-bold cursor-pointer">🗑️ Xóa</button>`
+                        : '';
+                    return `<div class="flex items-center justify-between gap-2 p-2.5 rounded-2xl ${idx === 0 ? 'bg-yellow-500/15 border border-yellow-400/50' : 'bg-white/5 border border-white/10'}">
+                        <div class="flex items-center gap-2.5 min-w-0">
+                            <span class="text-sm font-black text-yellow-300 w-7 text-center shrink-0">${medal}</span>
+                            <div class="min-w-0">
+                                <div class="flex flex-wrap items-center gap-1.5">
+                                    <span class="font-bold text-white truncate">${escapeHtml(item.name)}</span>
+                                    ${rankBadge}
+                                </div>
+                                <div class="text-[10px] text-slate-400 truncate">Lớp ${escapeHtml(item.className || '')} • ${escapeHtml(item.cohort || '')}</div>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-2 shrink-0">
+                            <div class="text-right">
+                                <div class="text-xs font-extrabold text-amber-300">${item.missionsDone || 0}/12 NV</div>
+                                <div class="text-[10px] text-sky-300">📜 ${item.shardsDone || 0}/12 mảnh</div>
+                            </div>
+                            ${adminDelBtn}
+                        </div>
+                    </div>`;
+                }).join('');
+            }
+
+            function upsertLeaderboardEntry(entry, broadcast = false) {
+                if (!entry || !entry.id || !entry.name) return;
+                if (deletedLeaderboardIds.has(entry.id) && entry.id !== playerProfile.id) return;
+                if (deletedLeaderboardIds.has(entry.id) && entry.id === playerProfile.id) {
+                    deletedLeaderboardIds.delete(entry.id);
+                }
+                const prev = leaderboardMap.get(entry.id);
+                const merged = {
+                    id: entry.id,
+                    name: entry.name,
+                    className: entry.className || '12A1',
+                    cohort: entry.cohort || 'Học sinh đang học',
+                    missionsDone: Math.max(prev?.missionsDone || 0, entry.missionsDone || 0),
+                    shardsDone: Math.max(prev?.shardsDone || 0, entry.shardsDone || 0),
+                    studentRank: entry.studentRank || prev?.studentRank || '',
+                    updatedAt: entry.updatedAt || Date.now()
+                };
+                if (merged.missionsDone >= 12) merged.studentRank = 'SIÊU BÁ KHÍ';
+                else if (merged.missionsDone >= 10 && merged.studentRank !== 'SIÊU BÁ KHÍ') merged.studentRank = 'Đoàn Viên Ưu Tú';
+                else if (merged.missionsDone >= 5 && !merged.studentRank) merged.studentRank = 'Học Sinh Ngoan';
+
+                leaderboardMap.set(entry.id, merged);
+                saveLeaderboardToStorage();
+                renderLeaderboard();
+
+                if (broadcast) {
+                    if (mqttClient && mqttClient.connected) {
+                        mqttClient.publish(`${ROOM_TOPIC}/lb/${merged.id}`, JSON.stringify(merged), { qos: 0, retain: true });
+                    }
+                    if (channel) channel.postMessage({ type: 'lb_upsert', entry: merged });
+                }
+            }
+
+            function syncSelfToLeaderboard() {
+                if (!playerProfile.loggedIn) return;
+                const missionsDone = studentMissions.filter(m => m.done).length;
+                const shardsDone = memoryShardObjs.filter(s => s.collected).length;
+                upsertLeaderboardEntry({
+                    id: playerProfile.id,
+                    name: playerProfile.name,
+                    className: playerProfile.className,
+                    cohort: playerProfile.cohort,
+                    missionsDone,
+                    shardsDone,
+                    studentRank: playerProfile.studentRank,
+                    updatedAt: Date.now()
+                }, true);
+            }
+
+            window.adminDeleteLeaderboardEntry = (targetId) => {
+                if (!isAdminUser || !targetId) return;
+                leaderboardMap.delete(targetId);
+                deletedLeaderboardIds.add(targetId);
+                saveLeaderboardToStorage();
+                renderLeaderboard();
+                if (mqttClient && mqttClient.connected) {
+                    mqttClient.publish(`${ROOM_TOPIC}/lb/${targetId}`, '', { qos: 0, retain: true });
+                    mqttClient.publish(`${ROOM_TOPIC}/admin/cmd`, JSON.stringify({ action: 'delete_lb', targetId }), { qos: 0 });
+                }
+                if (channel) channel.postMessage({ type: 'admin_delete_lb', id: playerProfile.id, targetId });
+                showToast('🗑️ Đã xóa học sinh khỏi Bảng Xếp Hạng.');
+            };
+
+            document.getElementById('btn-clear-leaderboard-admin').addEventListener('click', () => {
+                if (!isAdminUser) return;
+                const allIds = Array.from(leaderboardMap.keys());
+                allIds.forEach(id => {
+                    deletedLeaderboardIds.add(id);
+                    if (mqttClient && mqttClient.connected) {
+                        mqttClient.publish(`${ROOM_TOPIC}/lb/${id}`, '', { qos: 0, retain: true });
+                    }
+                });
+                leaderboardMap.clear();
+                saveLeaderboardToStorage();
+                renderLeaderboard();
+                if (mqttClient && mqttClient.connected) {
+                    mqttClient.publish(`${ROOM_TOPIC}/admin/cmd`, JSON.stringify({ action: 'clear_lb' }), { qos: 0 });
+                }
+                if (channel) channel.postMessage({ type: 'admin_clear_lb', id: playerProfile.id });
+                showToast('🗑️ Admin đã xóa toàn bộ dữ liệu Bảng Xếp Hạng.');
+            });
+
+            // =========================================================================
+            // CHAT RIÊNG 1-1 KHI 2 NGƯỜI ĐỒNG Ý (KHÔNG GIỚI HẠN NGÔN TỪ)
+            // =========================================================================
+            const privateChatState = {
+                partnerId: '',
+                partnerName: '',
+                pendingFromId: '',
+                pendingFromName: '',
+                messages: []
+            };
+
+            function renderPrivateChatMessages() {
+                const box = document.getElementById('private-chat-messages');
+                if (!box) return;
+                if (privateChatState.messages.length === 0) {
+                    box.innerHTML = `<div class="text-slate-400 text-[11px] text-center py-4">Hai bạn đã đồng ý trò chuyện riêng tư với <strong>${escapeHtml(privateChatState.partnerName)}</strong>. Tin nhắn ở đây không bị giới hạn bộ lọc từ ngữ.</div>`;
+                    return;
+                }
+                box.innerHTML = privateChatState.messages.map(m => {
+                    const isMe = m.fromId === playerProfile.id;
+                    return `<div class="flex flex-col ${isMe ? 'items-end' : 'items-start'}">
+                        <div class="text-[10px] ${isMe ? 'text-indigo-300' : 'text-emerald-300'} font-bold mb-0.5">${escapeHtml(isMe ? 'Bạn' : m.fromName)}</div>
+                        <div class="px-3 py-1.5 rounded-2xl max-w-[85%] break-words ${isMe ? 'bg-indigo-600 text-white' : 'bg-white/10 text-slate-100'}">${escapeHtml(m.text)}</div>
+                    </div>`;
+                }).join('');
+                box.scrollTop = box.scrollHeight;
+            }
+
+            function openPrivateChatRoom(partnerId, partnerName) {
+                privateChatState.partnerId = partnerId;
+                privateChatState.partnerName = partnerName;
+                privateChatState.messages = [];
+                document.getElementById('private-chat-title').textContent = `💌 Chat riêng với ${partnerName}`;
+                renderPrivateChatMessages();
+                closeAllPanels();
+                document.getElementById('panel-private-chat').classList.remove('hidden');
+            }
+
+            function sendPrivateSignal(targetId, payloadObj) {
+                const fullPayload = { fromId: playerProfile.id, fromName: playerProfile.name, targetId, ...payloadObj };
+                if (mqttClient && mqttClient.connected) {
+                    mqttClient.publish(`${ROOM_TOPIC}/pm/${targetId}`, JSON.stringify(fullPayload), { qos: 0 });
+                }
+                if (channel) {
+                    channel.postMessage({ type: 'pm_signal', ...fullPayload });
+                }
+            }
+
+            window.invitePrivateChat = (targetId, targetName) => {
+                if (!targetId || targetId === playerProfile.id) return;
+                sendPrivateSignal(targetId, { action: 'invite' });
+                closeAllPanels();
+                showToast(`💌 Đã gửi lời mời Chat Riêng 1-1 tới ${targetName}! Đang chờ bạn ấy đồng ý...`);
+            };
+
+            document.getElementById('btn-accept-private-chat').addEventListener('click', () => {
+                const fromId = privateChatState.pendingFromId;
+                const fromName = privateChatState.pendingFromName;
+                document.getElementById('private-chat-invite-banner').classList.add('hidden');
+                if (!fromId) return;
+                sendPrivateSignal(fromId, { action: 'accept' });
+                openPrivateChatRoom(fromId, fromName);
+                showToast(`✅ Đã kết nối Chat Riêng không giới hạn ngôn từ với ${fromName}!`);
+            });
+
+            document.getElementById('btn-decline-private-chat').addEventListener('click', () => {
+                const fromId = privateChatState.pendingFromId;
+                document.getElementById('private-chat-invite-banner').classList.add('hidden');
+                if (fromId) sendPrivateSignal(fromId, { action: 'decline' });
+                privateChatState.pendingFromId = '';
+            });
+
+            document.getElementById('btn-end-private-chat').addEventListener('click', () => {
+                if (privateChatState.partnerId) {
+                    sendPrivateSignal(privateChatState.partnerId, { action: 'close' });
+                }
+                privateChatState.partnerId = '';
+                privateChatState.partnerName = '';
+                closeAllPanels();
+                showToast('👋 Đã rời phòng chat riêng.');
+            });
+
+            document.getElementById('private-chat-form').addEventListener('submit', e => {
+                e.preventDefault();
+                if (!privateChatState.partnerId) return;
+                const input = document.getElementById('private-chat-input');
+                const text = input.value.trim();
+                if (!text) return;
+                privateChatState.messages.push({ fromId: playerProfile.id, fromName: playerProfile.name, text });
+                renderPrivateChatMessages();
+                sendPrivateSignal(privateChatState.partnerId, { action: 'msg', text });
+                input.value = '';
+            });
+
+            function handleIncomingPrivateSignal(msg) {
+                if (!msg || msg.targetId !== playerProfile.id || msg.fromId === playerProfile.id) return;
+                if (msg.action === 'invite') {
+                    privateChatState.pendingFromId = msg.fromId;
+                    privateChatState.pendingFromName = msg.fromName || 'Bạn học';
+                    document.getElementById('private-invite-text').textContent = `${privateChatState.pendingFromName} mời bạn trò chuyện riêng tư 1-1 (không giới hạn ngôn từ). Bạn có đồng ý không?`;
+                    document.getElementById('private-chat-invite-banner').classList.remove('hidden');
+                } else if (msg.action === 'accept') {
+                    openPrivateChatRoom(msg.fromId, msg.fromName || 'Bạn học');
+                    showToast(`✅ ${msg.fromName} đã đồng ý Chat Riêng! Hai bạn có thể nhắn tin thoải mái.`);
+                } else if (msg.action === 'decline') {
+                    showToast(`❌ ${msg.fromName || 'Người chơi'} đã từ chối lời mời chat riêng.`);
+                } else if (msg.action === 'msg') {
+                    if (privateChatState.partnerId === msg.fromId) {
+                        privateChatState.messages.push({ fromId: msg.fromId, fromName: msg.fromName || 'Bạn học', text: msg.text });
+                        renderPrivateChatMessages();
+                        const pmPanel = document.getElementById('panel-private-chat');
+                        if (pmPanel.classList.contains('hidden')) {
+                            showToast(`💌 Tin nhắn riêng mới từ ${msg.fromName}: ${msg.text}`);
+                        }
+                    }
+                } else if (msg.action === 'close') {
+                    if (privateChatState.partnerId === msg.fromId) {
+                        showToast(`👋 ${msg.fromName || 'Bạn ấy'} đã rời khỏi phòng chat riêng.`);
+                        privateChatState.partnerId = '';
+                        closeAllPanels();
+                    }
+                }
+            }
 
             function renderChat() {
                 const box = document.getElementById('chat-messages');
@@ -5596,9 +6166,10 @@
             function addGuestbookEntryLocal(entry) {
                 if (!entry || !entry.text) return;
                 const eid = entry.id || `${entry.author}_${entry.text}`;
-                if (guestbookIds.has(eid)) return;
+                if (deletedGuestbookIds.has(eid) || guestbookIds.has(eid)) return;
                 guestbookIds.add(eid);
                 guestbookEntries.push(entry);
+                saveGuestbookToStorage();
                 renderGuestbook();
             }
 
@@ -5625,7 +6196,8 @@
             function renderOnlineList() {
                 const list = document.getElementById('online-list');
                 const hasSpecial = isAdminUser || playerProfile.role !== 'Học sinh';
-                const selfBadge = hasSpecial ? ` <span class="px-1.5 py-0.5 rounded bg-amber-500 text-slate-950 text-[9px] font-extrabold">👑 ${escapeHtml(playerProfile.role.toUpperCase())}</span>` : '';
+                const rankTag = playerProfile.studentRank ? ` <span class="px-1.5 py-0.5 rounded bg-red-600/80 text-yellow-200 text-[9px] font-extrabold">${escapeHtml(playerProfile.studentRank)}</span>` : '';
+                const selfBadge = hasSpecial ? ` <span class="px-1.5 py-0.5 rounded bg-amber-500 text-slate-950 text-[9px] font-extrabold">👑 ${escapeHtml(playerProfile.role.toUpperCase())}</span>` : rankTag;
                 const items = [
                     `<div class="flex items-center justify-between p-2 rounded-xl bg-sky-900/40 border border-sky-500/30">
                         <div>
@@ -5638,7 +6210,8 @@
                 remotePlayers.forEach(rp => {
                     const isMuted = mutedPlayers.has(rp.id);
                     const rpRole = rp.role || (rp.isAdmin ? 'Admin' : 'Học sinh');
-                    const rpAdminTag = (rp.isAdmin || rpRole !== 'Học sinh') ? ` <span class="px-1.5 py-0.5 rounded bg-amber-500 text-slate-950 text-[9px] font-extrabold">👑 ${escapeHtml(rpRole.toUpperCase())}</span>` : '';
+                    const rpRankTag = rp.studentRank ? ` <span class="px-1.5 py-0.5 rounded bg-red-600/80 text-yellow-200 text-[9px] font-extrabold">${escapeHtml(rp.studentRank)}</span>` : '';
+                    const rpAdminTag = (rp.isAdmin || rpRole !== 'Học sinh') ? ` <span class="px-1.5 py-0.5 rounded bg-amber-500 text-slate-950 text-[9px] font-extrabold">👑 ${escapeHtml(rpRole.toUpperCase())}</span>` : rpRankTag;
                     const mutedTag = isMuted ? ' <span class="px-1.5 py-0.5 rounded bg-amber-600/80 text-white text-[9px] font-bold">🔇 Cấm chat</span>' : '';
                     const safeRpId = escapeHtml(rp.id);
                     const safeRpName = escapeHtml(rp.name);
@@ -5657,6 +6230,7 @@
                                 <div class="text-[10px] text-slate-400 truncate">${escapeHtml(rp.className)} • ${escapeHtml(rp.cohort)}</div>
                             </div>
                             <div class="flex items-center gap-1 shrink-0">
+                                <button onclick="window.invitePrivateChat('${safeRpId}', '${safeRpName}')" class="px-2 py-1 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white text-[10px] font-bold cursor-pointer">💌 Chat riêng</button>
                                 ${adminBtns}
                                 <button onclick="window.teleportToPlayer('${safeRpId}')" class="px-2 py-1 rounded-lg bg-sky-600 hover:bg-sky-500 text-white text-[10px] font-bold cursor-pointer">Tới gặp</button>
                             </div>
@@ -5708,7 +6282,6 @@
                 return ok;
             }
 
-            // Nút Chia sẻ 2 Link riêng biệt
             document.getElementById('btn-copy-link').addEventListener('click', () => {
                 closeAllPanels();
                 const currentUrl = window.location.href.split('?')[0];
@@ -5802,14 +6375,15 @@
                 if (!nameCheck.valid) return;
 
                 const safeRole = data.isAdmin ? (data.role || 'Quản trị viên (Admin)') : 'Học sinh';
+                const safeRank = data.studentRank || '';
                 let rp = remotePlayers.get(data.id);
                 if (!rp) {
                     const mesh = createHumanCharacter(data.outfit || 'uniform', false, data.gender || 'male');
-                    const label = makeParticipantNameplate(nameCheck.name, data.className || '12A1', data.cohort || 'Học sinh đang học', false, Boolean(data.isAdmin), safeRole);
+                    const label = makeParticipantNameplate(nameCheck.name, data.className || '12A1', data.cohort || 'Học sinh đang học', false, Boolean(data.isAdmin), safeRole, safeRank);
                     mesh.add(label);
                     mesh.position.set(data.x ?? sc(-4.6), data.y ?? 0, data.z ?? sc(44.5));
                     scene.add(mesh);
-                    rp = { ...data, name: nameCheck.name, role: safeRole, mesh, labelSprite: label, lastSeen: performance.now(), pedalAngle: 0 };
+                    rp = { ...data, name: nameCheck.name, role: safeRole, studentRank: safeRank, mesh, labelSprite: label, lastSeen: performance.now(), pedalAngle: 0 };
                     remotePlayers.set(data.id, rp);
                     renderOnlineList();
                 } else {
@@ -5819,20 +6393,22 @@
                         rp.gender = data.gender;
                         rp.isAdmin = Boolean(data.isAdmin);
                         rp.role = safeRole;
+                        rp.studentRank = safeRank;
                         rp.name = nameCheck.name;
                         rp.mesh = createHumanCharacter(rp.outfit || 'uniform', false, rp.gender || 'male');
-                        rp.labelSprite = makeParticipantNameplate(rp.name, data.className || rp.className, data.cohort || rp.cohort, false, rp.isAdmin, rp.role);
+                        rp.labelSprite = makeParticipantNameplate(rp.name, data.className || rp.className, data.cohort || rp.cohort, false, rp.isAdmin, rp.role, rp.studentRank);
                         rp.mesh.add(rp.labelSprite);
                         rp.mesh.position.set(data.x ?? rp.x, data.y ?? rp.y, data.z ?? rp.z);
                         scene.add(rp.mesh);
-                    } else if (rp.name !== nameCheck.name || rp.className !== data.className || rp.cohort !== data.cohort || Boolean(rp.isAdmin) !== Boolean(data.isAdmin) || rp.role !== safeRole) {
+                    } else if (rp.name !== nameCheck.name || rp.className !== data.className || rp.cohort !== data.cohort || Boolean(rp.isAdmin) !== Boolean(data.isAdmin) || rp.role !== safeRole || rp.studentRank !== safeRank) {
                         rp.name = nameCheck.name;
                         rp.className = data.className;
                         rp.cohort = data.cohort;
                         rp.isAdmin = Boolean(data.isAdmin);
                         rp.role = safeRole;
+                        rp.studentRank = safeRank;
                         rp.mesh.remove(rp.labelSprite);
-                        rp.labelSprite = makeParticipantNameplate(rp.name, rp.className, rp.cohort, false, rp.isAdmin, rp.role);
+                        rp.labelSprite = makeParticipantNameplate(rp.name, rp.className, rp.cohort, false, rp.isAdmin, rp.role, rp.studentRank);
                         rp.mesh.add(rp.labelSprite);
                         renderOnlineList();
                     }
@@ -5945,11 +6521,17 @@
                             mqttClient.subscribe(`${ROOM_TOPIC}/pos/+`);
                             mqttClient.subscribe(`${ROOM_TOPIC}/leave`);
                             mqttClient.subscribe(`${ROOM_TOPIC}/chat`);
+                            mqttClient.subscribe(`${ROOM_TOPIC}/marquee`);
                             mqttClient.subscribe(`${ROOM_TOPIC}/gb/+`);
+                            mqttClient.subscribe(`${ROOM_TOPIC}/lb/+`);
+                            mqttClient.subscribe(`${ROOM_TOPIC}/pm/${playerProfile.id}`);
                             mqttClient.subscribe(`${ROOM_TOPIC}/admin/mute/+`);
                             mqttClient.subscribe(`${ROOM_TOPIC}/admin/ban/+`);
                             mqttClient.subscribe(`${ROOM_TOPIC}/admin/cmd`);
-                            if (playerProfile.loggedIn && !isSelfBanned) publishPositionToNetwork(true);
+                            if (playerProfile.loggedIn && !isSelfBanned) {
+                                publishPositionToNetwork(true);
+                                syncSelfToLeaderboard();
+                            }
                         });
 
                         mqttClient.on('error', () => { brokerIdx++; });
@@ -5976,8 +6558,16 @@
                                         if (!msg.isAdmin && containsProfanity(msg.text)) return;
                                         addChatMessage(msg.sender, msg.text, msg.id, msg.senderName || msg.sender, Boolean(msg.isAdmin));
                                     }
+                                } else if (topic === `${ROOM_TOPIC}/marquee`) {
+                                    if (msg.id !== playerProfile.id && msg.name) {
+                                        triggerServerRedMarquee(msg.name, msg.className || '', false);
+                                    }
                                 } else if (topic.startsWith(`${ROOM_TOPIC}/gb/`)) {
                                     if (msg.isAdmin || !containsProfanity(msg.text || '')) addGuestbookEntryLocal(msg);
+                                } else if (topic.startsWith(`${ROOM_TOPIC}/lb/`)) {
+                                    upsertLeaderboardEntry(msg, false);
+                                } else if (topic === `${ROOM_TOPIC}/pm/${playerProfile.id}`) {
+                                    handleIncomingPrivateSignal(msg);
                                 } else if (topic.startsWith(`${ROOM_TOPIC}/admin/ban/`)) {
                                     handleIncomingBanState(msg);
                                 } else if (topic.startsWith(`${ROOM_TOPIC}/admin/mute/`)) {
@@ -5989,11 +6579,23 @@
                                         chatHistory.length = 0;
                                         addChatMessage('👑 Quản trị viên', `Admin ${msg.by || ''} đã làm sạch lịch sử khung chat.`);
                                     } else if (msg.action === 'delete_gb' && msg.entryId) {
+                                        deletedGuestbookIds.add(msg.entryId);
                                         const idx = guestbookEntries.findIndex(g => g.id === msg.entryId);
                                         if (idx !== -1) {
                                             guestbookEntries.splice(idx, 1);
                                             renderGuestbook();
                                         }
+                                        saveGuestbookToStorage();
+                                    } else if (msg.action === 'delete_lb' && msg.targetId) {
+                                        deletedLeaderboardIds.add(msg.targetId);
+                                        leaderboardMap.delete(msg.targetId);
+                                        saveLeaderboardToStorage();
+                                        renderLeaderboard();
+                                    } else if (msg.action === 'clear_lb') {
+                                        leaderboardMap.forEach((_, k) => deletedLeaderboardIds.add(k));
+                                        leaderboardMap.clear();
+                                        saveLeaderboardToStorage();
+                                        renderLeaderboard();
                                     }
                                 }
                             } catch (e) {}
@@ -6013,6 +6615,7 @@
                     id: playerProfile.id,
                     name: playerProfile.name,
                     role: playerProfile.role,
+                    studentRank: playerProfile.studentRank,
                     className: playerProfile.className,
                     cohort: playerProfile.cohort,
                     gender: playerProfile.gender,
@@ -6056,6 +6659,9 @@
                     const msg = ev.data;
                     if (!msg || msg.id === playerProfile.id) return;
                     if (msg.type === 'pos') upsertRemotePlayer(msg);
+                    else if (msg.type === 'server_marquee') triggerServerRedMarquee(msg.name, msg.className || '', false);
+                    else if (msg.type === 'lb_upsert') upsertLeaderboardEntry(msg.entry, false);
+                    else if (msg.type === 'pm_signal') handleIncomingPrivateSignal(msg);
                     else if (msg.type === 'chat') {
                         if (msg.id && (mutedPlayers.has(msg.id) || bannedPlayers.has(msg.id))) return;
                         if (!msg.isAdmin && containsProfanity(msg.text || '')) return;
@@ -6068,11 +6674,23 @@
                         chatHistory.length = 0;
                         addChatMessage('👑 Quản trị viên', `Admin ${msg.by || ''} đã làm sạch lịch sử khung chat.`);
                     } else if (msg.type === 'admin_delete_gb' && msg.entryId) {
+                        deletedGuestbookIds.add(msg.entryId);
                         const idx = guestbookEntries.findIndex(g => g.id === msg.entryId);
                         if (idx !== -1) {
                             guestbookEntries.splice(idx, 1);
                             renderGuestbook();
                         }
+                        saveGuestbookToStorage();
+                    } else if (msg.type === 'admin_delete_lb' && msg.targetId) {
+                        deletedLeaderboardIds.add(msg.targetId);
+                        leaderboardMap.delete(msg.targetId);
+                        saveLeaderboardToStorage();
+                        renderLeaderboard();
+                    } else if (msg.type === 'admin_clear_lb') {
+                        leaderboardMap.forEach((_, k) => deletedLeaderboardIds.add(k));
+                        leaderboardMap.clear();
+                        saveLeaderboardToStorage();
+                        renderLeaderboard();
                     }
                 };
             }
@@ -6094,7 +6712,7 @@
                     input.value = '';
                     return;
                 }
-                const rolePrefix = (isAdminUser || playerProfile.role !== 'Học sinh') ? `👑 [${playerProfile.role.toUpperCase()}] ` : '';
+                const rolePrefix = (isAdminUser || playerProfile.role !== 'Học sinh') ? `👑 [${playerProfile.role.toUpperCase()}] ` : (playerProfile.studentRank ? `[${playerProfile.studentRank}] ` : '');
                 const unitText = playerProfile.className.startsWith('1') ? `Lớp ${playerProfile.className}` : playerProfile.className;
                 const sender = `${rolePrefix}${playerProfile.name} • ${unitText}`;
                 addChatMessage(sender, text, playerProfile.id, playerProfile.name, isAdminUser);
@@ -6130,14 +6748,17 @@
                 };
                 addGuestbookEntryLocal(entry);
                 publishGuestbookToNetwork(entry);
+                completeStudentMission(11);
                 input.value = '';
-                showToast('📖 Đã ghi kỷ niệm vào Sổ Lưu Bút chung!');
+                showToast('📖 Đã ghi kỷ niệm vào Sổ Lưu Bút vĩnh viễn!');
             });
 
             applySelfMuteStateUI();
             renderChat();
             renderGuestbook();
+            renderLeaderboard();
             renderOnlineList();
+            renderStudentMissionsUI();
 
             const tabGbMessages = document.getElementById('tab-gb-messages');
             const tabGbShards = document.getElementById('tab-gb-shards');
@@ -6192,6 +6813,7 @@
                     }
                     if (playerState.sittingSeat) {
                         playerState.sittingSeat = null;
+                        playerState.mission12StudyStartTime = 0;
                         resetStandingHeight(playerMesh.userData);
                     }
                     playerState.x = sc(tx);
@@ -6214,6 +6836,25 @@
                     rolePill.classList.remove('hidden');
                 } else {
                     rolePill.classList.add('hidden');
+                }
+
+                const titleBadge = document.getElementById('hud-title-badge');
+                if (titleBadge) {
+                    if (playerProfile.studentRank === 'SIÊU BÁ KHÍ') {
+                        titleBadge.textContent = '🔥 SIÊU BÁ KHÍ';
+                        titleBadge.className = 'px-1.5 py-0.5 rounded-md bg-red-600 border border-yellow-300 text-yellow-200 text-[10px] font-black shrink-0 animate-pulse';
+                        titleBadge.classList.remove('hidden');
+                    } else if (playerProfile.studentRank === 'Đoàn Viên Ưu Tú') {
+                        titleBadge.textContent = '🚩 Đoàn Viên Ưu Tú';
+                        titleBadge.className = 'px-1.5 py-0.5 rounded-md bg-sky-600/45 border border-sky-400 text-sky-200 text-[10px] font-extrabold shrink-0';
+                        titleBadge.classList.remove('hidden');
+                    } else if (playerProfile.studentRank === 'Học Sinh Ngoan') {
+                        titleBadge.textContent = '🌟 Học Sinh Ngoan';
+                        titleBadge.className = 'px-1.5 py-0.5 rounded-md bg-emerald-500/25 border border-emerald-400 text-emerald-300 text-[10px] font-extrabold shrink-0';
+                        titleBadge.classList.remove('hidden');
+                    } else {
+                        titleBadge.classList.add('hidden');
+                    }
                 }
             }
 
@@ -6240,7 +6881,10 @@
                 playerProfile.className = classSelect.value;
                 playerProfile.loggedIn = true;
 
-                if (isNewStudentIdentity) resetAllShardsForNewStudent();
+                if (isNewStudentIdentity) {
+                    resetAllShardsForNewStudent();
+                    resetStudentMissionsForNewStudent();
+                }
 
                 updateHudProfileDisplay();
                 rebuildPlayerAvatar();
@@ -6249,6 +6893,7 @@
                 document.getElementById('hud-root').classList.remove('hidden');
                 renderOnlineList();
                 publishPositionToNetwork(true);
+                syncSelfToLeaderboard();
                 const roleMsg = isAdminUser ? ` (${playerProfile.role} 👑)` : '';
                 showToast(`🎓 Chào mừng ${playerProfile.name}${roleMsg} đến với Trường THPT Nguyễn Khuyến!`);
             });
@@ -6275,7 +6920,7 @@
             document.getElementById('btn-interact-action').addEventListener('click', triggerNearestInteract);
 
             // =========================================================================
-            // 20. VẼ BẢN ĐỒ RADAR NHỎ (MINIMAP) KÈM VỊ TRÍ TUẦN TRA CỦA 3 BÁC BẢO VỆ
+            // 21. VẼ BẢN ĐỒ RADAR NHỎ (MINIMAP) KÈM VỊ TRÍ TUẦN TRA CỦA 3 BÁC BẢO VỆ
             // =========================================================================
             const miniCanvas = document.getElementById('minimap-canvas');
             const miniCtx = miniCanvas.getContext('2d');
@@ -6289,22 +6934,18 @@
                 const toMapY = z => ((z / CAMPUS_SCALE + 82) / 136) * h;
 
                 const s = CAMPUS_SCALE;
-                // Sân gạch đỏ trung tâm
                 miniCtx.fillStyle = '#b45309';
                 miniCtx.fillRect(toMapX(-24.1 * s), toMapY(-17.7 * s), (49.2 / 106) * w, (54.5 / 136) * h);
 
-                // Đường bộ phía trước & đường phụ phía Đông
                 miniCtx.fillStyle = '#475569';
                 miniCtx.fillRect(0, toMapY(38.5 * s), w, (14 / 136) * h);
                 miniCtx.fillRect(toMapX(40.0 * s), toMapY(-72.0 * s), (4.4 / 106) * w, (112.0 / 136) * h);
 
-                // Hồ cá Koi
                 miniCtx.fillStyle = '#0ea5e9';
                 miniCtx.beginPath();
                 miniCtx.ellipse(toMapX(22.8 * s), toMapY(32.6 * s), (6.55 / 106) * w, (2.25 / 136) * h, 0, 0, Math.PI * 2);
                 miniCtx.fill();
 
-                // Chữ U ngược: Dãy A (12A1-12A12), Dãy B (11B1-11B12) gạch đỏ; Dãy C (10C1-10C12) & Hiệu Bộ trắng kem
                 miniCtx.fillStyle = '#dc2626';
                 miniCtx.fillRect(toMapX(-20.9 * s), toMapY(-30.1 * s), (42.8 / 106) * w, (12.4 / 136) * h);
                 miniCtx.fillRect(toMapX(25.1 * s), toMapY(-17.5 * s), (12.0 / 106) * w, (44.0 / 136) * h);
@@ -6313,14 +6954,12 @@
                 miniCtx.fillRect(toMapX(-36.1 * s), toMapY(-17.5 * s), (12.0 / 106) * w, (41.0 / 136) * h);
                 miniCtx.fillRect(toMapX(-41.2 * s), toMapY(26.6 * s), (20.4 / 106) * w, (9.2 / 136) * h);
 
-                // Khu 6 Lán xe & Nhà vệ sinh
                 miniCtx.fillStyle = '#0284c7';
                 miniCtx.fillRect(toMapX(-20.5 * s), toMapY(-35.8 * s), (42.0 / 106) * w, (3.4 / 136) * h);
 
                 miniCtx.fillStyle = '#f43f5e';
                 miniCtx.fillRect(toMapX(36.1 * s), toMapY(-77 * s), (12.2 / 106) * w, (5 / 136) * h);
 
-                // 12 Mảnh lưu bút
                 miniCtx.fillStyle = '#fde047';
                 for (let i = 0; i < memoryShardObjs.length; i++) {
                     const sh = memoryShardObjs[i];
@@ -6329,7 +6968,6 @@
                     miniCtx.fill();
                 }
 
-                // 3 Bác Bảo Vệ tuần tra (chấm xanh ngọc)
                 miniCtx.fillStyle = '#10b981';
                 for (let i = 0; i < securityGuards.length; i++) {
                     const g = securityGuards[i];
@@ -6338,7 +6976,6 @@
                     miniCtx.fill();
                 }
 
-                // Người chơi khác
                 miniCtx.fillStyle = '#38bdf8';
                 remotePlayers.forEach(rp => {
                     miniCtx.beginPath();
@@ -6346,7 +6983,6 @@
                     miniCtx.fill();
                 });
 
-                // Người chơi hiện tại
                 const px = toMapX(playerState.x);
                 const py = toMapY(playerState.z);
                 miniCtx.fillStyle = '#facc15';
@@ -6359,7 +6995,7 @@
             }
 
             // =========================================================================
-            // 21. VÒNG LẶP CẬP NHẬT CHÍNH (60 FPS) & XỬ LÝ RESIZE
+            // 22. VÒNG LẶP CẬP NHẬT CHÍNH (60 FPS) & XỬ LÝ RESIZE
             // =========================================================================
             window.addEventListener('resize', () => {
                 camera.aspect = window.innerWidth / window.innerHeight;
@@ -6372,9 +7008,30 @@
             let fpsTimer = 0;
             let lastLocationText = '';
             let minimapTick = 0;
+            let cullTick = 0;
             let heartbeatTick = 0;
             let guardBannerTimer = 0;
             const _camTargetVec = new THREE.Vector3();
+            const _rpTargetVec = new THREE.Vector3();
+
+            const domCache = {
+                marqueeBanner: document.getElementById('server-marquee-banner'),
+                marqueeTimer: document.getElementById('server-marquee-timer'),
+                hudTopBar: document.getElementById('hud-top-bar'),
+                guardBanner: document.getElementById('guard-warning-banner'),
+                guardTitle: document.getElementById('guard-warning-title'),
+                guardText: document.getElementById('guard-warning-text'),
+                gatherBar: document.getElementById('class-gather-test-bar'),
+                gatherClassName: document.getElementById('gather-class-name'),
+                gatherCountNum: document.getElementById('gather-count-num'),
+                mission12SeatedNum: document.getElementById('mission12-seated-num'),
+                mission12TimerText: document.getElementById('mission12-timer-text'),
+                lockdownTimerText: document.getElementById('lockdown-timer-text'),
+                smokeBanner: document.getElementById('smoking-warning-banner'),
+                hudLocation: document.getElementById('hud-location'),
+                interactPrompt: document.getElementById('interact-prompt'),
+                interactLabel: document.getElementById('interact-label')
+            };
 
             function animate(now) {
                 requestAnimationFrame(animate);
@@ -6390,7 +7047,22 @@
                     fpsTimer = 0;
                 }
 
-                // Cập nhật hồ cá Koi, ống tre phun nước, chim bay & bướm
+                // Cập nhật đồng hồ băng rôn đỏ chạy toàn Server 2 phút
+                if (serverMarqueeEndTime > 0) {
+                    const remMarquee = Math.max(0, serverMarqueeEndTime - now);
+                    const totalSec = Math.ceil(remMarquee / 1000);
+                    const mStr = String(Math.floor(totalSec / 60)).padStart(2, '0');
+                    const sStr = String(totalSec % 60).padStart(2, '0');
+                    const mTimerEl = document.getElementById('server-marquee-timer');
+                    if (mTimerEl) mTimerEl.textContent = `${mStr}:${sStr}`;
+                    if (remMarquee <= 0) {
+                        serverMarqueeEndTime = 0;
+                        document.getElementById('server-marquee-banner').classList.add('hidden');
+                        const topBar = document.getElementById('hud-top-bar');
+                        if (topBar) topBar.style.marginTop = '0px';
+                    }
+                }
+
                 if (pondWaterTex) {
                     pondWaterTex.offset.x = (now * 0.00008) % 1;
                     pondWaterTex.offset.y = (now * 0.00005) % 1;
@@ -6448,8 +7120,24 @@
                     cl.mesh.position.x += cl.speed * dt;
                     if (cl.mesh.position.x > 135) cl.mesh.position.x = -135;
                 }
+                const refX = cameraMode === 'flycam' ? camera.position.x : playerState.x;
+                const refZ = cameraMode === 'flycam' ? camera.position.z : playerState.z;
                 for (let f = 0; f < ceilingFans.length; f++) {
-                    ceilingFans[f].rotation.y += dt * 5.2;
+                    const cf = ceilingFans[f];
+                    const ud = cf.userData;
+                    if (!ud || (Math.abs(refX - ud.wx) < 36 && Math.abs(refZ - ud.wz) < 36)) {
+                        cf.rotation.y += dt * 5.2;
+                    }
+                }
+                cullTick++;
+                if (cullTick % 6 === 1) {
+                    const maxFurnDistSq = cameraMode === 'flycam' ? (95 * 95) : (44 * 44);
+                    for (let i = 0; i < classroomFurnitureGroups.length; i++) {
+                        const cfg = classroomFurnitureGroups[i];
+                        const dx = refX - cfg.x;
+                        const dz = refZ - cfg.z;
+                        cfg.group.visible = (dx * dx + dz * dz) <= maxFurnDistSq;
+                    }
                 }
                 for (let s = 0; s < memoryShardObjs.length; s++) {
                     const sh = memoryShardObjs[s];
@@ -6481,7 +7169,6 @@
                         : Infinity;
 
                     if (distToPlayer < 6.8) {
-                        // Bác bảo vệ dừng tuần tra, quay về phía học sinh và giơ tay nhắc nhở
                         const targetYaw = Math.atan2(playerState.x - g.x, playerState.z - g.z);
                         let diff = targetYaw - g.yaw;
                         while (diff > Math.PI) diff -= Math.PI * 2;
@@ -6499,7 +7186,6 @@
                             gLimbs.rightElbow.rotation.x = -0.65;
                         }
 
-                        // Ép buộc dắt xe (không cho đạp xe) & hiện nhắc nhở sơ vin + đeo thẻ
                         if (playerProfile.role === 'Học sinh') {
                             if (playerState.ridingBike && !playerState.pushingBike) {
                                 playerState.pushingBike = true;
@@ -6520,7 +7206,6 @@
                             }
                         }
                     } else {
-                        // Di chuyển tuần tra theo lộ trình điểm mốc
                         const wp = g.waypoints[g.wpIdx];
                         const dx = wp.x - g.x;
                         const dz = wp.z - g.z;
@@ -6570,6 +7255,7 @@
                     const bdz = soccerBallMesh.position.z - playerState.z;
                     const bDist = Math.hypot(bdx, bdz);
                     if (bDist < 0.78 && bDist > 0.001) {
+                        completeStudentMission(9);
                         soccerBallVel.x = (bdx / bDist) * 11.5;
                         soccerBallVel.z = (bdz / bDist) * 11.5;
                     }
@@ -6588,13 +7274,20 @@
                     }
                 }
 
-                // Di chuyển & hoạt ảnh nhân vật chính
+                // Di chuyển, kiểm tra nhiệm vụ & hoạt ảnh nhân vật chính
                 if (playerProfile.loggedIn && !isSelfBanned) {
-                    // Kiểm tra xem người chơi có đang đứng trong đúng phòng học trùng với tên lớp của mình không
+                    if (playerState.z < sc(35.5) && playerState.z > sc(-78.0)) {
+                        completeStudentMission(1);
+                    }
+                    if (Math.hypot(playerState.x - sc(0.5), playerState.z - sc(-9.6)) < 4.5 && playerState.y < 1.0) {
+                        completeStudentMission(3);
+                    }
+
                     const myClassCode = playerProfile.className;
                     const myClassZone = classroomZonesMap.get(myClassCode);
                     const myFloorNum = playerState.y >= BASE_Y2 - 0.5 ? 2 : 1;
                     const isInsideOwnClassroom = Boolean(
+                        playerProfile.role === 'Học sinh' &&
                         myClassZone &&
                         myClassZone.floor === myFloorNum &&
                         playerState.x >= myClassZone.minX &&
@@ -6603,46 +7296,65 @@
                         playerState.z <= myClassZone.maxZ
                     );
 
-                    if (!playerState.classLockdownActive) {
-                        const gatherBar = document.getElementById('class-gather-test-bar');
-                        if (isInsideOwnClassroom) {
-                            // Đếm số học sinh có cùng tên lớp với biển tên lớp ở ngoài đang ở trong phòng này
-                            const matchingStudents = [{ id: playerProfile.id, name: playerProfile.name }];
-                            remotePlayers.forEach(rp => {
-                                const rpFloor = (rp.y || 0) >= BASE_Y2 - 0.5 ? 2 : 1;
-                                if (
-                                    rp.className === myClassCode &&
-                                    rpFloor === myClassZone.floor &&
-                                    rp.x >= myClassZone.minX &&
-                                    rp.x <= myClassZone.maxX &&
-                                    rp.z >= myClassZone.minZ &&
-                                    rp.z <= myClassZone.maxZ
-                                ) {
-                                    matchingStudents.push({ id: rp.id, name: rp.name });
-                                }
-                            });
-                            for (let sIdx = 0; sIdx < simulatedClassmates.length; sIdx++) {
-                                const sim = simulatedClassmates[sIdx];
-                                if (sim.className === myClassCode) {
-                                    matchingStudents.push({ id: sim.id, name: sim.name });
-                                }
+                    const gatherBar = document.getElementById('class-gather-test-bar');
+                    if (isInsideOwnClassroom) {
+                        const matchingStudents = [{
+                            id: playerProfile.id,
+                            name: playerProfile.name,
+                            sitting: Boolean(playerState.sittingSeat)
+                        }];
+                        remotePlayers.forEach(rp => {
+                            const rpFloor = (rp.y || 0) >= BASE_Y2 - 0.5 ? 2 : 1;
+                            if (
+                                (!rp.role || rp.role === 'Học sinh') &&
+                                !rp.isAdmin &&
+                                rp.className === myClassCode &&
+                                rpFloor === myClassZone.floor &&
+                                rp.x >= myClassZone.minX &&
+                                rp.x <= myClassZone.maxX &&
+                                rp.z >= myClassZone.minZ &&
+                                rp.z <= myClassZone.maxZ
+                            ) {
+                                matchingStudents.push({ id: rp.id, name: rp.name, sitting: Boolean(rp.sitting) });
                             }
+                        });
 
-                            if (gatherBar) {
-                                document.getElementById('gather-class-name').textContent = myClassCode;
-                                document.getElementById('gather-count-num').textContent = `${matchingStudents.length}/5`;
-                                gatherBar.classList.remove('hidden');
-                            }
+                        const seatedClassmatesCount = matchingStudents.filter(s => s.sitting).length;
 
-                            // Khi có ĐÚNG 5 học sinh trùng tên lớp cùng ở trong phòng học đó -> Bắt ngồi vào chỗ 5 phút
-                            if (matchingStudents.length === 5 && !playerState.completedLockdownRooms.has(myClassCode)) {
-                                startClassroomFiveMinLockdown(myClassZone, matchingStudents);
+                        if (gatherBar) {
+                            document.getElementById('gather-class-name').textContent = myClassCode;
+                            document.getElementById('gather-count-num').textContent = `${matchingStudents.length}`;
+                            document.getElementById('mission12-seated-num').textContent = `${Math.min(12, seatedClassmatesCount)}/12`;
+
+                            if (seatedClassmatesCount >= 12) {
+                                if (!playerState.mission12StudyStartTime) {
+                                    playerState.mission12StudyStartTime = now;
+                                }
+                                const elapsedStudyMs = now - playerState.mission12StudyStartTime;
+                                const studySec = Math.min(300, Math.floor(elapsedStudyMs / 1000));
+                                const sm = String(Math.floor(studySec / 60)).padStart(2, '0');
+                                const ss = String(studySec % 60).padStart(2, '0');
+                                document.getElementById('mission12-timer-text').textContent = `${sm}:${ss} / 05:00`;
+
+                                if (elapsedStudyMs >= 5 * 60 * 1000) {
+                                    completeStudentMission(12);
+                                }
+                            } else {
+                                playerState.mission12StudyStartTime = 0;
+                                document.getElementById('mission12-timer-text').textContent = '00:00 / 05:00';
                             }
-                        } else if (gatherBar) {
-                            gatherBar.classList.add('hidden');
+                            gatherBar.classList.remove('hidden');
+                        }
+
+                        if (!playerState.classLockdownActive && matchingStudents.length === 5 && !playerState.completedLockdownRooms.has(myClassCode)) {
+                            startClassroomFiveMinLockdown(myClassZone, matchingStudents);
                         }
                     } else {
-                        // Đang trong 5 phút bị khóa ngồi đọc 5 Điều Bác Hồ Dạy & Nội quy nhà trường
+                        playerState.mission12StudyStartTime = 0;
+                        if (gatherBar) gatherBar.classList.add('hidden');
+                    }
+
+                    if (playerState.classLockdownActive) {
                         const remainingMs = Math.max(0, playerState.classLockdownEndTime - now);
                         const totalSec = Math.ceil(remainingMs / 1000);
                         const mins = String(Math.floor(totalSec / 60)).padStart(2, '0');
@@ -6650,7 +7362,6 @@
                         const timerEl = document.getElementById('lockdown-timer-text');
                         if (timerEl) timerEl.textContent = `${mins}:${secs}`;
 
-                        // Tự động luân phiên trình chiếu: 5 Điều Bác Hồ Dạy -> Nội quy nhà trường (Đi dép quai hậu)
                         const elapsedSec = (5 * 60 * 1000 - remainingMs) / 1000;
                         const autoSlide = Math.floor(elapsedSec / 15) % 2;
                         if (autoSlide !== playerState.classLockdownSlide) {
@@ -6658,7 +7369,7 @@
                         }
 
                         if (remainingMs <= 0) {
-                            finishClassroomLockdown(false);
+                            finishClassroomLockdown();
                         }
                     }
 
@@ -6683,7 +7394,6 @@
                         standUpFromSeat();
                     }
 
-                    // Nếu rời khỏi khu vực của bác bảo vệ, có thể đạp xe trở lại
                     if (playerState.ridingBike && playerState.pushingBike && !isNearAnySecurityGuard()) {
                         playerState.pushingBike = false;
                         showToast('🚲 Đã qua khu vực giám sát của Bác Bảo Vệ, bạn có thể lên yên đạp xe tiếp!');
@@ -6691,7 +7401,7 @@
 
                     const speed = playerState.ridingBike
                         ? (playerState.pushingBike ? 4.8 : 12.2)
-                        : ((keys['ShiftLeft'] || keys['ShiftRight']) ? 9.4 : 6.4);
+                        : ((keys['ShiftLeft'] || keys['ShiftRight'] || touchSprintActive) ? 9.4 : 6.4);
 
                     let actualMoveDist = 0;
                     if (!playerState.sittingSeat && isMoving) {
@@ -6767,7 +7477,6 @@
                             applyBikingPose(limbs, bData.pedalAngle || 0);
                         }
                     } else if (playerState.ridingBike && playerState.pushingBike) {
-                        // Tư thế đi bộ dắt xe đạp bên cạnh (tay phải giữ ghi-đông)
                         resetStandingHeight(limbs);
                         const bike = playerState.ridingBike.mesh;
                         const sideOffset = 0.46;
@@ -6871,22 +7580,30 @@
                 const floorNum = playerState.y >= BASE_Y2 - 0.5 ? 2 : 1;
                 if (playerState.z > sc(38.2)) locText = '📍 Đường trước cổng trường THPT Nguyễn Khuyến';
                 else if (inRestroom) locText = '🚭 Khu Nhà vệ sinh (Góc cuối trường)';
-                else if (playerState.z >= sc(-37.5) && playerState.z <= sc(-30.5) && Math.abs(playerState.x - sc(0.5)) <= sc(21.5)) locText = '🚲 Khu 6 Lán xe đạp (12 xe đạp)';
-                else if (playerState.z < sc(-41.5) && playerState.z >= sc(-63.5)) locText = '⚽ Khu vực Sân bóng phía sau trường';
-                else if (playerState.z >= sc(-17.0) && playerState.z <= sc(-10.0) && Math.abs(playerState.x - sc(0.5)) <= sc(6.5)) {
+                else if (playerState.z >= sc(-37.5) && playerState.z <= sc(-30.5) && Math.abs(playerState.x - sc(0.5)) <= sc(21.5)) {
+                    locText = '🚲 Khu 6 Lán xe đạp (12 xe đạp)';
+                    completeStudentMission(8);
+                } else if (playerState.z < sc(-41.5) && playerState.z >= sc(-63.5)) {
+                    locText = '⚽ Khu vực Sân bóng phía sau trường';
+                    completeStudentMission(9);
+                } else if (playerState.z >= sc(-17.0) && playerState.z <= sc(-10.0) && Math.abs(playerState.x - sc(0.5)) <= sc(6.5)) {
                     locText = '🎤 Khán đài / Sân khấu Lễ Khai Giảng';
                 } else {
                     for (let i = 0; i < roomLabels.length; i++) {
                         const rl = roomLabels[i];
                         if (rl.floor === floorNum && playerState.x >= rl.minX && playerState.x <= rl.maxX && playerState.z >= rl.minZ && playerState.z <= rl.maxZ) {
                             locText = `🏫 ${rl.name}`;
+                            if (rl.name.includes('PHÒNG TRUYỀN THỐNG') || rl.name.includes('HỘI TRƯỜNG LỚN')) {
+                                completeStudentMission(7);
+                            }
                             break;
                         }
                     }
                 }
                 if (locText !== lastLocationText) {
                     lastLocationText = locText;
-                    document.getElementById('hud-location').textContent = locText;
+                    const locEl = document.getElementById('hud-location');
+                    if (locEl) locEl.textContent = locText;
                 }
 
                 let foundInteract = null;
@@ -6930,16 +7647,18 @@
                 }
 
                 nearestInteract = foundInteract;
-                const promptEl = document.getElementById('interact-prompt');
-                if (foundInteract && !playerState.classLockdownActive) {
-                    document.getElementById('interact-label').textContent = foundInteract.getLabel ? foundInteract.getLabel() : foundInteract.label;
-                    promptEl.classList.remove('hidden');
-                } else {
-                    promptEl.classList.add('hidden');
+                const promptEl = domCache.interactPrompt;
+                const labelEl = domCache.interactLabel;
+                if (promptEl) {
+                    if (foundInteract && !playerState.classLockdownActive) {
+                        if (labelEl) labelEl.textContent = foundInteract.getLabel ? foundInteract.getLabel() : foundInteract.label;
+                        promptEl.classList.remove('hidden');
+                    } else {
+                        promptEl.classList.add('hidden');
+                    }
                 }
 
                 if (playerState.classLockdownActive && playerState.classLockdownBoardTarget) {
-                    // Khóa hướng nhìn thẳng lên bảng 5 Điều Bác Hồ Dạy & Nội quy nhà trường
                     const bt = playerState.classLockdownBoardTarget;
                     const lookDirX = bt.x - playerState.x;
                     const lookDirZ = bt.z - playerState.z;
@@ -6997,7 +7716,7 @@
                         if (rp.riding && !rp.pushing && rp.bikeMesh) {
                             const prevX = rp.bikeMesh.position.x;
                             const prevZ = rp.bikeMesh.position.z;
-                            rp.bikeMesh.position.lerp(new THREE.Vector3(rp.x, rp.y || 0, rp.z), 0.25);
+                            _rpTargetVec.set(rp.x, rp.y || 0, rp.z); rp.bikeMesh.position.lerp(_rpTargetVec, 0.25);
                             rp.bikeMesh.rotation.y = rp.yaw || 0;
 
                             const moved = Math.hypot(rp.bikeMesh.position.x - prevX, rp.bikeMesh.position.z - prevZ);
@@ -7019,7 +7738,7 @@
                             applyBikingPose(rp.mesh.userData, bData ? bData.pedalAngle : 0);
                         } else if (rp.riding && rp.pushing && rp.bikeMesh) {
                             resetStandingHeight(rp.mesh.userData);
-                            rp.mesh.position.lerp(new THREE.Vector3(rp.x, rp.y || 0, rp.z), 0.25);
+                            _rpTargetVec.set(rp.x, rp.y || 0, rp.z); rp.mesh.position.lerp(_rpTargetVec, 0.25);
                             rp.mesh.rotation.y = rp.yaw || 0;
                             const rYaw = rp.mesh.rotation.y;
                             rp.bikeMesh.position.set(
@@ -7029,12 +7748,12 @@
                             );
                             rp.bikeMesh.rotation.y = rYaw;
                         } else if (rp.sitting) {
-                            rp.mesh.position.lerp(new THREE.Vector3(rp.x, rp.y || 0, rp.z), 0.25);
+                            _rpTargetVec.set(rp.x, rp.y || 0, rp.z); rp.mesh.position.lerp(_rpTargetVec, 0.25);
                             rp.mesh.rotation.y = rp.yaw || 0;
                             applySittingPose(rp.mesh.userData, now);
                         } else {
                             resetStandingHeight(rp.mesh.userData);
-                            rp.mesh.position.lerp(new THREE.Vector3(rp.x, rp.y || 0, rp.z), 0.25);
+                            _rpTargetVec.set(rp.x, rp.y || 0, rp.z); rp.mesh.position.lerp(_rpTargetVec, 0.25);
                             rp.mesh.rotation.y = rp.yaw || 0;
                         }
                     }
