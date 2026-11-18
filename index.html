@@ -269,7 +269,7 @@
                 </div>
 
                 <!-- Hàng nút chế độ góc nhìn, nhiệm vụ, chia sẻ 2 link & hiệu năng -->
-                <div class="flex flex-wrap items-center gap-1.5">
+                <div id="hud-top-tools-row" class="flex flex-wrap items-center gap-1.5">
                     <button id="btn-missions-hud"
                         class="px-2.5 py-1.5 rounded-xl bg-gradient-to-r from-red-600 to-amber-600 hover:from-red-500 hover:to-amber-500 border border-yellow-300/60 text-[11px] font-extrabold text-white shadow cursor-pointer">
                         🎯 Nhiệm vụ: <span id="mission-count-hud">0/12</span>
@@ -309,13 +309,80 @@
                 </div>
             </div>
 
-            <!-- Bản đồ Radar nhỏ góc trên bên phải -->
-            <div class="pointer-events-auto flex flex-col items-end gap-1.5">
-                <div class="relative rounded-2xl overflow-hidden border-2 border-white/25 bg-slate-900/85 shadow-xl">
+            <!-- Cụm Đồng hồ & Thời tiết Vĩnh Bảo, Bản đồ Radar & Cột Tắt/Bật Chức Năng góc trên bên phải -->
+            <div class="pointer-events-auto flex flex-col items-end gap-1.5 max-w-[48vw] sm:max-w-xs">
+                <!-- Đồng hồ & Thời tiết thời gian thực Vĩnh Bảo, Hải Phòng -->
+                <div id="vinhbao-weather-widget" class="w-full rounded-2xl bg-slate-900/90 backdrop-blur-md border border-sky-400/35 px-2.5 py-1.5 shadow-xl text-right">
+                    <div class="flex items-center justify-between gap-2">
+                        <span class="text-[10px] font-extrabold text-sky-300 uppercase tracking-wider">📍 Vĩnh Bảo • Hải Phòng</span>
+                        <button id="btn-sync-realtime-sky" type="button" title="Đồng bộ bầu trời & đèn trường theo giờ thực tế Vĩnh Bảo"
+                            class="px-1.5 py-0.5 rounded bg-sky-500/25 hover:bg-sky-500/40 border border-sky-400/40 text-[9px] font-bold text-sky-200 cursor-pointer">
+                            🔄 Giờ thực: BẬT
+                        </button>
+                    </div>
+                    <div class="flex items-baseline justify-end gap-1.5 mt-0.5">
+                        <span id="vb-live-clock" class="font-mono text-xs sm:text-sm font-black text-amber-300 tracking-tight">--:--:--</span>
+                        <span id="vb-live-date" class="text-[10px] font-semibold text-slate-300">--/--/----</span>
+                    </div>
+                    <div class="flex items-center justify-end gap-1.5 text-[10px] sm:text-[11px] font-bold text-emerald-300 mt-0.5">
+                        <span id="vb-weather-desc">⛅ Đang tải thời tiết...</span>
+                        <span id="vb-weather-temp" class="text-white font-extrabold">--°C</span>
+                    </div>
+                    <div id="vb-weather-extra" class="text-[9px] text-slate-400 font-medium">
+                        Độ ẩm: --% • Gió: -- km/h
+                    </div>
+                </div>
+
+                <!-- Bản đồ Radar nhỏ -->
+                <div id="minimap-wrapper" class="relative rounded-2xl overflow-hidden border-2 border-white/25 bg-slate-900/85 shadow-xl">
                     <canvas id="minimap-canvas" width="132" height="132" class="block w-[112px] h-[112px] sm:w-[132px] sm:h-[132px]"></canvas>
                     <div class="absolute bottom-1 left-1.5 right-1.5 flex justify-between text-[9px] font-bold text-white/90 drop-shadow pointer-events-none">
                         <span>Bắc (12A)</span>
                         <span id="online-pill" class="text-emerald-300">● 1/500</span>
+                    </div>
+                </div>
+
+                <!-- Cột Tắt / Bật hiển thị Map & các chức năng -->
+                <div id="hud-toggle-column-wrapper" class=" flex flex-col items-end w-full">
+                    <button id="btn-toggle-control-column" type="button"
+                        class="px-2.5 py-1.5 rounded-xl bg-slate-900/90 hover:bg-slate-800 backdrop-blur-md border border-amber-400/50 text-[11px] font-extrabold text-amber-300 shadow-lg flex items-center gap-1.5 cursor-pointer">
+                        <span>🎛️ Tắt/Bật Map & Tiện Ích</span>
+                        <span id="toggle-col-arrow" class="text-[10px]">▼</span>
+                    </button>
+                    <div id="hud-toggle-column-body" class="mt-1.5 w-48 sm:w-52 rounded-2xl bg-slate-900/95 backdrop-blur-md border border-white/20 p-2 shadow-2xl flex flex-col gap-1 text-[11px]">
+                        <div class="text-[10px] font-extrabold text-slate-400 uppercase px-1 pb-0.5 border-b border-white/10">
+                            Hiển thị giao diện & Đèn
+                        </div>
+                        <button id="btn-toggle-minimap" type="button"
+                            class="w-full px-2.5 py-1.5 rounded-xl bg-emerald-600/25 hover:bg-emerald-600/35 border border-emerald-400/40 text-emerald-200 font-bold flex items-center justify-between cursor-pointer">
+                            <span>🗺️ Bản đồ Radar</span>
+                            <span id="state-toggle-minimap" class="text-[10px] font-extrabold text-emerald-300">BẬT</span>
+                        </button>
+                        <button id="btn-toggle-weather" type="button"
+                            class="w-full px-2.5 py-1.5 rounded-xl bg-emerald-600/25 hover:bg-emerald-600/35 border border-emerald-400/40 text-emerald-200 font-bold flex items-center justify-between cursor-pointer">
+                            <span>🌤️ Giờ & Thời tiết</span>
+                            <span id="state-toggle-weather" class="text-[10px] font-extrabold text-emerald-300">BẬT</span>
+                        </button>
+                        <button id="btn-toggle-top-tools" type="button"
+                            class="w-full px-2.5 py-1.5 rounded-xl bg-emerald-600/25 hover:bg-emerald-600/35 border border-emerald-400/40 text-emerald-200 font-bold flex items-center justify-between cursor-pointer">
+                            <span>🛠️ Nút công cụ trên</span>
+                            <span id="state-toggle-top-tools" class="text-[10px] font-extrabold text-emerald-300">BẬT</span>
+                        </button>
+                        <button id="btn-toggle-bottom-nav" type="button"
+                            class="w-full px-2.5 py-1.5 rounded-xl bg-emerald-600/25 hover:bg-emerald-600/35 border border-emerald-400/40 text-emerald-200 font-bold flex items-center justify-between cursor-pointer">
+                            <span>📌 Menu dưới cùng</span>
+                            <span id="state-toggle-bottom-nav" class="text-[10px] font-extrabold text-emerald-300">BẬT</span>
+                        </button>
+                        <button id="btn-toggle-touch-pad" type="button"
+                            class="w-full px-2.5 py-1.5 rounded-xl bg-emerald-600/25 hover:bg-emerald-600/35 border border-emerald-400/40 text-emerald-200 font-bold flex items-center justify-between cursor-pointer">
+                            <span>🕹️ Phím di chuyển ảo</span>
+                            <span id="state-toggle-touch-pad" class="text-[10px] font-extrabold text-emerald-300">BẬT</span>
+                        </button>
+                        <button id="btn-toggle-school-lights" type="button"
+                            class="w-full px-2.5 py-1.5 rounded-xl bg-amber-500/25 hover:bg-amber-500/35 border border-amber-400/50 text-amber-200 font-bold flex items-center justify-between cursor-pointer">
+                            <span>💡 Đèn lớp & sân</span>
+                            <span id="state-toggle-school-lights" class="text-[10px] font-extrabold text-amber-300">TỰ ĐỘNG</span>
+                        </button>
                     </div>
                 </div>
             </div>
@@ -450,7 +517,7 @@
         </div>
 
         <!-- Cụm nút Chạy nhanh & Nhảy bên phải cho điện thoại -->
-        <div class="pointer-events-auto fixed bottom-16 right-4 sm:bottom-16 sm:right-6 flex flex-col items-end gap-2.5 touch-none">
+        <div id="touch-action-btns" class="pointer-events-auto fixed bottom-16 right-4 sm:bottom-16 sm:right-6 flex flex-col items-end gap-2.5 touch-none">
             <button id="btn-sprint" type="button"
                 class="w-13 h-13 px-3 py-2.5 rounded-full bg-amber-500/85 hover:bg-amber-400 active:scale-90 border-2 border-white/35 text-slate-950 font-extrabold text-[11px] shadow-lg backdrop-blur-sm cursor-pointer">
                 🏃 CHẠY
@@ -462,7 +529,7 @@
         </div>
 
         <!-- Thanh công cụ dưới cùng -->
-        <div class="pointer-events-auto fixed bottom-2.5 left-1/2 -translate-x-1/2 flex items-center gap-1 sm:gap-2 px-2 py-1.5 rounded-2xl bg-slate-900/85 backdrop-blur-md border border-white/15 shadow-2xl max-w-[96vw] overflow-x-auto">
+        <div id="hud-bottom-nav" class="pointer-events-auto fixed bottom-2.5 left-1/2 -translate-x-1/2 flex items-center gap-1 sm:gap-2 px-2 py-1.5 rounded-2xl bg-slate-900/85 backdrop-blur-md border border-white/15 shadow-2xl max-w-[96vw] overflow-x-auto">
             <button data-panel="panel-missions" class="nav-panel-btn px-2.5 sm:px-3 py-1.5 rounded-xl bg-red-600/30 hover:bg-red-600 border border-red-400/50 text-xs font-extrabold text-yellow-200 hover:text-white transition shrink-0 cursor-pointer">
                 🎯 Nhiệm vụ
             </button>
@@ -605,6 +672,43 @@
                 </div>
             </div>
 
+            <!-- Cảnh báo chống gian lận khi phát hiện cố ý thua / nhường điểm -->
+            <div id="game-anticheat-warning-banner" class="hidden mb-2 p-2.5 rounded-2xl bg-red-950/95 border-2 border-red-400 text-xs text-red-100 shadow-lg">
+                <div class="flex items-center justify-between gap-2">
+                    <span class="font-black text-amber-300">🚨 CẢNH BÁO GIAN LẬN (CHỐNG CỐ Ý THUA / BƠM ĐIỂM)</span>
+                    <button id="btn-close-anticheat-banner" type="button" class="px-1.5 py-0.5 rounded bg-white/10 hover:bg-white/20 text-[10px] font-bold cursor-pointer">Đóng</button>
+                </div>
+                <p id="game-anticheat-warning-text" class="text-[11px] mt-1 leading-relaxed text-red-200">
+                    Phát hiện dấu hiệu cố ý thua nhanh hoặc không chặn nước cờ nguy hiểm. Hiệp đấu này sẽ không được cộng điểm vào Bảng Xếp Hạng!
+                </p>
+            </div>
+
+            <!-- Thanh đồng hồ thời gian chơi từng hiệp, lượt suy nghĩ, số nước đi & nút đầu hàng / xem BXH -->
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-1.5 mb-2 text-[11px]">
+                <div class="px-2.5 py-1.5 rounded-xl bg-slate-950/90 border border-sky-400/35 flex items-center justify-between">
+                    <span class="text-slate-400 font-semibold">⏱️ Hiệp <span id="game-round-num">#1</span>:</span>
+                    <span id="game-round-timer" class="font-mono font-extrabold text-sky-300">00:00</span>
+                </div>
+                <div class="px-2.5 py-1.5 rounded-xl bg-slate-950/90 border border-amber-400/35 flex items-center justify-between">
+                    <span class="text-slate-400 font-semibold">⏳ Lượt:</span>
+                    <span id="game-turn-timer" class="font-mono font-extrabold text-amber-300">30s</span>
+                </div>
+                <div class="px-2.5 py-1.5 rounded-xl bg-slate-950/90 border border-white/15 flex items-center justify-between">
+                    <span class="text-slate-400 font-semibold">📊 Nước đi:</span>
+                    <span id="game-move-counter" class="font-mono font-extrabold text-emerald-300">0</span>
+                </div>
+                <div class="flex items-center gap-1">
+                    <button id="btn-game-resign" type="button" title="Xin thua hiệp hiện tại"
+                        class="flex-1 py-1.5 px-2 rounded-xl bg-rose-600/30 hover:bg-rose-600/50 border border-rose-400/40 text-rose-200 font-bold text-[10px] cursor-pointer">
+                        🏳️ Xin thua
+                    </button>
+                    <button id="btn-open-chess-caro-lb" type="button" title="Mở Bảng Xếp Hạng Thắng Cờ Caro & Cờ Vua"
+                        class="flex-1 py-1.5 px-2 rounded-xl bg-yellow-500/25 hover:bg-yellow-500/40 border border-yellow-400/50 text-yellow-300 font-extrabold text-[10px] cursor-pointer">
+                        🏆 BXH Cờ
+                    </button>
+                </div>
+            </div>
+
             <!-- Thanh trạng thái lượt đi & tỷ số -->
             <div class="flex items-center justify-between gap-2 mb-2 px-3 py-1.5 rounded-xl bg-slate-950/90 border border-white/15 text-xs">
                 <div id="game-status-banner" class="font-extrabold text-amber-300 truncate">
@@ -621,6 +725,17 @@
                     class="w-full max-w-[360px] sm:max-w-[400px] aspect-square rounded-2xl border-2 border-amber-400/60 shadow-inner bg-amber-50 cursor-pointer touch-manipulation"></canvas>
             </div>
 
+            <!-- Lịch sử thời gian chơi từng hiệp gần nhất -->
+            <div class="mt-2 p-2 rounded-2xl bg-slate-950/80 border border-white/10 text-[11px]">
+                <div class="flex items-center justify-between text-slate-300 font-bold mb-1 px-1">
+                    <span>🕒 Lịch sử thời gian chơi từng hiệp</span>
+                    <span id="game-fairplay-pill" class="text-[10px] text-emerald-300 font-extrabold">🛡️ Fair-Play: Đang giám sát</span>
+                </div>
+                <div id="game-round-history-list" class="max-h-20 overflow-y-auto custom-scroll space-y-1 text-[10px] text-slate-400 px-1">
+                    <div>Chưa có hiệp đấu nào hoàn tất. Hãy đánh ván đầu tiên!</div>
+                </div>
+            </div>
+
             <div class="mt-2 flex items-center justify-between text-[11px] text-slate-400 px-1">
                 <span id="game-rule-hint">📌 Cờ Caro: Đạt 5 quân liên tiếp ngang, dọc hoặc chéo để chiến thắng.</span>
                 <button id="btn-tp-game-table" type="button" class="text-sky-300 hover:text-sky-200 font-bold underline cursor-pointer">
@@ -633,12 +748,12 @@
         <!-- CÁC BẢNG CHỨC NĂNG NỔI (NHIỆM VỤ, XẾP HẠNG, BẢN ĐỒ, CHAT RIÊNG...) -->
         <!-- ================================================================= -->
 
-        <!-- 0B. Bảng Xếp Hạng Lưu Trữ Vĩnh Viễn (Chỉ Admin mới có quyền xóa) -->
-        <div id="panel-leaderboard" class="modal-panel hidden pointer-events-auto fixed inset-x-0 bottom-16 mx-auto w-[94vw] max-w-lg rounded-3xl bg-slate-900/95 border border-yellow-400/50 p-4 shadow-2xl backdrop-blur-md z-30 max-h-[76vh] overflow-y-auto custom-scroll">
+        <!-- 0B. Bảng Xếp Hạng Lưu Trữ Vĩnh Viễn (Nhiệm Vụ, Thắng Cờ Caro & Thắng Cờ Vua) -->
+        <div id="panel-leaderboard" class="modal-panel hidden pointer-events-auto fixed inset-x-0 bottom-16 mx-auto w-[94vw] max-w-lg rounded-3xl bg-slate-900/95 border border-yellow-400/50 p-4 shadow-2xl backdrop-blur-md z-30 max-h-[78vh] overflow-y-auto custom-scroll">
             <div class="flex items-center justify-between mb-2">
                 <div>
-                    <h3 class="text-sm font-extrabold text-yellow-300">🏆 Bảng Xếp Hạng Học Sinh THPT Nguyễn Khuyến</h3>
-                    <p class="text-[11px] text-slate-300">Lưu giữ vĩnh viễn thành tích & danh hiệu đến khi Admin xóa</p>
+                    <h3 class="text-sm font-extrabold text-yellow-300">🏆 Bảng Xếp Hạng Toàn Trường THPT Nguyễn Khuyến</h3>
+                    <p class="text-[11px] text-slate-300">Xếp hạng Nhiệm vụ, Cao thủ Cờ Caro & Cờ Vua (Có chống gian lận cố ý thua)</p>
                 </div>
                 <div class="flex items-center gap-1.5">
                     <button id="btn-clear-leaderboard-admin" type="button"
@@ -648,6 +763,23 @@
                     <button class="close-panel-btn px-2.5 py-1 rounded-lg bg-white/10 text-xs font-bold cursor-pointer">✕</button>
                 </div>
             </div>
+
+            <!-- 3 Tab Bảng Xếp Hạng: Nhiệm Vụ | Thắng Cờ Caro | Thắng Cờ Vua -->
+            <div class="grid grid-cols-3 gap-1.5 mb-3 p-1 rounded-2xl bg-slate-950/85 border border-white/10 text-[11px]">
+                <button id="tab-lb-missions" type="button"
+                    class="py-1.5 px-2 rounded-xl bg-yellow-500 text-slate-950 font-extrabold transition cursor-pointer">
+                    🎯 Nhiệm vụ
+                </button>
+                <button id="tab-lb-caro" type="button"
+                    class="py-1.5 px-2 rounded-xl text-slate-200 hover:bg-white/10 font-bold transition cursor-pointer">
+                    ❌⭕ Thắng Cờ Caro
+                </button>
+                <button id="tab-lb-chess" type="button"
+                    class="py-1.5 px-2 rounded-xl text-slate-200 hover:bg-white/10 font-bold transition cursor-pointer">
+                    ♟️ Thắng Cờ Vua
+                </button>
+            </div>
+
             <div id="leaderboard-list" class="space-y-1.5 text-xs"></div>
         </div>
 
@@ -1748,6 +1880,28 @@
             // 5. BẦU TRỜI CHUYỂN SẮC, MÂY TRÔI & CHIM BAY
             // =========================================================================
             const streetLampHalos = [];
+            const indoorLightHalos = [];
+            const schoolBulbMeshes = [];
+            let schoolLightsMode = 'auto'; // 'auto' | 'on' | 'off'
+            let areSchoolLightsActive = false;
+            const matBulbGlass = new THREE.MeshBasicMaterial({ color: 0xe2e8f0 });
+            const matTubeLightLED = new THREE.MeshBasicMaterial({ color: 0xe2e8f0 });
+            const matLampFixture = new THREE.MeshStandardMaterial({ color: 0xf8fafc, roughness: 0.35, metalness: 0.25 });
+            const sharedGlowTex = makeCanvasTexture(128, 128, (ctx, w, h) => {
+                const g = ctx.createRadialGradient(w / 2, h / 2, 4, w / 2, h / 2, w / 2);
+                g.addColorStop(0, 'rgba(254, 249, 195, 0.95)');
+                g.addColorStop(0.38, 'rgba(253, 224, 71, 0.45)');
+                g.addColorStop(0.72, 'rgba(250, 204, 21, 0.14)');
+                g.addColorStop(1, 'rgba(250, 204, 21, 0)');
+                ctx.fillStyle = g;
+                ctx.fillRect(0, 0, w, h);
+            });
+            const nightLocalLight = new THREE.PointLight(0xfffbeb, 0, 28, 1.6);
+            nightLocalLight.position.set(0, 3.2, 0);
+            scene.add(nightLocalLight);
+            const courtyardNightLight = new THREE.PointLight(0xfef08a, 0, 65, 1.4);
+            courtyardNightLight.position.set(sc(0.5), 9.5, sc(8.5));
+            scene.add(courtyardNightLight);
             const skyClouds = [];
             const skyBirds = [];
             let skyDomeMesh = null;
@@ -1940,13 +2094,46 @@
                 if (cloudTopMat) cloudTopMat.color.setHex(cfg.cloudTop);
                 if (cloudUnderMat) cloudUnderMat.color.setHex(cfg.cloudUnder);
 
-                streetLampHalos.forEach(h => {
-                    h.material.opacity = cfg.lampGlow;
-                    h.visible = cfg.lampGlow > 0.2;
-                });
+                updateSchoolLightsState();
                 const moodBtn = document.getElementById('btn-sky-mood');
                 if (moodBtn) moodBtn.textContent = cfg.label;
                 renderer.shadowMap.needsUpdate = true;
+            }
+
+            function updateSchoolLightsState() {
+                const cfg = skyMoodConfigs[currentSkyMoodIdx] || skyMoodConfigs[0];
+                const autoShouldOn = cfg.id === 'sunset' || cfg.id === 'night';
+                areSchoolLightsActive = schoolLightsMode === 'on' ? true : (schoolLightsMode === 'off' ? false : autoShouldOn);
+                const glowStrength = areSchoolLightsActive ? (cfg.id === 'night' ? 0.95 : 0.78) : 0;
+
+                matBulbGlass.color.setHex(areSchoolLightsActive ? 0xfef08a : 0xcbd5e1);
+                matTubeLightLED.color.setHex(areSchoolLightsActive ? 0xffffff : 0xdbeafe);
+
+                streetLampHalos.forEach(h => {
+                    h.material.opacity = glowStrength;
+                    h.visible = areSchoolLightsActive;
+                });
+                indoorLightHalos.forEach(h => {
+                    h.material.opacity = areSchoolLightsActive ? (cfg.id === 'night' ? 0.78 : 0.62) : 0;
+                    h.visible = areSchoolLightsActive;
+                });
+
+                nightLocalLight.intensity = areSchoolLightsActive ? (cfg.id === 'night' ? 0.95 : 0.55) : 0;
+                courtyardNightLight.intensity = areSchoolLightsActive ? (cfg.id === 'night' ? 0.75 : 0.42) : 0;
+
+                const stEl = document.getElementById('state-toggle-school-lights');
+                if (stEl) {
+                    if (schoolLightsMode === 'auto') {
+                        stEl.textContent = areSchoolLightsActive ? 'TỰ ĐỘNG (SÁNG)' : 'TỰ ĐỘNG';
+                        stEl.className = 'text-[10px] font-extrabold text-amber-300';
+                    } else if (schoolLightsMode === 'on') {
+                        stEl.textContent = 'BẬT SÁNG';
+                        stEl.className = 'text-[10px] font-extrabold text-emerald-300';
+                    } else {
+                        stEl.textContent = 'ĐÃ TẮT';
+                        stEl.className = 'text-[10px] font-extrabold text-slate-400';
+                    }
+                }
             }
             applySkyMood(0);
 
@@ -3369,6 +3556,99 @@
                 return fanGroup;
             }
 
+            const _tubeHousingGeo = getBoxGeo(1.42, 0.045, 0.24);
+            const _tubeBulbGeo = getBoxGeo(1.36, 0.032, 0.055);
+            const _corridorMountGeo = new THREE.CylinderGeometry(0.22, 0.24, 0.06, 12);
+            const _corridorGlobeGeo = new THREE.SphereGeometry(0.16, 10, 8);
+
+            function createClassroomTubeLight(x, y, z, rotY = 0) {
+                const lamp = new THREE.Group();
+                lamp.position.set(x, y, z);
+                lamp.rotation.y = rotY;
+
+                const housing = new THREE.Mesh(_tubeHousingGeo, matLampFixture);
+                housing.userData.noShadowCast = true;
+                lamp.add(housing);
+
+                [-0.06, 0.06].forEach(dz => {
+                    const tube = new THREE.Mesh(_tubeBulbGeo, matTubeLightLED);
+                    tube.position.set(0, -0.028, dz);
+                    tube.userData.noShadowCast = true;
+                    lamp.add(tube);
+                    schoolBulbMeshes.push(tube);
+                });
+
+                const halo = new THREE.Sprite(
+                    new THREE.SpriteMaterial({ map: sharedGlowTex, color: 0xfef9c3, transparent: true, opacity: 0.72, depthWrite: false })
+                );
+                halo.scale.set(2.45, 2.45, 1);
+                halo.position.set(0, -0.18, 0);
+                halo.visible = areSchoolLightsActive;
+                lamp.add(halo);
+                indoorLightHalos.push(halo);
+                return lamp;
+            }
+
+            function createCorridorCeilingLamp(x, y, z) {
+                const lamp = new THREE.Group();
+                lamp.position.set(x, y, z);
+
+                const mount = new THREE.Mesh(_corridorMountGeo, matLampFixture);
+                mount.userData.noShadowCast = true;
+                lamp.add(mount);
+
+                const bulb = new THREE.Mesh(_corridorGlobeGeo, matBulbGlass);
+                bulb.scale.set(1, 0.65, 1);
+                bulb.position.y = -0.06;
+                bulb.userData.noShadowCast = true;
+                lamp.add(bulb);
+                schoolBulbMeshes.push(bulb);
+
+                const halo = new THREE.Sprite(
+                    new THREE.SpriteMaterial({ map: sharedGlowTex, color: 0xfde047, transparent: true, opacity: 0.75, depthWrite: false })
+                );
+                halo.scale.set(2.35, 2.35, 1);
+                halo.position.set(0, -0.18, 0);
+                halo.visible = areSchoolLightsActive;
+                lamp.add(halo);
+                indoorLightHalos.push(halo);
+                return lamp;
+            }
+
+            function createCourtyardLampPost(x, z, height = 4.6) {
+                const postGroup = new THREE.Group();
+                postGroup.position.set(x, 0, z);
+
+                const base = new THREE.Mesh(new THREE.CylinderGeometry(0.16, 0.22, 0.45, 8), matIron);
+                base.position.y = 0.225;
+                postGroup.add(base);
+
+                const pole = new THREE.Mesh(new THREE.CylinderGeometry(0.065, 0.1, height, 8), matIron);
+                pole.position.y = height / 2;
+                postGroup.add(pole);
+
+                const arm = new THREE.Mesh(getBoxGeo(0.65, 0.06, 0.06), matIron);
+                arm.position.set(0, height - 0.05, 0);
+                postGroup.add(arm);
+
+                [-0.28, 0.28].forEach(dx => {
+                    const globe = new THREE.Mesh(new THREE.SphereGeometry(0.20, 10, 8), matBulbGlass);
+                    globe.position.set(dx, height + 0.08, 0);
+                    postGroup.add(globe);
+                    schoolBulbMeshes.push(globe);
+                });
+
+                const halo = new THREE.Sprite(
+                    new THREE.SpriteMaterial({ map: sharedGlowTex, color: 0xfde047, transparent: true, opacity: 0.85, depthWrite: false })
+                );
+                halo.scale.set(3.8, 3.8, 1);
+                halo.position.set(0, height + 0.1, 0);
+                halo.visible = areSchoolLightsActive;
+                postGroup.add(halo);
+                streetLampHalos.push(halo);
+                return postGroup;
+            }
+
             function buildArchitecturalRoof(parentGroup, cx, cz, widthX, depthZ, roofY, mainAxis = 'x', frontDir = 1) {
                 const w = sc(widthX) + 0.9;
                 const d = sc(depthZ) + 0.9;
@@ -3647,6 +3927,13 @@
 
                 parentGroup.add(createCeilingFan(sx - w * 0.22, baseY + 3.25, sz - d * 0.12));
                 parentGroup.add(createCeilingFan(sx + w * 0.22, baseY + 3.25, sz + d * 0.18));
+
+                // 4 Bộ đèn tuýp LED đôi trần lớp học + 1 đèn chiếu bảng
+                roomFurnGroup.add(createClassroomTubeLight(sx - w * 0.24, baseY + 3.26, sz - d * 0.24, boardRot));
+                roomFurnGroup.add(createClassroomTubeLight(sx + w * 0.24, baseY + 3.26, sz - d * 0.24, boardRot));
+                roomFurnGroup.add(createClassroomTubeLight(sx - w * 0.24, baseY + 3.26, sz + d * 0.24, boardRot));
+                roomFurnGroup.add(createClassroomTubeLight(sx + w * 0.24, baseY + 3.26, sz + d * 0.24, boardRot));
+                roomFurnGroup.add(createClassroomTubeLight(sx, baseY + 3.26, boardZ + rowDir * 0.85, boardRot));
             }
 
             function populateAdminOfficeFurniture(parentGroup, cx, baseY, cz, role) {
@@ -3744,6 +4031,10 @@
                     });
                 }
                 parentGroup.add(createCeilingFan(sx, baseY + 3.25, sz));
+                parentGroup.add(createClassroomTubeLight(sx - 1.6, baseY + 3.26, sz - 1.2, 0));
+                parentGroup.add(createClassroomTubeLight(sx + 1.6, baseY + 3.26, sz - 1.2, 0));
+                parentGroup.add(createClassroomTubeLight(sx - 1.6, baseY + 3.26, sz + 1.4, 0));
+                parentGroup.add(createClassroomTubeLight(sx + 1.6, baseY + 3.26, sz + 1.4, 0));
             }
 
             function populateTraditionalAndGreatHall(parentGroup, tradX, hallX, baseY, cz, wingW, wingD) {
@@ -3789,6 +4080,12 @@
                     });
                 }
                 parentGroup.add(createCeilingFan(sxHall, baseY + 3.25, sz));
+                [-2.2, 2.2].forEach(dx => {
+                    parentGroup.add(createClassroomTubeLight(sxTrad + dx, baseY + 3.26, sz - 1.2, 0));
+                    parentGroup.add(createClassroomTubeLight(sxTrad + dx, baseY + 3.26, sz + 1.4, 0));
+                    parentGroup.add(createClassroomTubeLight(sxHall + dx, baseY + 3.26, sz - 1.4, 0));
+                    parentGroup.add(createClassroomTubeLight(sxHall + dx, baseY + 3.26, sz + 1.4, 0));
+                });
             }
 
             function buildInteriorUStaircase(parentGroup, cfg) {
@@ -4763,6 +5060,41 @@
                     }
                 });
 
+                // Hệ thống bóng đèn ốp trần hành lang Tầng 1 & Tầng 2 (Dãy A, B, C, Hiệu Bộ & Cầu thang)
+                [-17.8, -11.6, -5.4, 0.5, 6.4, 12.6, 18.8].forEach(lx => {
+                    bldgGroup.add(createCorridorCeilingLamp(sc(lx), BASE_Y1 + 3.26, sc(-19.1)));
+                    bldgGroup.add(createCorridorCeilingLamp(sc(lx), BASE_Y2 + 3.26, sc(-19.1)));
+                });
+                [-14.3, -7.9, -1.5, 4.5, 10.5, 16.9, 23.3].forEach(lz => {
+                    bldgGroup.add(createCorridorCeilingLamp(sc(26.5), BASE_Y1 + 3.26, sc(lz)));
+                    bldgGroup.add(createCorridorCeilingLamp(sc(26.5), BASE_Y2 + 3.26, sc(lz)));
+                });
+                [-14.5, -8.6, -2.7, 3.0, 8.7, 14.6, 20.5].forEach(lz => {
+                    bldgGroup.add(createCorridorCeilingLamp(sc(-25.5), BASE_Y1 + 3.26, sc(lz)));
+                    bldgGroup.add(createCorridorCeilingLamp(sc(-25.5), BASE_Y2 + 3.26, sc(lz)));
+                });
+                [-39.3, -35.6, -31.0, -26.3, -22.6].forEach(lx => {
+                    bldgGroup.add(createCorridorCeilingLamp(sc(lx), BASE_Y1 + 3.26, sc(28.0)));
+                    bldgGroup.add(createCorridorCeilingLamp(sc(lx), BASE_Y2 + 3.26, sc(28.0)));
+                });
+
+                // Hệ thống cột đèn cao áp chiếu sáng sân trường, lối đi chính, Hồ cá Koi & Khán đài
+                [
+                    [-8.8, 32.0], [1.2, 32.0],
+                    [-11.5, 22.0], [12.5, 22.0],
+                    [-11.5, 8.5], [12.5, 8.5],
+                    [-11.5, -4.5], [12.5, -4.5],
+                    [15.8, 32.6], [29.6, 32.6],
+                    [-31.0, 23.2], [-18.5, 11.5]
+                ].forEach(([lx, lz]) => {
+                    bldgGroup.add(createCourtyardLampPost(sc(lx), sc(lz), 4.6));
+                });
+
+                // Đèn chiếu sáng trên mái Khán đài Lễ Khai Giảng
+                [-4.2, -1.4, 1.4, 4.2].forEach(dx => {
+                    bldgGroup.add(createCorridorCeilingLamp(sc(0.5 + dx), 5.12, sc(-11.2)));
+                });
+
                 enableShadowRecursive(bldgGroup, true, true);
                 freezeStaticGroup(bldgGroup);
                 ceilingFans.forEach(cf => { cf.matrixAutoUpdate = true; });
@@ -5327,14 +5659,23 @@
                 innerCurbRight.position.set(sc(44.52), 0.07, sc(-15.0));
                 backGroup.add(innerCurbRight);
 
-                [-62.0, -40.0, -18.0, 4.0, 26.0].forEach(lz => {
-                    const lampPole = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.1, 4.4, 8), matIron);
-                    lampPole.position.set(sc(45.1), 2.2, sc(lz));
-                    backGroup.add(lampPole);
+                // Bóng đèn trần trong 6 Lán xe đạp học sinh
+                for (let s = 0; s < 6; s++) {
+                    const sx = sc(-17.5 + s * 7.2);
+                    const sz = sc(-34.2);
+                    backGroup.add(createCorridorCeilingLamp(sx, 2.42, sz));
+                }
 
-                    const bulb = new THREE.Mesh(new THREE.SphereGeometry(0.18, 8, 6), new THREE.MeshBasicMaterial({ color: 0xfef08a }));
-                    bulb.position.set(sc(45.1), 4.45, sc(lz));
-                    backGroup.add(bulb);
+                // 4 Cột đèn pha cao áp ở 4 góc Sân bóng cỏ xanh
+                [
+                    [-8.5, -42.5], [21.5, -42.5],
+                    [-8.5, -62.5], [21.5, -62.5]
+                ].forEach(([fx, fz]) => {
+                    backGroup.add(createCourtyardLampPost(sc(fx), sc(fz), 6.2));
+                });
+
+                [-62.0, -40.0, -18.0, 4.0, 26.0].forEach(lz => {
+                    backGroup.add(createCourtyardLampPost(sc(45.1), sc(lz), 4.4));
                 });
 
                 const rrFloor = new THREE.Mesh(getBoxGeo(sc(rrW), 0.18, sc(rrD)), matFloorTile);
@@ -6367,9 +6708,191 @@
                 btnPerfMode.innerHTML = `${highGraphicsMode ? '✨ Đồ họa Cao' : '⚡ Siêu mượt'} • <span id="fps-counter">60</span> FPS`;
             });
 
+            let realtimeSkySyncEnabled = true;
+
             document.getElementById('btn-sky-mood').addEventListener('click', () => {
+                realtimeSkySyncEnabled = false;
+                const syncBtn = document.getElementById('btn-sync-realtime-sky');
+                if (syncBtn) {
+                    syncBtn.textContent = '🔄 Giờ thực: TẮT';
+                    syncBtn.className = 'px-1.5 py-0.5 rounded bg-slate-800 hover:bg-slate-700 border border-white/15 text-[9px] font-bold text-slate-300 cursor-pointer';
+                }
                 applySkyMood(currentSkyMoodIdx + 1);
-                showToast(`🌤️ Đã chuyển không gian sang chế độ: ${skyMoodConfigs[currentSkyMoodIdx].label}`);
+                showToast(`🌤️ Đã chuyển thủ công sang chế độ: ${skyMoodConfigs[currentSkyMoodIdx].label}`);
+            });
+
+            // =========================================================================
+            // ĐỒNG HỒ & THỜI TIẾT THỜI GIAN THỰC VĨNH BẢO - HẢI PHÒNG + CỘT TẮT/BẬT HUD
+            // =========================================================================
+            const VINH_BAO_LAT = 20.6967;
+            const VINH_BAO_LON = 105.9867;
+
+            function getVietnamTimeParts() {
+                const now = new Date();
+                try {
+                    const fmt = new Intl.DateTimeFormat('vi-VN', {
+                        timeZone: 'Asia/Ho_Chi_Minh',
+                        weekday: 'short',
+                        year: 'numeric',
+                        month: '2-digit',
+                        day: '2-digit',
+                        hour: '2-digit',
+                        minute: '2-digit',
+                        second: '2-digit',
+                        hour12: false
+                    });
+                    const parts = fmt.formatToParts(now);
+                    const map = {};
+                    parts.forEach(p => { map[p.type] = p.value; });
+                    const hourNum = parseInt(map.hour || '7', 10);
+                    return {
+                        timeStr: `${map.hour || '00'}:${map.minute || '00'}:${map.second || '00'}`,
+                        dateStr: `${map.weekday || ''} • ${map.day || '01'}/${map.month || '01'}/${map.year || '2026'}`,
+                        hour: isNaN(hourNum) ? now.getHours() : hourNum
+                    };
+                } catch (e) {
+                    const pad = n => String(n).padStart(2, '0');
+                    return {
+                        timeStr: `${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`,
+                        dateStr: `${pad(now.getDate())}/${pad(now.getMonth() + 1)}/${now.getFullYear()}`,
+                        hour: now.getHours()
+                    };
+                }
+            }
+
+            function syncSkyWithVinhBaoHour(hour) {
+                if (!realtimeSkySyncEnabled) return;
+                let targetIdx = 0; // 05:30 - 16:59 -> Nắng sớm / Ban ngày
+                if (hour >= 17 && hour < 19) {
+                    targetIdx = 1; // 17:00 - 18:59 -> Hoàng hôn
+                } else if (hour >= 19 || hour < 6) {
+                    targetIdx = 2; // 19:00 - 05:59 -> Đêm lung linh (Bật sáng toàn bộ đèn lớp, hành lang & sân trường)
+                }
+                if (currentSkyMoodIdx !== targetIdx) {
+                    applySkyMood(targetIdx);
+                }
+            }
+
+            function updateVinhBaoClockUI() {
+                const t = getVietnamTimeParts();
+                const clockEl = document.getElementById('vb-live-clock');
+                const dateEl = document.getElementById('vb-live-date');
+                if (clockEl) clockEl.textContent = t.timeStr;
+                if (dateEl) dateEl.textContent = t.dateStr;
+                syncSkyWithVinhBaoHour(t.hour);
+            }
+            updateVinhBaoClockUI();
+            setInterval(updateVinhBaoClockUI, 1000);
+
+            function decodeWmoWeather(code, isDay) {
+                const c = Number(code);
+                if (c === 0) return isDay ? '☀️ Trời quang nắng đẹp' : '🌙 Đêm quang đãng';
+                if (c === 1 || c === 2) return isDay ? '⛅ Có mây nhẹ' : '☁️ Đêm ít mây';
+                if (c === 3) return '☁️ Trời nhiều mây';
+                if (c === 45 || c === 48) return '🌫️ Sương mù nhẹ';
+                if (c >= 51 && c <= 57) return '🌦️ Mưa phùn nhẹ';
+                if (c >= 61 && c <= 67) return '🌧️ Mưa rào Vĩnh Bảo';
+                if (c >= 80 && c <= 82) return '🌧️ Mưa rào từng đợt';
+                if (c >= 95) return '⛈️ Dông & mưa rào';
+                return isDay ? '🌤️ Thời tiết mát mẻ' : '🌙 Đêm mát mẻ';
+            }
+
+            async function fetchVinhBaoRealtimeWeather() {
+                const descEl = document.getElementById('vb-weather-desc');
+                const tempEl = document.getElementById('vb-weather-temp');
+                const extraEl = document.getElementById('vb-weather-extra');
+                try {
+                    const url = `https://api.open-meteo.com/v1/forecast?latitude=${VINH_BAO_LAT}&longitude=${VINH_BAO_LON}&current=temperature_2m,relative_humidity_2m,weather_code,wind_speed_10m,is_day&timezone=Asia%2FHo_Chi_Minh`;
+                    const res = await fetch(url);
+                    if (!res.ok) throw new Error('Weather HTTP ' + res.status);
+                    const data = await res.json();
+                    const cur = data && data.current ? data.current : null;
+                    if (!cur) throw new Error('No current weather');
+                    const temp = Math.round(Number(cur.temperature_2m ?? 25));
+                    const hum = Math.round(Number(cur.relative_humidity_2m ?? 78));
+                    const wind = Math.round(Number(cur.wind_speed_10m ?? 9));
+                    const isDay = Number(cur.is_day ?? 1) === 1;
+                    const label = decodeWmoWeather(cur.weather_code ?? 1, isDay);
+
+                    if (descEl) descEl.textContent = label;
+                    if (tempEl) tempEl.textContent = `${temp}°C`;
+                    if (extraEl) extraEl.textContent = `Độ ẩm: ${hum}% • Gió: ${wind} km/h`;
+                } catch (err) {
+                    const t = getVietnamTimeParts();
+                    const isDay = t.hour >= 6 && t.hour < 18;
+                    if (descEl) descEl.textContent = isDay ? '🌤️ Nắng dịu Vĩnh Bảo' : '🌙 Đêm mát Vĩnh Bảo';
+                    if (tempEl) tempEl.textContent = isDay ? '26°C' : '22°C';
+                    if (extraEl) extraEl.textContent = 'Độ ẩm: 78% • Gió nhẹ: 10 km/h';
+                }
+            }
+            fetchVinhBaoRealtimeWeather();
+            setInterval(fetchVinhBaoRealtimeWeather, 5 * 60 * 1000);
+
+            document.getElementById('btn-sync-realtime-sky').addEventListener('click', () => {
+                realtimeSkySyncEnabled = !realtimeSkySyncEnabled;
+                const syncBtn = document.getElementById('btn-sync-realtime-sky');
+                if (realtimeSkySyncEnabled) {
+                    syncBtn.textContent = '🔄 Giờ thực: BẬT';
+                    syncBtn.className = 'px-1.5 py-0.5 rounded bg-sky-500/25 hover:bg-sky-500/40 border border-sky-400/40 text-[9px] font-bold text-sky-200 cursor-pointer';
+                    updateVinhBaoClockUI();
+                    showToast('🕒 Đã đồng bộ bầu trời & đèn điện theo thời gian thực tại Vĩnh Bảo, Hải Phòng!');
+                } else {
+                    syncBtn.textContent = '🔄 Giờ thực: TẮT';
+                    syncBtn.className = 'px-1.5 py-0.5 rounded bg-slate-800 hover:bg-slate-700 border border-white/15 text-[9px] font-bold text-slate-300 cursor-pointer';
+                    showToast('✋ Đã tắt đồng bộ tự động. Bạn có thể bấm nút Bầu trời hoặc Đèn để chỉnh tùy ý!');
+                }
+            });
+
+            // Sự kiện thu gọn / mở rộng Cột Tắt/Bật Map & Tiện ích
+            const btnToggleCol = document.getElementById('btn-toggle-control-column');
+            const colBody = document.getElementById('hud-toggle-column-body');
+            const colArrow = document.getElementById('toggle-col-arrow');
+            btnToggleCol.addEventListener('click', () => {
+                const isHidden = colBody.classList.toggle('hidden');
+                if (colArrow) colArrow.textContent = isHidden ? '◀' : '▼';
+            });
+
+            function bindHudVisibilityToggle(btnId, stateId, targetIds, labelName) {
+                const btn = document.getElementById(btnId);
+                const stateSpan = document.getElementById(stateId);
+                let visible = true;
+                if (!btn) return;
+                btn.addEventListener('click', () => {
+                    visible = !visible;
+                    targetIds.forEach(tid => {
+                        const el = document.getElementById(tid);
+                        if (el) el.classList.toggle('hidden', !visible);
+                    });
+                    if (stateSpan) {
+                        stateSpan.textContent = visible ? 'BẬT' : 'TẮT';
+                        stateSpan.className = visible
+                            ? 'text-[10px] font-extrabold text-emerald-300'
+                            : 'text-[10px] font-extrabold text-rose-300';
+                    }
+                    btn.className = visible
+                        ? 'w-full px-2.5 py-1.5 rounded-xl bg-emerald-600/25 hover:bg-emerald-600/35 border border-emerald-400/40 text-emerald-200 font-bold flex items-center justify-between cursor-pointer'
+                        : 'w-full px-2.5 py-1.5 rounded-xl bg-slate-800/85 hover:bg-slate-700 border border-white/10 text-slate-300 font-semibold flex items-center justify-between cursor-pointer';
+                    showToast(`${visible ? '✅ Đã hiện' : '🙈 Đã ẩn'} ${labelName}`);
+                });
+            }
+
+            bindHudVisibilityToggle('btn-toggle-minimap', 'state-toggle-minimap', ['minimap-wrapper'], 'Bản đồ Radar (Minimap)');
+            bindHudVisibilityToggle('btn-toggle-weather', 'state-toggle-weather', ['vinhbao-weather-widget'], 'Đồng hồ & Thời tiết Vĩnh Bảo');
+            bindHudVisibilityToggle('btn-toggle-top-tools', 'state-toggle-top-tools', ['hud-top-tools-row'], 'Hàng nút chức năng trên');
+            bindHudVisibilityToggle('btn-toggle-bottom-nav', 'state-toggle-bottom-nav', ['hud-bottom-nav'], 'Thanh menu dưới cùng');
+            bindHudVisibilityToggle('btn-toggle-touch-pad', 'state-toggle-touch-pad', ['joystick-zone', 'touch-action-btns'], 'Cụm phím di chuyển ảo');
+
+            document.getElementById('btn-toggle-school-lights').addEventListener('click', () => {
+                if (schoolLightsMode === 'auto') schoolLightsMode = 'on';
+                else if (schoolLightsMode === 'on') schoolLightsMode = 'off';
+                else schoolLightsMode = 'auto';
+                updateSchoolLightsState();
+                const modeLabel = schoolLightsMode === 'on'
+                    ? '💡 Đã BẬT SÁNG toàn bộ bóng đèn lớp học, hành lang & sân trường!'
+                    : (schoolLightsMode === 'off'
+                        ? '🌑 Đã TẮT toàn bộ bóng đèn trường học.'
+                        : '⚡ Chế độ đèn TỰ ĐỘNG (tự bật sáng khi Hoàng hôn / Ban đêm).');
+                showToast(modeLabel);
             });
 
             function computeSafeThirdPersonCam(px, py, pz, yaw, pitch, desiredDist) {
@@ -6694,22 +7217,139 @@
                 } catch (e) {}
             }
 
+            let activeLeaderboardTab = 'missions'; // 'missions' | 'caro' | 'chess'
+
+            function formatDurationSec(sec) {
+                if (!sec || sec <= 0 || !isFinite(sec)) return '--:--';
+                const s = Math.round(sec);
+                const mStr = String(Math.floor(s / 60)).padStart(2, '0');
+                const sStr = String(s % 60).padStart(2, '0');
+                return `${mStr}:${sStr}`;
+            }
+
+            function switchLeaderboardTab(tabName) {
+                activeLeaderboardTab = tabName;
+                const tabs = [
+                    { id: 'tab-lb-missions', key: 'missions' },
+                    { id: 'tab-lb-caro', key: 'caro' },
+                    { id: 'tab-lb-chess', key: 'chess' }
+                ];
+                tabs.forEach(t => {
+                    const btn = document.getElementById(t.id);
+                    if (!btn) return;
+                    btn.className = t.key === activeLeaderboardTab
+                        ? 'py-1.5 px-2 rounded-xl bg-yellow-500 text-slate-950 font-extrabold transition cursor-pointer'
+                        : 'py-1.5 px-2 rounded-xl text-slate-200 hover:bg-white/10 font-bold transition cursor-pointer';
+                });
+                renderLeaderboard();
+            }
+
+            document.getElementById('tab-lb-missions').addEventListener('click', () => switchLeaderboardTab('missions'));
+            document.getElementById('tab-lb-caro').addEventListener('click', () => switchLeaderboardTab('caro'));
+            document.getElementById('tab-lb-chess').addEventListener('click', () => switchLeaderboardTab('chess'));
+
             function renderLeaderboard() {
                 const listEl = document.getElementById('leaderboard-list');
                 if (!listEl) return;
-                const rows = Array.from(leaderboardMap.values()).sort((a, b) => {
-                    if ((b.missionsDone || 0) !== (a.missionsDone || 0)) return (b.missionsDone || 0) - (a.missionsDone || 0);
-                    if ((b.shardsDone || 0) !== (a.shardsDone || 0)) return (b.shardsDone || 0) - (a.shardsDone || 0);
-                    return (a.updatedAt || 0) - (b.updatedAt || 0);
-                });
+                const allEntries = Array.from(leaderboardMap.values());
 
-                if (rows.length === 0) {
+                if (allEntries.length === 0) {
                     listEl.innerHTML = '<div class="p-4 text-center text-slate-400">Chưa có học sinh nào ghi danh trên Bảng Xếp Hạng.</div>';
                     return;
                 }
 
+                let rows = [];
+                if (activeLeaderboardTab === 'caro') {
+                    rows = allEntries.slice().sort((a, b) => {
+                        if ((b.caroWins || 0) !== (a.caroWins || 0)) return (b.caroWins || 0) - (a.caroWins || 0);
+                        const aBest = a.bestCaroTimeSec || 999999;
+                        const bBest = b.bestCaroTimeSec || 999999;
+                        if (aBest !== bBest) return aBest - bBest;
+                        return (a.updatedAt || 0) - (b.updatedAt || 0);
+                    });
+                } else if (activeLeaderboardTab === 'chess') {
+                    rows = allEntries.slice().sort((a, b) => {
+                        if ((b.chessWins || 0) !== (a.chessWins || 0)) return (b.chessWins || 0) - (a.chessWins || 0);
+                        const aBest = a.bestChessTimeSec || 999999;
+                        const bBest = b.bestChessTimeSec || 999999;
+                        if (aBest !== bBest) return aBest - bBest;
+                        return (a.updatedAt || 0) - (b.updatedAt || 0);
+                    });
+                } else {
+                    rows = allEntries.slice().sort((a, b) => {
+                        if ((b.missionsDone || 0) !== (a.missionsDone || 0)) return (b.missionsDone || 0) - (a.missionsDone || 0);
+                        if ((b.shardsDone || 0) !== (a.shardsDone || 0)) return (b.shardsDone || 0) - (a.shardsDone || 0);
+                        return (a.updatedAt || 0) - (b.updatedAt || 0);
+                    });
+                }
+
                 listEl.innerHTML = rows.map((item, idx) => {
                     const medal = idx === 0 ? '🥇' : (idx === 1 ? '🥈' : (idx === 2 ? '🥉' : `#${idx + 1}`));
+                    const cheatPill = (item.cheatWarnings || 0) > 0
+                        ? `<span class="px-1.5 py-0.5 rounded bg-red-600/30 border border-red-400 text-red-200 text-[9px] font-bold">⚠️ Cảnh cáo: ${item.cheatWarnings}</span>`
+                        : '';
+                    const adminDelBtn = isAdminUser
+                        ? `<button onclick="window.adminDeleteLeaderboardEntry('${escapeHtml(item.id)}')" class="px-2 py-1 rounded-lg bg-red-600/85 hover:bg-red-500 text-white text-[10px] font-bold cursor-pointer">🗑️ Xóa</button>`
+                        : '';
+
+                    if (activeLeaderboardTab === 'caro') {
+                        const wins = item.caroWins || 0;
+                        const bestStr = formatDurationSec(item.bestCaroTimeSec);
+                        const lastStr = formatDurationSec(item.lastCaroTimeSec);
+                        const titleBadge = wins >= 10
+                            ? '<span class="px-1.5 py-0.5 rounded bg-amber-500 text-slate-950 text-[10px] font-black">👑 Kỳ Vương Caro</span>'
+                            : (wins >= 3 ? '<span class="px-1.5 py-0.5 rounded bg-sky-500/25 border border-sky-400 text-sky-200 text-[10px] font-bold">⚡ Cao Thủ Caro</span>' : '');
+                        return `<div class="flex items-center justify-between gap-2 p-2.5 rounded-2xl ${idx === 0 && wins > 0 ? 'bg-yellow-500/15 border border-yellow-400/50' : 'bg-white/5 border border-white/10'}">
+                            <div class="flex items-center gap-2.5 min-w-0">
+                                <span class="text-sm font-black text-yellow-300 w-7 text-center shrink-0">${medal}</span>
+                                <div class="min-w-0">
+                                    <div class="flex flex-wrap items-center gap-1.5">
+                                        <span class="font-bold text-white truncate">${escapeHtml(item.name)}</span>
+                                        ${titleBadge}
+                                        ${cheatPill}
+                                    </div>
+                                    <div class="text-[10px] text-slate-400 truncate">Lớp ${escapeHtml(item.className || '')} • Hiệp gần nhất: ${lastStr}</div>
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-2 shrink-0">
+                                <div class="text-right">
+                                    <div class="text-xs font-extrabold text-amber-300">❌⭕ ${wins} trận thắng</div>
+                                    <div class="text-[10px] text-emerald-300">⏱️ Nhanh nhất: ${bestStr}</div>
+                                </div>
+                                ${adminDelBtn}
+                            </div>
+                        </div>`;
+                    }
+
+                    if (activeLeaderboardTab === 'chess') {
+                        const wins = item.chessWins || 0;
+                        const bestStr = formatDurationSec(item.bestChessTimeSec);
+                        const lastStr = formatDurationSec(item.lastChessTimeSec);
+                        const titleBadge = wins >= 10
+                            ? '<span class="px-1.5 py-0.5 rounded bg-amber-500 text-slate-950 text-[10px] font-black">👑 Đại Kiện Tướng</span>'
+                            : (wins >= 3 ? '<span class="px-1.5 py-0.5 rounded bg-indigo-500/30 border border-indigo-400 text-indigo-200 text-[10px] font-bold">♟️ Kỳ Thủ Cờ Vua</span>' : '');
+                        return `<div class="flex items-center justify-between gap-2 p-2.5 rounded-2xl ${idx === 0 && wins > 0 ? 'bg-yellow-500/15 border border-yellow-400/50' : 'bg-white/5 border border-white/10'}">
+                            <div class="flex items-center gap-2.5 min-w-0">
+                                <span class="text-sm font-black text-yellow-300 w-7 text-center shrink-0">${medal}</span>
+                                <div class="min-w-0">
+                                    <div class="flex flex-wrap items-center gap-1.5">
+                                        <span class="font-bold text-white truncate">${escapeHtml(item.name)}</span>
+                                        ${titleBadge}
+                                        ${cheatPill}
+                                    </div>
+                                    <div class="text-[10px] text-slate-400 truncate">Lớp ${escapeHtml(item.className || '')} • Hiệp gần nhất: ${lastStr}</div>
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-2 shrink-0">
+                                <div class="text-right">
+                                    <div class="text-xs font-extrabold text-amber-300">♟️ ${wins} trận thắng</div>
+                                    <div class="text-[10px] text-emerald-300">⏱️ Nhanh nhất: ${bestStr}</div>
+                                </div>
+                                ${adminDelBtn}
+                            </div>
+                        </div>`;
+                    }
+
                     const rankBadge = item.studentRank === 'SIÊU BÁ KHÍ'
                         ? '<span class="px-1.5 py-0.5 rounded bg-red-600 border border-yellow-300 text-yellow-200 text-[10px] font-black">🔥 SIÊU BÁ KHÍ</span>'
                         : (item.studentRank === 'Đoàn Viên Ưu Tú'
@@ -6717,9 +7357,6 @@
                             : (item.studentRank === 'Học Sinh Ngoan'
                                 ? '<span class="px-1.5 py-0.5 rounded bg-emerald-500/25 border border-emerald-400 text-emerald-300 text-[10px] font-bold">🌟 Học Sinh Ngoan</span>'
                                 : '<span class="px-1.5 py-0.5 rounded bg-white/10 text-slate-300 text-[10px]">🎒 Học sinh</span>'));
-                    const adminDelBtn = isAdminUser
-                        ? `<button onclick="window.adminDeleteLeaderboardEntry('${escapeHtml(item.id)}')" class="px-2 py-1 rounded-lg bg-red-600/85 hover:bg-red-500 text-white text-[10px] font-bold cursor-pointer">🗑️ Xóa</button>`
-                        : '';
                     return `<div class="flex items-center justify-between gap-2 p-2.5 rounded-2xl ${idx === 0 ? 'bg-yellow-500/15 border border-yellow-400/50' : 'bg-white/5 border border-white/10'}">
                         <div class="flex items-center gap-2.5 min-w-0">
                             <span class="text-sm font-black text-yellow-300 w-7 text-center shrink-0">${medal}</span>
@@ -6727,6 +7364,7 @@
                                 <div class="flex flex-wrap items-center gap-1.5">
                                     <span class="font-bold text-white truncate">${escapeHtml(item.name)}</span>
                                     ${rankBadge}
+                                    ${cheatPill}
                                 </div>
                                 <div class="text-[10px] text-slate-400 truncate">Lớp ${escapeHtml(item.className || '')} • ${escapeHtml(item.cohort || '')}</div>
                             </div>
@@ -6734,7 +7372,7 @@
                         <div class="flex items-center gap-2 shrink-0">
                             <div class="text-right">
                                 <div class="text-xs font-extrabold text-amber-300">${item.missionsDone || 0}/12 NV</div>
-                                <div class="text-[10px] text-sky-300">📜 ${item.shardsDone || 0}/12 mảnh</div>
+                                <div class="text-[10px] text-sky-300">📜 ${item.shardsDone || 0}/12 mảnh • 🎮 ${(item.caroWins || 0) + (item.chessWins || 0)} thắng</div>
                             </div>
                             ${adminDelBtn}
                         </div>
@@ -6749,13 +7387,28 @@
                     deletedLeaderboardIds.delete(entry.id);
                 }
                 const prev = leaderboardMap.get(entry.id);
+                const prevBestCaro = prev?.bestCaroTimeSec || 0;
+                const newBestCaro = entry.bestCaroTimeSec || 0;
+                const mergedBestCaro = (prevBestCaro > 0 && newBestCaro > 0) ? Math.min(prevBestCaro, newBestCaro) : (prevBestCaro || newBestCaro || 0);
+
+                const prevBestChess = prev?.bestChessTimeSec || 0;
+                const newBestChess = entry.bestChessTimeSec || 0;
+                const mergedBestChess = (prevBestChess > 0 && newBestChess > 0) ? Math.min(prevBestChess, newBestChess) : (prevBestChess || newBestChess || 0);
+
                 const merged = {
                     id: entry.id,
                     name: entry.name,
-                    className: entry.className || '12A1',
-                    cohort: entry.cohort || 'Học sinh đang học',
+                    className: entry.className || prev?.className || '12A1',
+                    cohort: entry.cohort || prev?.cohort || 'Học sinh đang học',
                     missionsDone: Math.max(prev?.missionsDone || 0, entry.missionsDone || 0),
                     shardsDone: Math.max(prev?.shardsDone || 0, entry.shardsDone || 0),
+                    caroWins: Math.max(prev?.caroWins || 0, entry.caroWins || 0),
+                    chessWins: Math.max(prev?.chessWins || 0, entry.chessWins || 0),
+                    bestCaroTimeSec: mergedBestCaro,
+                    bestChessTimeSec: mergedBestChess,
+                    lastCaroTimeSec: entry.lastCaroTimeSec || prev?.lastCaroTimeSec || 0,
+                    lastChessTimeSec: entry.lastChessTimeSec || prev?.lastChessTimeSec || 0,
+                    cheatWarnings: Math.max(prev?.cheatWarnings || 0, entry.cheatWarnings || 0),
                     studentRank: entry.studentRank || prev?.studentRank || '',
                     updatedAt: entry.updatedAt || Date.now()
                 };
@@ -6777,6 +7430,7 @@
 
             function syncSelfToLeaderboard() {
                 if (!playerProfile.loggedIn) return;
+                const prev = leaderboardMap.get(playerProfile.id);
                 const missionsDone = studentMissions.filter(m => m.done).length;
                 const shardsDone = memoryShardObjs.filter(s => s.collected).length;
                 upsertLeaderboardEntry({
@@ -6786,6 +7440,13 @@
                     cohort: playerProfile.cohort,
                     missionsDone,
                     shardsDone,
+                    caroWins: prev?.caroWins || 0,
+                    chessWins: prev?.chessWins || 0,
+                    bestCaroTimeSec: prev?.bestCaroTimeSec || 0,
+                    bestChessTimeSec: prev?.bestChessTimeSec || 0,
+                    lastCaroTimeSec: prev?.lastCaroTimeSec || 0,
+                    lastChessTimeSec: prev?.lastChessTimeSec || 0,
+                    cheatWarnings: prev?.cheatWarnings || 0,
                     studentRank: playerProfile.studentRank,
                     updatedAt: Date.now()
                 }, true);
@@ -6967,6 +7628,17 @@
                 turn: 'X',        // Caro: 'X' | 'O'; Chess: 'w' | 'b'
                 gameOver: false,
                 winnerText: '',
+                // Quản lý hiệp đấu, đồng hồ & chống gian lận cố ý thua
+                roundIndex: 1,
+                roundStartTimeMs: 0,
+                roundElapsedSec: 0,
+                turnStartTimeMs: 0,
+                turnLimitSec: 30,
+                moveCount: 0,
+                missedBlockCount: 0,
+                blunderCount: 0,
+                fastLossStreak: 0,
+                roundHistory: [],
                 // Caro 15x15
                 caroSize: 15,
                 caroBoard: [],
@@ -6978,6 +7650,242 @@
                 chessLegalMoves: [],
                 chessLastMove: null
             };
+
+            function resetRoundTracking() {
+                const nowMs = Date.now();
+                schoolGameState.roundStartTimeMs = nowMs;
+                schoolGameState.roundElapsedSec = 0;
+                schoolGameState.turnStartTimeMs = nowMs;
+                schoolGameState.moveCount = 0;
+                schoolGameState.missedBlockCount = 0;
+                schoolGameState.blunderCount = 0;
+                updateRoundTimerUI();
+            }
+
+            function updateRoundTimerUI() {
+                const roundNumEl = document.getElementById('game-round-num');
+                const roundTimerEl = document.getElementById('game-round-timer');
+                const turnTimerEl = document.getElementById('game-turn-timer');
+                const moveCountEl = document.getElementById('game-move-counter');
+
+                if (roundNumEl) roundNumEl.textContent = `#${schoolGameState.roundIndex}`;
+                if (moveCountEl) moveCountEl.textContent = `${schoolGameState.moveCount}`;
+
+                if (!schoolGameState.gameOver && schoolGameState.roundStartTimeMs > 0) {
+                    const nowMs = Date.now();
+                    schoolGameState.roundElapsedSec = Math.max(0, Math.floor((nowMs - schoolGameState.roundStartTimeMs) / 1000));
+                    const turnElapsed = Math.max(0, Math.floor((nowMs - schoolGameState.turnStartTimeMs) / 1000));
+                    const remTurn = Math.max(0, schoolGameState.turnLimitSec - turnElapsed);
+                    if (turnTimerEl) {
+                        turnTimerEl.textContent = `${remTurn}s`;
+                        turnTimerEl.className = remTurn <= 8
+                            ? 'font-mono font-extrabold text-red-400 animate-pulse'
+                            : 'font-mono font-extrabold text-amber-300';
+                    }
+                } else if (turnTimerEl) {
+                    turnTimerEl.textContent = '--';
+                    turnTimerEl.className = 'font-mono font-extrabold text-slate-400';
+                }
+
+                if (roundTimerEl) {
+                    roundTimerEl.textContent = formatDurationSec(schoolGameState.roundElapsedSec || 0.1).replace('--:--', '00:00');
+                }
+            }
+
+            setInterval(() => {
+                const panelEl = document.getElementById('panel-games');
+                if (panelEl && !panelEl.classList.contains('hidden')) {
+                    updateRoundTimerUI();
+                }
+            }, 500);
+
+            function triggerAntiCheatWarning(reasonText, broadcastToPartner = true) {
+                const banner = document.getElementById('game-anticheat-warning-banner');
+                const textEl = document.getElementById('game-anticheat-warning-text');
+                const pillEl = document.getElementById('game-fairplay-pill');
+                if (banner && textEl) {
+                    textEl.textContent = reasonText;
+                    banner.classList.remove('hidden');
+                }
+                if (pillEl) {
+                    pillEl.textContent = '🚨 Phát hiện nghi vấn cố ý thua!';
+                    pillEl.className = 'text-[10px] text-red-400 font-extrabold animate-pulse';
+                }
+                showToast(`🚨 CẢNH BÁO GIAN LẬN: ${reasonText}`);
+
+                // Ghi nhận số lần cảnh báo vào BXH
+                const prev = leaderboardMap.get(playerProfile.id);
+                upsertLeaderboardEntry({
+                    id: playerProfile.id,
+                    name: playerProfile.name,
+                    className: playerProfile.className,
+                    cohort: playerProfile.cohort,
+                    missionsDone: studentMissions.filter(m => m.done).length,
+                    shardsDone: memoryShardObjs.filter(s => s.collected).length,
+                    cheatWarnings: (prev?.cheatWarnings || 0) + 1,
+                    updatedAt: Date.now()
+                }, true);
+
+                if (broadcastToPartner && schoolGameState.mode === 'pvp' && schoolGameState.partnerId) {
+                    sendGameSignal(schoolGameState.partnerId, {
+                        action: 'anticheat_alert',
+                        reason: reasonText
+                    });
+                }
+            }
+
+            document.getElementById('btn-close-anticheat-banner').addEventListener('click', () => {
+                document.getElementById('game-anticheat-warning-banner').classList.add('hidden');
+            });
+
+            function renderRoundHistoryUI() {
+                const listEl = document.getElementById('game-round-history-list');
+                if (!listEl) return;
+                if (schoolGameState.roundHistory.length === 0) {
+                    listEl.innerHTML = '<div>Chưa có hiệp đấu nào hoàn tất. Hãy đánh ván đầu tiên!</div>';
+                    return;
+                }
+                listEl.innerHTML = schoolGameState.roundHistory.slice(-6).reverse().map(h => {
+                    const badge = h.flaggedCheat
+                        ? '<span class="text-red-400 font-extrabold">🚨 Hủy điểm (Cố ý thua)</span>'
+                        : `<span class="${h.iWon ? 'text-emerald-300' : (h.isDraw ? 'text-sky-300' : 'text-amber-300')} font-bold">${escapeHtml(h.outcomeLabel)}</span>`;
+                    return `<div class="flex items-center justify-between gap-2 py-0.5 border-b border-white/5">
+                        <span>Hiệp #${h.roundIdx} (${h.gameType === 'caro' ? 'Caro' : 'Cờ Vua'}) • ${badge}</span>
+                        <span class="font-mono text-sky-200">⏱️ ${formatDurationSec(Math.max(1, h.durationSec))} (${h.moves} nước)</span>
+                    </div>`;
+                }).join('');
+            }
+
+            // Kiểm tra xem đối thủ có đang có chuỗi 3 mở hoặc 4 quân nguy hiểm mà người chơi cố tình không chặn không
+            function checkCaroMissedUrgentBlock(board, chosenR, chosenC, mySym) {
+                const N = schoolGameState.caroSize;
+                const oppSym = mySym === 'X' ? 'O' : 'X';
+                const dirs = [[0, 1], [1, 0], [1, 1], [1, -1]];
+                let urgentBlockCells = [];
+
+                for (let r = 0; r < N; r++) {
+                    for (let c = 0; c < N; c++) {
+                        if (board[r][c] !== '') continue;
+                        for (let d = 0; d < dirs.length; d++) {
+                            const [dr, dc] = dirs[d];
+                            let cnt = 1, openEnds = 0;
+                            let s1 = 1;
+                            while (r + dr * s1 >= 0 && r + dr * s1 < N && c + dc * s1 >= 0 && c + dc * s1 < N && board[r + dr * s1][c + dc * s1] === oppSym) { cnt++; s1++; }
+                            if (r + dr * s1 >= 0 && r + dr * s1 < N && c + dc * s1 >= 0 && c + dc * s1 < N && board[r + dr * s1][c + dc * s1] === '') openEnds++;
+                            let s2 = 1;
+                            while (r - dr * s2 >= 0 && r - dr * s2 < N && c - dc * s2 >= 0 && c - dc * s2 < N && board[r - dr * s2][c - dc * s2] === oppSym) { cnt++; s2++; }
+                            if (r - dr * s2 >= 0 && r - dr * s2 < N && c - dc * s2 >= 0 && c - dc * s2 < N && board[r - dr * s2][c - dc * s2] === '') openEnds++;
+
+                            if (cnt >= 4 || (cnt === 3 && openEnds === 2)) {
+                                urgentBlockCells.push({ r, c });
+                            }
+                        }
+                    }
+                }
+                if (urgentBlockCells.length === 0) return false;
+                // Nếu nước vừa đánh không nằm gần bất kỳ ô chặn khẩn cấp nào (cách > 2 ô)
+                const blockedOrNear = urgentBlockCells.some(u => Math.abs(u.r - chosenR) <= 1 && Math.abs(u.c - chosenC) <= 1);
+                return !blockedOrNear;
+            }
+
+            function finalizeCompletedRound({ gameType, iWon, isDraw = false, resignedEarly = false }) {
+                const nowMs = Date.now();
+                const durationSec = Math.max(1, Math.round((nowMs - (schoolGameState.roundStartTimeMs || nowMs)) / 1000));
+                schoolGameState.roundElapsedSec = durationSec;
+                const moves = schoolGameState.moveCount;
+                let flaggedCheat = false;
+                let cheatReason = '';
+
+                if (!isDraw) {
+                    if (resignedEarly && (durationSec < 20 || moves < 6)) {
+                        flaggedCheat = true;
+                        cheatReason = `Xin thua quá sớm (chỉ sau ${durationSec} giây / ${moves} nước đi). Hệ thống hủy kết quả hiệp đấu để chống dàn xếp bơm điểm BXH!`;
+                    } else if (gameType === 'caro' && (moves <= 9 || durationSec < 10 || schoolGameState.missedBlockCount >= 2)) {
+                        flaggedCheat = true;
+                        cheatReason = `Phát hiện dấu hiệu cố ý nhường thắng Cờ Caro (${schoolGameState.missedBlockCount >= 2 ? 'bỏ qua không chặn chuỗi 3-4 quân nguy hiểm của đối phương' : `hiệp đấu kết thúc bất thường chỉ sau ${moves} nước / ${durationSec}s`}). Không cộng điểm BXH!`;
+                    } else if (gameType === 'chess' && (moves <= 8 || durationSec < 12 || schoolGameState.blunderCount >= 2)) {
+                        flaggedCheat = true;
+                        cheatReason = `Phát hiện dấu hiệu cố ý thua nhanh Cờ Vua (${schoolGameState.blunderCount >= 2 ? 'cố tình thí quân chủ lực Hậu/Xe liên tiếp' : `chiếu hết bất thường chỉ sau ${moves} nước / ${durationSec}s`}). Không cộng điểm BXH!`;
+                    }
+                }
+
+                if (!iWon && !isDraw && (durationSec < 18 || moves <= 10)) {
+                    schoolGameState.fastLossStreak++;
+                    if (schoolGameState.fastLossStreak >= 2 && !flaggedCheat) {
+                        flaggedCheat = true;
+                        cheatReason = `Bạn đã để thua nhanh liên tiếp ${schoolGameState.fastLossStreak} hiệp đấu. Hệ thống cảnh báo hành vi cố ý thua để nhường điểm!`;
+                    }
+                } else if (iWon) {
+                    schoolGameState.fastLossStreak = 0;
+                }
+
+                if (flaggedCheat) {
+                    triggerAntiCheatWarning(cheatReason, true);
+                } else {
+                    const pillEl = document.getElementById('game-fairplay-pill');
+                    if (pillEl) {
+                        pillEl.textContent = '🛡️ Hiệp đấu hợp lệ (Fair-Play)';
+                        pillEl.className = 'text-[10px] text-emerald-300 font-extrabold';
+                    }
+                    if (iWon) {
+                        schoolGameState.myScore++;
+                        const prev = leaderboardMap.get(playerProfile.id);
+                        const missionsDone = studentMissions.filter(m => m.done).length;
+                        const shardsDone = memoryShardObjs.filter(s => s.collected).length;
+                        if (gameType === 'caro') {
+                            const prevBest = prev?.bestCaroTimeSec || 0;
+                            const bestCaro = prevBest > 0 ? Math.min(prevBest, durationSec) : durationSec;
+                            upsertLeaderboardEntry({
+                                id: playerProfile.id,
+                                name: playerProfile.name,
+                                className: playerProfile.className,
+                                cohort: playerProfile.cohort,
+                                missionsDone,
+                                shardsDone,
+                                caroWins: (prev?.caroWins || 0) + 1,
+                                chessWins: prev?.chessWins || 0,
+                                bestCaroTimeSec: bestCaro,
+                                lastCaroTimeSec: durationSec,
+                                updatedAt: Date.now()
+                            }, true);
+                        } else {
+                            const prevBest = prev?.bestChessTimeSec || 0;
+                            const bestChess = prevBest > 0 ? Math.min(prevBest, durationSec) : durationSec;
+                            upsertLeaderboardEntry({
+                                id: playerProfile.id,
+                                name: playerProfile.name,
+                                className: playerProfile.className,
+                                cohort: playerProfile.cohort,
+                                missionsDone,
+                                shardsDone,
+                                caroWins: prev?.caroWins || 0,
+                                chessWins: (prev?.chessWins || 0) + 1,
+                                bestChessTimeSec: bestChess,
+                                lastChessTimeSec: durationSec,
+                                updatedAt: Date.now()
+                            }, true);
+                        }
+                    } else if (!isDraw) {
+                        schoolGameState.oppScore++;
+                    }
+                }
+
+                const outcomeLabel = isDraw ? 'Hòa' : (iWon ? 'Thắng' : 'Thua');
+                schoolGameState.roundHistory.push({
+                    roundIdx: schoolGameState.roundIndex,
+                    gameType,
+                    durationSec,
+                    moves,
+                    iWon,
+                    isDraw,
+                    flaggedCheat,
+                    outcomeLabel
+                });
+                schoolGameState.roundIndex++;
+                renderRoundHistoryUI();
+                updateRoundTimerUI();
+                return { durationSec, moves, flaggedCheat };
+            }
 
             function refreshGameFriendSelect() {
                 const sel = document.getElementById('select-game-friend');
@@ -7002,6 +7910,7 @@
                 if (schoolGameState.mode === 'ai') {
                     schoolGameState.mySide = 'X';
                 }
+                resetRoundTracking();
                 updateGameStatusUI();
                 drawActiveGameBoard();
             }
@@ -7027,6 +7936,7 @@
                 if (schoolGameState.mode === 'ai') {
                     schoolGameState.mySide = 'w';
                 }
+                resetRoundTracking();
                 updateGameStatusUI();
                 drawActiveGameBoard();
             }
@@ -7169,32 +8079,43 @@
                 if (schoolGameState.gameOver || r < 0 || r >= N || c < 0 || c >= N) return false;
                 if (schoolGameState.caroBoard[r][c] !== '') return false;
 
+                // Kiểm tra trước khi đặt quân: nếu người chơi cố tình không chặn chuỗi 3-4 quân nguy hiểm của đối phương
+                if (sym === schoolGameState.mySide && checkCaroMissedUrgentBlock(schoolGameState.caroBoard, r, c, sym)) {
+                    schoolGameState.missedBlockCount++;
+                }
+
                 schoolGameState.caroBoard[r][c] = sym;
                 schoolGameState.caroLastMove = { r, c };
+                schoolGameState.moveCount++;
+                schoolGameState.turnStartTimeMs = Date.now();
 
                 const winLine = checkCaroWinner(schoolGameState.caroBoard, r, c, sym);
                 if (winLine) {
                     schoolGameState.caroWinLine = winLine;
                     schoolGameState.gameOver = true;
                     const iWon = sym === schoolGameState.mySide;
-                    if (iWon) {
-                        schoolGameState.myScore++;
-                        schoolGameState.winnerText = '🏆 CHÚC MỪNG! BẠN ĐÃ CHIẾN THẮNG VÁN CỜ CARO!';
-                        showToast('🎉 Tuyệt vời! Bạn đã nối đủ 5 quân và thắng ván Cờ Caro!');
+                    const res = finalizeCompletedRound({ gameType: 'caro', iWon, isDraw: false, resignedEarly: false });
+                    const timeTag = ` (⏱️ ${formatDurationSec(res.durationSec)} • ${res.moves} nước)`;
+                    if (res.flaggedCheat) {
+                        schoolGameState.winnerText = `🚨 HỦY KẾT QUẢ HIỆP ĐẤU DO NGHI VẤN CỐ Ý THUA!${timeTag}`;
+                    } else if (iWon) {
+                        schoolGameState.winnerText = `🏆 BẠN THẮNG CỜ CARO!${timeTag}`;
+                        showToast(`🎉 Bạn đã thắng ván Cờ Caro trong ${formatDurationSec(res.durationSec)} (${res.moves} nước) và được ghi nhận lên BXH!`);
                     } else {
-                        schoolGameState.oppScore++;
                         const oppName = schoolGameState.mode === 'ai' ? 'Máy AI' : schoolGameState.partnerName;
-                        schoolGameState.winnerText = `🏳️ ${oppName} đã nối đủ 5 quân và thắng ván này!`;
+                        schoolGameState.winnerText = `🏳️ ${oppName} thắng ván này!${timeTag}`;
                     }
                 } else {
                     const isFull = schoolGameState.caroBoard.every(row => row.every(cell => cell !== ''));
                     if (isFull) {
                         schoolGameState.gameOver = true;
-                        schoolGameState.winnerText = '🤝 VÁN CỜ HÒA (Bàn cờ đã kín)!';
+                        const res = finalizeCompletedRound({ gameType: 'caro', iWon: false, isDraw: true, resignedEarly: false });
+                        schoolGameState.winnerText = `🤝 VÁN CỜ HÒA (⏱️ ${formatDurationSec(res.durationSec)})!`;
                     } else {
                         schoolGameState.turn = sym === 'X' ? 'O' : 'X';
                     }
                 }
+                updateRoundTimerUI();
 
                 updateGameStatusUI();
                 drawActiveGameBoard();
@@ -7399,6 +8320,7 @@
                 if (!movingPiece) return false;
                 const color = movingPiece[0];
 
+                const capturedTarget = b[toR][toC];
                 b[toR][toC] = movingPiece;
                 b[fromR][fromC] = '';
                 if (b[toR][toC] === 'wP' && toR === 0) b[toR][toC] = 'wQ';
@@ -7407,28 +8329,42 @@
                 schoolGameState.chessSelected = null;
                 schoolGameState.chessLegalMoves = [];
                 schoolGameState.chessLastMove = { fromR, fromC, toR, toC };
+                schoolGameState.moveCount++;
+                schoolGameState.turnStartTimeMs = Date.now();
 
                 const nextColor = color === 'w' ? 'b' : 'w';
                 schoolGameState.turn = nextColor;
+
+                // Phát hiện nếu người chơi cố tình đưa Hậu hoặc Xe vào ô bị ăn không (không ăn quân tương xứng)
+                if (color === schoolGameState.mySide && (movingPiece[1] === 'Q' || movingPiece[1] === 'R') && !capturedTarget) {
+                    const oppReplies = getAllLegalChessMoves(b, nextColor);
+                    if (oppReplies.some(rm => rm.toR === toR && rm.toC === toC)) {
+                        schoolGameState.blunderCount++;
+                    }
+                }
 
                 const nextLegalMoves = getAllLegalChessMoves(b, nextColor);
                 if (nextLegalMoves.length === 0) {
                     schoolGameState.gameOver = true;
                     if (isChessKingInCheck(b, nextColor)) {
                         const iWon = color === schoolGameState.mySide;
-                        if (iWon) {
-                            schoolGameState.myScore++;
-                            schoolGameState.winnerText = '🏆 CHIẾU HẾT! BẠN ĐÃ CHIẾN THẮNG VÁN CỜ VUA!';
-                            showToast('♟️ Chiếu hết! Chúc mừng bạn đã thắng ván Cờ Vua!');
+                        const res = finalizeCompletedRound({ gameType: 'chess', iWon, isDraw: false, resignedEarly: false });
+                        const timeTag = ` (⏱️ ${formatDurationSec(res.durationSec)} • ${res.moves} nước)`;
+                        if (res.flaggedCheat) {
+                            schoolGameState.winnerText = `🚨 HỦY KẾT QUẢ HIỆP ĐẤU DO NGHI VẤN CỐ Ý THUA!${timeTag}`;
+                        } else if (iWon) {
+                            schoolGameState.winnerText = `🏆 CHIẾU HẾT! BẠN THẮNG CỜ VUA!${timeTag}`;
+                            showToast(`♟️ Chiếu hết! Bạn thắng ván Cờ Vua trong ${formatDurationSec(res.durationSec)} (${res.moves} nước) và được ghi lên BXH!`);
                         } else {
-                            schoolGameState.oppScore++;
                             const oppName = schoolGameState.mode === 'ai' ? 'Máy AI' : schoolGameState.partnerName;
-                            schoolGameState.winnerText = `🏳️ CHIẾU HẾT! ${oppName} đã thắng ván Cờ Vua này!`;
+                            schoolGameState.winnerText = `🏳️ CHIẾU HẾT! ${oppName} thắng ván này!${timeTag}`;
                         }
                     } else {
-                        schoolGameState.winnerText = '🤝 HÒA CỜ (Hết nước đi hợp lệ - Stalemate)!';
+                        const res = finalizeCompletedRound({ gameType: 'chess', iWon: false, isDraw: true, resignedEarly: false });
+                        schoolGameState.winnerText = `🤝 HÒA CỜ (⏱️ ${formatDurationSec(res.durationSec)})!`;
                     }
                 }
+                updateRoundTimerUI();
 
                 updateGameStatusUI();
                 drawActiveGameBoard();
@@ -7677,6 +8613,22 @@
                 } else if (msg.action === 'rematch' && schoolGameState.partnerId === msg.fromId) {
                     resetActiveGame();
                     showToast(`🔄 ${schoolGameState.partnerName} đã bắt đầu ván mới!`);
+                } else if (msg.action === 'resign' && schoolGameState.partnerId === msg.fromId) {
+                    schoolGameState.gameOver = true;
+                    const res = finalizeCompletedRound({
+                        gameType: schoolGameState.gameType,
+                        iWon: true,
+                        isDraw: false,
+                        resignedEarly: Boolean(msg.resignedEarly)
+                    });
+                    if (res.flaggedCheat) {
+                        schoolGameState.winnerText = `🚨 Đối thủ xin thua quá sớm (${res.durationSec}s) — Không tính điểm BXH!`;
+                    } else {
+                        schoolGameState.winnerText = `🏆 ${schoolGameState.partnerName} đã xin thua! Bạn thắng hiệp này (⏱️ ${formatDurationSec(res.durationSec)})!`;
+                    }
+                    updateGameStatusUI();
+                } else if (msg.action === 'anticheat_alert') {
+                    triggerAntiCheatWarning(msg.reason || 'Hệ thống phát hiện dấu hiệu cố ý thua trong ván đấu!', false);
                 } else if (msg.action === 'leave' && schoolGameState.partnerId === msg.fromId) {
                     showToast(`👋 ${schoolGameState.partnerName} đã rời bàn cờ.`);
                     schoolGameState.partnerId = '';
@@ -7771,6 +8723,43 @@
             document.getElementById('btn-game-new-ai').addEventListener('click', () => {
                 resetActiveGame();
                 showToast('🔄 Đã tạo ván cờ mới với Máy AI!');
+            });
+
+            document.getElementById('btn-game-resign').addEventListener('click', () => {
+                if (schoolGameState.gameOver) {
+                    showToast('ℹ️ Hiệp đấu hiện tại đã kết thúc. Hãy bấm "Ván mới" để chơi hiệp tiếp theo!');
+                    return;
+                }
+                const nowMs = Date.now();
+                const elapsedSec = Math.max(1, Math.round((nowMs - (schoolGameState.roundStartTimeMs || nowMs)) / 1000));
+                const isEarlyThrow = elapsedSec < 20 || schoolGameState.moveCount < 6;
+                schoolGameState.gameOver = true;
+
+                const res = finalizeCompletedRound({
+                    gameType: schoolGameState.gameType,
+                    iWon: false,
+                    isDraw: false,
+                    resignedEarly: isEarlyThrow
+                });
+
+                if (schoolGameState.mode === 'pvp' && schoolGameState.partnerId) {
+                    sendGameSignal(schoolGameState.partnerId, {
+                        action: 'resign',
+                        resignedEarly: isEarlyThrow
+                    });
+                }
+
+                schoolGameState.winnerText = res.flaggedCheat
+                    ? `🚨 CẢNH BÁO: Xin thua quá sớm (${res.durationSec}s / ${res.moves} nước) — Nghi vấn cố ý thua!`
+                    : `🏳️ Bạn đã xin thua hiệp này (⏱️ ${formatDurationSec(res.durationSec)} • ${res.moves} nước).`;
+                updateGameStatusUI();
+            });
+
+            document.getElementById('btn-open-chess-caro-lb').addEventListener('click', () => {
+                const targetTab = schoolGameState.gameType === 'chess' ? 'chess' : 'caro';
+                closeAllPanels();
+                switchLeaderboardTab(targetTab);
+                document.getElementById('panel-leaderboard').classList.remove('hidden');
             });
 
             document.getElementById('btn-send-game-invite').addEventListener('click', () => {
@@ -9552,6 +10541,10 @@
                     }
                 });
                 if (listChanged) renderOnlineList();
+
+                if (areSchoolLightsActive) {
+                    nightLocalLight.position.set(playerState.x, playerState.y + 2.85, playerState.z);
+                }
 
                 minimapTick++;
                 if (minimapTick % 4 === 0) drawMinimap();
