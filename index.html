@@ -243,113 +243,131 @@
     <!-- ===================================================================== -->
     <div id="hud-root" class="hidden pointer-events-none fixed inset-0 z-20">
 
-        <!-- Thanh thông tin trên cùng -->
-        <div id="hud-top-bar" class="flex flex-wrap items-start justify-between gap-2 p-2.5 sm:p-3.5 transition-all duration-200">
+        <!-- Nút nổi khôi phục nhanh khi bật chế độ Màn hình thoáng (Ẩn HUD) -->
+        <button id="btn-restore-clean-hud" type="button"
+            class="hidden pointer-events-auto fixed top-2.5 right-2.5 z-50 px-3 py-1.5 rounded-full bg-slate-900/90 hover:bg-slate-800 text-amber-300 border-2 border-amber-400/70 text-[11px] font-extrabold shadow-2xl backdrop-blur-md cursor-pointer">
+            👁️ Hiện lại Giao diện
+        </button>
+
+        <!-- Thanh thông tin trên cùng (Đã tối ưu siêu gọn cho Điện thoại) -->
+        <div id="hud-top-bar" class="flex items-start justify-between gap-1.5 p-2 sm:p-3.5 transition-all duration-200">
             <!-- Thẻ học sinh / Giáo viên & Vị trí hiện tại -->
-            <div class="pointer-events-auto flex flex-col gap-1.5 max-w-[68vw] sm:max-w-lg">
-                <div class="flex items-center gap-2 px-3 py-2 rounded-2xl bg-slate-900/85 backdrop-blur-md border border-white/15 shadow-lg">
-                    <div class="w-8 h-8 rounded-xl bg-sky-600 flex items-center justify-center font-extrabold text-xs text-white shrink-0" id="hud-avatar-badge">
+            <div class="pointer-events-auto flex flex-col gap-1 sm:gap-1.5 max-w-[58vw] sm:max-w-lg">
+                <div class="flex items-center gap-1.5 sm:gap-2 px-2 py-1.5 sm:px-3 sm:py-2 rounded-2xl bg-slate-900/85 backdrop-blur-md border border-white/15 shadow-lg">
+                    <div class="w-7 h-7 sm:w-8 sm:h-8 rounded-xl bg-sky-600 flex items-center justify-center font-extrabold text-[11px] sm:text-xs text-white shrink-0" id="hud-avatar-badge">
                         NK
                     </div>
-                    <div class="min-w-0">
-                        <div class="flex flex-wrap items-center gap-1.5">
-                            <span id="hud-player-name" class="font-bold text-xs sm:text-sm text-white truncate">Nguyễn Văn An</span>
-                            <span id="hud-role-pill" class="hidden px-1.5 py-0.5 rounded-md bg-amber-500 text-slate-950 text-[10px] font-extrabold shrink-0">👑 ADMIN</span>
-                            <span id="hud-title-badge" class="hidden px-1.5 py-0.5 rounded-md bg-emerald-500/25 border border-emerald-400 text-emerald-300 text-[10px] font-extrabold shrink-0">🌟 Học Sinh Ngoan</span>
-                            <span id="hud-player-tag" class="px-1.5 py-0.5 rounded-md bg-sky-500/25 text-sky-300 text-[10px] font-bold shrink-0">Lớp 12A1 • Học sinh đang học</span>
+                    <div class="min-w-0 flex-1">
+                        <div class="flex flex-wrap items-center gap-1">
+                            <span id="hud-player-name" class="font-bold text-[11px] sm:text-sm text-white truncate max-w-[105px] sm:max-w-none">Nguyễn Văn An</span>
+                            <span id="hud-role-pill" class="hidden px-1 py-0.5 rounded bg-amber-500 text-slate-950 text-[9px] sm:text-[10px] font-extrabold shrink-0">👑 ADMIN</span>
+                            <span id="hud-title-badge" class="hidden px-1 py-0.5 rounded bg-emerald-500/25 border border-emerald-400 text-emerald-300 text-[9px] sm:text-[10px] font-extrabold shrink-0">🌟 Học Sinh Ngoan</span>
+                            <span id="hud-player-tag" class="hidden sm:inline-block px-1.5 py-0.5 rounded-md bg-sky-500/25 text-sky-300 text-[10px] font-bold shrink-0">Lớp 12A1 • Học sinh đang học</span>
                         </div>
-                        <div id="hud-location" class="text-[11px] text-amber-300 font-medium truncate">
+                        <div id="hud-location" class="text-[10px] sm:text-[11px] text-amber-300 font-medium truncate">
                             📍 Đường trước cổng trường THPT Nguyễn Khuyến
                         </div>
                     </div>
                     <button id="btn-edit-card" title="Đổi thông tin thẻ vào trường"
-                        class="ml-1 px-2 py-1 rounded-lg bg-white/10 hover:bg-white/20 text-[11px] font-semibold text-slate-200 shrink-0 cursor-pointer">
+                        class="px-1.5 py-1 sm:px-2 sm:py-1 rounded-lg bg-white/10 hover:bg-white/20 text-[10px] sm:text-[11px] font-semibold text-slate-200 shrink-0 cursor-pointer">
                         Thẻ
+                    </button>
+                    <button id="btn-nameplate-quick" type="button" title="Tùy chỉnh thu nhỏ hoặc tắt tên hiển thị trên đầu nhân vật cho đỡ che tầm nhìn"
+                        class="px-1.5 py-1 sm:px-2 sm:py-1 rounded-lg bg-indigo-500/25 hover:bg-indigo-500/40 border border-indigo-400/45 text-[10px] sm:text-[11px] font-extrabold text-indigo-200 shrink-0 cursor-pointer">
+                        🏷️ Tên: Nhỏ
+                    </button>
+                    <button id="btn-toggle-mobile-tools" type="button" title="Mở/Đóng các nút công cụ nhanh"
+                        class="sm:hidden px-1.5 py-1 rounded-lg bg-sky-500/25 hover:bg-sky-500/40 border border-sky-400/40 text-[10px] font-extrabold text-sky-200 shrink-0 cursor-pointer">
+                        🛠️ Nút <span id="mobile-tools-arrow">▼</span>
+                    </button>
+                    <button id="btn-clean-screen-quick" type="button" title="Ẩn gọn giao diện để nhìn sân trường thoáng hơn"
+                        class="px-1.5 py-1 rounded-lg bg-amber-500/20 hover:bg-amber-500/35 border border-amber-400/40 text-[10px] font-extrabold text-amber-300 shrink-0 cursor-pointer">
+                        👁️
                     </button>
                 </div>
 
-                <!-- Hàng nút chế độ góc nhìn, nhiệm vụ, chia sẻ 2 link & hiệu năng -->
-                <div id="hud-top-tools-row" class="flex flex-wrap items-center gap-1.5">
+                <!-- Hàng nút chế độ góc nhìn, nhiệm vụ, chia sẻ 2 link & hiệu năng (Mặc định thu gọn trên ĐT, mở sẵn trên PC) -->
+                <div id="hud-top-tools-row" class="hidden sm:flex flex-wrap items-center gap-1 sm:gap-1.5 p-1.5 sm:p-0 rounded-2xl sm:rounded-none bg-slate-950/85 sm:bg-transparent backdrop-blur-md sm:backdrop-blur-none border border-white/15 sm:border-none shadow-xl sm:shadow-none">
                     <button id="btn-missions-hud"
-                        class="px-2.5 py-1.5 rounded-xl bg-gradient-to-r from-red-600 to-amber-600 hover:from-red-500 hover:to-amber-500 border border-yellow-300/60 text-[11px] font-extrabold text-white shadow cursor-pointer">
+                        class="px-2 py-1 sm:px-2.5 sm:py-1.5 rounded-xl bg-gradient-to-r from-red-600 to-amber-600 hover:from-red-500 hover:to-amber-500 border border-yellow-300/60 text-[10px] sm:text-[11px] font-extrabold text-white shadow cursor-pointer">
                         🎯 Nhiệm vụ: <span id="mission-count-hud">0/12</span>
                     </button>
                     <button id="btn-games-hud"
-                        class="px-2.5 py-1.5 rounded-xl bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 border border-indigo-300/60 text-[11px] font-extrabold text-white shadow cursor-pointer">
+                        class="px-2 py-1 sm:px-2.5 sm:py-1.5 rounded-xl bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 border border-indigo-300/60 text-[10px] sm:text-[11px] font-extrabold text-white shadow cursor-pointer">
                         🎮 Cờ Caro & Cờ Vua
                     </button>
                     <button id="btn-cam-mode"
-                        class="px-2.5 py-1.5 rounded-xl bg-slate-900/85 hover:bg-slate-800 backdrop-blur-md border border-white/15 text-[11px] font-bold text-white shadow cursor-pointer">
+                        class="px-2 py-1 sm:px-2.5 sm:py-1.5 rounded-xl bg-slate-900/85 hover:bg-slate-800 backdrop-blur-md border border-white/15 text-[10px] sm:text-[11px] font-bold text-white shadow cursor-pointer">
                         👁️ Góc nhìn 3
                     </button>
                     <button id="btn-flycam"
-                        class="px-2.5 py-1.5 rounded-xl bg-slate-900/85 hover:bg-slate-800 backdrop-blur-md border border-white/15 text-[11px] font-bold text-sky-300 shadow cursor-pointer">
+                        class="px-2 py-1 sm:px-2.5 sm:py-1.5 rounded-xl bg-slate-900/85 hover:bg-slate-800 backdrop-blur-md border border-white/15 text-[10px] sm:text-[11px] font-bold text-sky-300 shadow cursor-pointer">
                         🎥 Flycam
                     </button>
                     <button id="btn-copy-link"
-                        class="px-2.5 py-1.5 rounded-xl bg-emerald-950/90 hover:bg-emerald-900 backdrop-blur-md border border-emerald-400/45 text-[11px] font-bold text-emerald-300 shadow cursor-pointer">
+                        class="px-2 py-1 sm:px-2.5 sm:py-1.5 rounded-xl bg-emerald-950/90 hover:bg-emerald-900 backdrop-blur-md border border-emerald-400/45 text-[10px] sm:text-[11px] font-bold text-emerald-300 shadow cursor-pointer">
                         🔗 Mời bạn
                     </button>
                     <button id="btn-admin-panel"
-                        class="hidden px-2.5 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-400 border border-amber-200 text-[11px] font-extrabold text-slate-950 shadow cursor-pointer">
+                        class="hidden px-2 py-1 sm:px-2.5 sm:py-1.5 rounded-xl bg-amber-500 hover:bg-amber-400 border border-amber-200 text-[10px] sm:text-[11px] font-extrabold text-slate-950 shadow cursor-pointer">
                         👑 Quản trị & Chức vụ
                     </button>
                     <button id="btn-perf-mode"
-                        class="px-2.5 py-1.5 rounded-xl bg-amber-950/90 hover:bg-amber-900 backdrop-blur-md border border-amber-400/40 text-[11px] font-bold text-amber-200 shadow cursor-pointer">
+                        class="px-2 py-1 sm:px-2.5 sm:py-1.5 rounded-xl bg-amber-950/90 hover:bg-amber-900 backdrop-blur-md border border-amber-400/40 text-[10px] sm:text-[11px] font-bold text-amber-200 shadow cursor-pointer">
                         ⚡ Siêu mượt • <span id="fps-counter">60</span> FPS
                     </button>
                     <button id="btn-sky-mood"
-                        class="px-2.5 py-1.5 rounded-xl bg-sky-950/90 hover:bg-sky-900 backdrop-blur-md border border-sky-400/45 text-[11px] font-bold text-sky-200 shadow cursor-pointer">
+                        class="px-2 py-1 sm:px-2.5 sm:py-1.5 rounded-xl bg-sky-950/90 hover:bg-sky-900 backdrop-blur-md border border-sky-400/45 text-[10px] sm:text-[11px] font-bold text-sky-200 shadow cursor-pointer">
                         ☀️ Nắng sớm
                     </button>
                     <button id="btn-shards-hud"
-                        class="px-2.5 py-1.5 rounded-xl bg-amber-950/90 hover:bg-amber-900 backdrop-blur-md border border-amber-400/45 text-[11px] font-extrabold text-amber-300 shadow cursor-pointer">
+                        class="px-2 py-1 sm:px-2.5 sm:py-1.5 rounded-xl bg-amber-950/90 hover:bg-amber-900 backdrop-blur-md border border-amber-400/45 text-[10px] sm:text-[11px] font-extrabold text-amber-300 shadow cursor-pointer">
                         📜 Mảnh lưu bút: <span id="shard-count-hud">0/12</span>
                     </button>
                 </div>
             </div>
 
             <!-- Cụm Đồng hồ & Thời tiết Vĩnh Bảo, Bản đồ Radar & Cột Tắt/Bật Chức Năng góc trên bên phải -->
-            <div class="pointer-events-auto flex flex-col items-end gap-1.5 max-w-[48vw] sm:max-w-xs">
-                <!-- Đồng hồ & Thời tiết thời gian thực Vĩnh Bảo, Hải Phòng -->
-                <div id="vinhbao-weather-widget" class="w-full rounded-2xl bg-slate-900/90 backdrop-blur-md border border-sky-400/35 px-2.5 py-1.5 shadow-xl text-right">
-                    <div class="flex items-center justify-between gap-2">
+            <div class="pointer-events-auto flex flex-col items-end gap-1 sm:gap-1.5 max-w-[40vw] sm:max-w-xs">
+                <!-- Đồng hồ & Thời tiết thời gian thực Vĩnh Bảo, Hải Phòng (Siêu gọn 1 dòng trên ĐT, đầy đủ trên PC) -->
+                <div id="vinhbao-weather-widget" class="rounded-xl sm:rounded-2xl bg-slate-900/90 backdrop-blur-md border border-sky-400/35 px-2 py-1 sm:px-2.5 sm:py-1.5 shadow-xl text-right">
+                    <div class="hidden sm:flex items-center justify-between gap-2">
                         <span class="text-[10px] font-extrabold text-sky-300 uppercase tracking-wider">📍 Vĩnh Bảo • Hải Phòng</span>
                         <button id="btn-sync-realtime-sky" type="button" title="Đồng bộ bầu trời & đèn trường theo giờ thực tế Vĩnh Bảo"
                             class="px-1.5 py-0.5 rounded bg-sky-500/25 hover:bg-sky-500/40 border border-sky-400/40 text-[9px] font-bold text-sky-200 cursor-pointer">
                             🔄 Giờ thực: BẬT
                         </button>
                     </div>
-                    <div class="flex items-baseline justify-end gap-1.5 mt-0.5">
-                        <span id="vb-live-clock" class="font-mono text-xs sm:text-sm font-black text-amber-300 tracking-tight">--:--:--</span>
-                        <span id="vb-live-date" class="text-[10px] font-semibold text-slate-300">--/--/----</span>
+                    <div class="flex items-center justify-end gap-1.5 sm:mt-0.5">
+                        <span id="vb-live-clock" class="font-mono text-[11px] sm:text-sm font-black text-amber-300 tracking-tight">--:--:--</span>
+                        <span id="vb-live-date" class="hidden sm:inline text-[10px] font-semibold text-slate-300">--/--/----</span>
+                        <span id="vb-weather-temp" class="text-[11px] sm:text-xs text-emerald-300 font-extrabold">--°C</span>
                     </div>
-                    <div class="flex items-center justify-end gap-1.5 text-[10px] sm:text-[11px] font-bold text-emerald-300 mt-0.5">
+                    <div class="hidden sm:flex items-center justify-end gap-1.5 text-[11px] font-bold text-emerald-300 mt-0.5">
                         <span id="vb-weather-desc">⛅ Đang tải thời tiết...</span>
-                        <span id="vb-weather-temp" class="text-white font-extrabold">--°C</span>
                     </div>
-                    <div id="vb-weather-extra" class="text-[9px] text-slate-400 font-medium">
+                    <div id="vb-weather-extra" class="hidden sm:block text-[9px] text-slate-400 font-medium">
                         Độ ẩm: --% • Gió: -- km/h
                     </div>
                 </div>
 
-                <!-- Bản đồ Radar nhỏ -->
-                <div id="minimap-wrapper" class="relative rounded-2xl overflow-hidden border-2 border-white/25 bg-slate-900/85 shadow-xl">
-                    <canvas id="minimap-canvas" width="132" height="132" class="block w-[112px] h-[112px] sm:w-[132px] sm:h-[132px]"></canvas>
-                    <div class="absolute bottom-1 left-1.5 right-1.5 flex justify-between text-[9px] font-bold text-white/90 drop-shadow pointer-events-none">
-                        <span>Bắc (12A)</span>
+                <!-- Bản đồ Radar nhỏ (76x76px trên ĐT, 132x132px trên PC) -->
+                <div id="minimap-wrapper" class="relative rounded-xl sm:rounded-2xl overflow-hidden border-2 border-white/25 bg-slate-900/85 shadow-xl">
+                    <canvas id="minimap-canvas" width="132" height="132" class="block w-[76px] h-[76px] sm:w-[132px] sm:h-[132px]"></canvas>
+                    <div class="absolute bottom-0.5 left-1 right-1 flex justify-between text-[8px] sm:text-[9px] font-bold text-white/90 drop-shadow pointer-events-none">
+                        <span class="hidden sm:inline">Bắc (12A)</span>
                         <span id="online-pill" class="text-emerald-300">● 1/500</span>
                     </div>
                 </div>
 
-                <!-- Cột Tắt / Bật hiển thị Map & các chức năng -->
-                <div id="hud-toggle-column-wrapper" class=" flex flex-col items-end w-full">
+                <!-- Cột Tắt / Bật hiển thị Map & các chức năng (Mặc định đóng gọn thành nút nhỏ) -->
+                <div id="hud-toggle-column-wrapper" class="relative flex flex-col items-end">
                     <button id="btn-toggle-control-column" type="button"
-                        class="px-2.5 py-1.5 rounded-xl bg-slate-900/90 hover:bg-slate-800 backdrop-blur-md border border-amber-400/50 text-[11px] font-extrabold text-amber-300 shadow-lg flex items-center gap-1.5 cursor-pointer">
+                        class="px-2 py-1 sm:px-2.5 sm:py-1.5 rounded-xl bg-slate-900/90 hover:bg-slate-800 backdrop-blur-md border border-amber-400/50 text-[10px] sm:text-[11px] font-extrabold text-amber-300 shadow-lg flex items-center gap-1 cursor-pointer">
                         <span>🎛️ Tắt/Bật Map & Tiện Ích</span>
                         <span id="toggle-col-arrow" class="text-[10px]">▼</span>
                     </button>
-                    <div id="hud-toggle-column-body" class="mt-1.5 w-48 sm:w-52 rounded-2xl bg-slate-900/95 backdrop-blur-md border border-white/20 p-2 shadow-2xl flex flex-col gap-1 text-[11px]">
+                    <div id="hud-toggle-column-body" class="hidden absolute right-0 top-full mt-1.5 z-50 w-48 sm:w-52 rounded-2xl bg-slate-900/95 backdrop-blur-md border border-white/20 p-2 shadow-2xl flex flex-col gap-1 text-[11px]">
                         <div class="text-[10px] font-extrabold text-slate-400 uppercase px-1 pb-0.5 border-b border-white/10">
                             Hiển thị giao diện & Đèn
                         </div>
@@ -377,6 +395,11 @@
                             class="w-full px-2.5 py-1.5 rounded-xl bg-emerald-600/25 hover:bg-emerald-600/35 border border-emerald-400/40 text-emerald-200 font-bold flex items-center justify-between cursor-pointer">
                             <span>🕹️ Phím di chuyển ảo</span>
                             <span id="state-toggle-touch-pad" class="text-[10px] font-extrabold text-emerald-300">BẬT</span>
+                        </button>
+                        <button id="btn-toggle-nameplate-mode" type="button"
+                            class="w-full px-2.5 py-1.5 rounded-xl bg-indigo-500/25 hover:bg-indigo-500/35 border border-indigo-400/50 text-indigo-200 font-bold flex items-center justify-between cursor-pointer">
+                            <span>🏷️ Tên trên đầu</span>
+                            <span id="state-toggle-nameplate-mode" class="text-[10px] font-extrabold text-indigo-300">NHỎ GỌN</span>
                         </button>
                         <button id="btn-toggle-school-lights" type="button"
                             class="w-full px-2.5 py-1.5 rounded-xl bg-amber-500/25 hover:bg-amber-500/35 border border-amber-400/50 text-amber-200 font-bold flex items-center justify-between cursor-pointer">
@@ -508,47 +531,47 @@
             </button>
         </div>
 
-        <!-- Cần điều khiển ảo bên trái (Cảm ứng & Chuột - Hỗ trợ đa điểm) -->
+        <!-- Cần điều khiển ảo bên trái (Nhỏ gọn & trong suốt hơn trên điện thoại) -->
         <div id="joystick-zone"
-            class="pointer-events-auto fixed bottom-16 left-4 sm:bottom-16 sm:left-6 w-32 h-32 sm:w-28 sm:h-28 rounded-full bg-slate-900/55 border-2 border-white/30 backdrop-blur-sm flex items-center justify-center touch-none shadow-xl">
+            class="pointer-events-auto fixed bottom-14 left-3 sm:bottom-16 sm:left-6 w-24 h-24 sm:w-28 sm:h-28 rounded-full bg-slate-900/40 border-2 border-white/25 backdrop-blur-sm flex items-center justify-center touch-none shadow-lg">
             <div id="joystick-knob"
-                class="w-12 h-12 sm:w-11 sm:h-11 rounded-full bg-white/90 shadow-lg border-2 border-sky-400 pointer-events-none">
+                class="w-9 h-9 sm:w-11 sm:h-11 rounded-full bg-white/85 shadow-md border-2 border-sky-400 pointer-events-none">
             </div>
         </div>
 
-        <!-- Cụm nút Chạy nhanh & Nhảy bên phải cho điện thoại -->
-        <div id="touch-action-btns" class="pointer-events-auto fixed bottom-16 right-4 sm:bottom-16 sm:right-6 flex flex-col items-end gap-2.5 touch-none">
+        <!-- Cụm nút Chạy nhanh & Nhảy bên phải cho điện thoại (Gọn gàng, dễ bấm) -->
+        <div id="touch-action-btns" class="pointer-events-auto fixed bottom-14 right-3 sm:bottom-16 sm:right-6 flex flex-col items-end gap-2 touch-none">
             <button id="btn-sprint" type="button"
-                class="w-13 h-13 px-3 py-2.5 rounded-full bg-amber-500/85 hover:bg-amber-400 active:scale-90 border-2 border-white/35 text-slate-950 font-extrabold text-[11px] shadow-lg backdrop-blur-sm cursor-pointer">
+                class="px-2.5 py-2 sm:px-3 sm:py-2.5 rounded-full bg-amber-500/80 hover:bg-amber-400 active:scale-90 border border-white/35 text-slate-950 font-extrabold text-[10px] sm:text-[11px] shadow-md backdrop-blur-sm cursor-pointer">
                 🏃 CHẠY
             </button>
             <button id="btn-jump" type="button"
-                class="w-15 h-15 w-14 h-14 rounded-full bg-sky-600/85 hover:bg-sky-500 active:scale-90 border-2 border-white/35 text-white font-extrabold text-xs shadow-lg backdrop-blur-sm cursor-pointer">
+                class="w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-sky-600/80 hover:bg-sky-500 active:scale-90 border border-white/35 text-white font-extrabold text-[11px] sm:text-xs shadow-md backdrop-blur-sm cursor-pointer">
                 NHẢY
             </button>
         </div>
 
-        <!-- Thanh công cụ dưới cùng -->
-        <div id="hud-bottom-nav" class="pointer-events-auto fixed bottom-2.5 left-1/2 -translate-x-1/2 flex items-center gap-1 sm:gap-2 px-2 py-1.5 rounded-2xl bg-slate-900/85 backdrop-blur-md border border-white/15 shadow-2xl max-w-[96vw] overflow-x-auto">
-            <button data-panel="panel-missions" class="nav-panel-btn px-2.5 sm:px-3 py-1.5 rounded-xl bg-red-600/30 hover:bg-red-600 border border-red-400/50 text-xs font-extrabold text-yellow-200 hover:text-white transition shrink-0 cursor-pointer">
+        <!-- Thanh công cụ dưới cùng (Gọn hơn trên điện thoại) -->
+        <div id="hud-bottom-nav" class="pointer-events-auto fixed bottom-2 left-1/2 -translate-x-1/2 flex items-center gap-1 sm:gap-1.5 px-1.5 py-1 sm:px-2 sm:py-1.5 rounded-2xl bg-slate-900/85 backdrop-blur-md border border-white/15 shadow-2xl max-w-[98vw] overflow-x-auto no-scrollbar">
+            <button data-panel="panel-missions" class="nav-panel-btn px-2 sm:px-3 py-1 sm:py-1.5 rounded-xl bg-red-600/30 hover:bg-red-600 border border-red-400/50 text-[11px] sm:text-xs font-extrabold text-yellow-200 hover:text-white transition shrink-0 cursor-pointer">
                 🎯 Nhiệm vụ
             </button>
-            <button data-panel="panel-games" class="nav-panel-btn px-2.5 sm:px-3 py-1.5 rounded-xl bg-indigo-600/40 hover:bg-indigo-600 border border-indigo-400/55 text-xs font-extrabold text-indigo-200 hover:text-white transition shrink-0 cursor-pointer">
+            <button data-panel="panel-games" class="nav-panel-btn px-2 sm:px-3 py-1 sm:py-1.5 rounded-xl bg-indigo-600/40 hover:bg-indigo-600 border border-indigo-400/55 text-[11px] sm:text-xs font-extrabold text-indigo-200 hover:text-white transition shrink-0 cursor-pointer">
                 🎮 Cờ Caro / Vua
             </button>
-            <button data-panel="panel-leaderboard" class="nav-panel-btn px-2.5 sm:px-3 py-1.5 rounded-xl bg-yellow-500/25 hover:bg-yellow-500 border border-yellow-400/55 text-xs font-extrabold text-yellow-300 hover:text-slate-950 transition shrink-0 cursor-pointer">
+            <button data-panel="panel-leaderboard" class="nav-panel-btn px-2 sm:px-3 py-1 sm:py-1.5 rounded-xl bg-yellow-500/25 hover:bg-yellow-500 border border-yellow-400/55 text-[11px] sm:text-xs font-extrabold text-yellow-300 hover:text-slate-950 transition shrink-0 cursor-pointer">
                 🏆 Xếp hạng
             </button>
-            <button data-panel="panel-map" class="nav-panel-btn px-2.5 sm:px-3 py-1.5 rounded-xl bg-white/10 hover:bg-sky-600 text-xs font-bold text-white transition shrink-0 cursor-pointer">
+            <button data-panel="panel-map" class="nav-panel-btn px-2 sm:px-3 py-1 sm:py-1.5 rounded-xl bg-white/10 hover:bg-sky-600 text-[11px] sm:text-xs font-bold text-white transition shrink-0 cursor-pointer">
                 🗺️ Bản đồ
             </button>
-            <button data-panel="panel-online" class="nav-panel-btn px-2.5 sm:px-3 py-1.5 rounded-xl bg-white/10 hover:bg-sky-600 text-xs font-bold text-white transition shrink-0 cursor-pointer">
+            <button data-panel="panel-online" class="nav-panel-btn px-2 sm:px-3 py-1 sm:py-1.5 rounded-xl bg-white/10 hover:bg-sky-600 text-[11px] sm:text-xs font-bold text-white transition shrink-0 cursor-pointer">
                 👥 Online
             </button>
-            <button data-panel="panel-chat" class="nav-panel-btn px-2.5 sm:px-3 py-1.5 rounded-xl bg-white/10 hover:bg-sky-600 text-xs font-bold text-white transition shrink-0 cursor-pointer">
+            <button data-panel="panel-chat" class="nav-panel-btn px-2 sm:px-3 py-1 sm:py-1.5 rounded-xl bg-white/10 hover:bg-sky-600 text-[11px] sm:text-xs font-bold text-white transition shrink-0 cursor-pointer">
                 💬 Chat
             </button>
-            <button data-panel="panel-guestbook" class="nav-panel-btn px-2.5 sm:px-3 py-1.5 rounded-xl bg-amber-500/25 hover:bg-amber-500 border border-amber-400/50 text-xs font-extrabold text-amber-200 hover:text-slate-950 transition shrink-0 cursor-pointer">
+            <button data-panel="panel-guestbook" class="nav-panel-btn px-2 sm:px-3 py-1 sm:py-1.5 rounded-xl bg-amber-500/25 hover:bg-amber-500 border border-amber-400/50 text-[11px] sm:text-xs font-extrabold text-amber-200 hover:text-slate-950 transition shrink-0 cursor-pointer">
                 📖 Lưu bút
             </button>
         </div>
@@ -1627,6 +1650,59 @@
                 return new THREE.Sprite(new THREE.SpriteMaterial({ map: tex, transparent: true, depthWrite: false }));
             }
 
+            // Chế độ hiển thị bảng tên trên đầu nhân vật: 'compact' (Nhỏ gọn - Mặc định), 'hide_self' (Ẩn tên mình), 'off' (Tắt hết), 'full' (Cỡ lớn)
+            const NAMEPLATE_MODES = ['compact', 'hide_self', 'off', 'full'];
+            let nameplateDisplayMode = 'compact';
+            try {
+                const savedNpMode = localStorage.getItem('thptnk_nameplate_mode');
+                if (savedNpMode && NAMEPLATE_MODES.includes(savedNpMode)) {
+                    nameplateDisplayMode = savedNpMode;
+                }
+            } catch (e) {}
+
+            function configureNameplateTransform(sprite, isSelf = false, isGuard = false) {
+                if (!sprite) return;
+                sprite.userData = sprite.userData || {};
+                sprite.userData.isSelf = isSelf;
+                sprite.userData.isGuard = isGuard;
+
+                if (nameplateDisplayMode === 'off') {
+                    sprite.visible = false;
+                    return;
+                }
+                if (nameplateDisplayMode === 'hide_self' && isSelf) {
+                    sprite.visible = false;
+                    return;
+                }
+                sprite.visible = true;
+
+                if (nameplateDisplayMode === 'full') {
+                    if (isGuard) {
+                        sprite.scale.set(3.0, 0.58, 1);
+                        sprite.position.set(0, 2.34, 0);
+                    } else {
+                        sprite.scale.set(2.75, 0.62, 1);
+                        sprite.position.set(0, 2.24, 0);
+                    }
+                    if (sprite.material) sprite.material.opacity = 0.95;
+                } else {
+                    // Chế độ 'compact' hoặc 'hide_self' (tên thu nhỏ gọn gàng, hơi trong suốt để không bao giờ che tầm nhìn)
+                    if (isSelf) {
+                        sprite.scale.set(1.52, 0.34, 1);
+                        sprite.position.set(0, 2.02, 0);
+                        if (sprite.material) sprite.material.opacity = 0.78;
+                    } else if (isGuard) {
+                        sprite.scale.set(1.95, 0.38, 1);
+                        sprite.position.set(0, 2.15, 0);
+                        if (sprite.material) sprite.material.opacity = 0.86;
+                    } else {
+                        sprite.scale.set(1.82, 0.40, 1);
+                        sprite.position.set(0, 2.10, 0);
+                        if (sprite.material) sprite.material.opacity = 0.86;
+                    }
+                }
+            }
+
             function makeParticipantNameplate(name, className, cohort, isSelf = false, isAdmin = false, role = 'Học sinh', studentRank = '') {
                 const hasSpecialRole = isAdmin || (role && role !== 'Học sinh');
                 const isBaKhi = studentRank === 'SIÊU BÁ KHÍ';
@@ -1642,8 +1718,8 @@
                 const tex = makeCanvasTexture(640, 132, (ctx, w, h) => {
                     ctx.clearRect(0, 0, w, h);
                     ctx.fillStyle = isBaKhi
-                        ? 'rgba(153, 27, 27, 0.96)'
-                        : (hasSpecialRole ? 'rgba(120, 53, 15, 0.94)' : 'rgba(15, 23, 42, 0.9)');
+                        ? 'rgba(153, 27, 27, 0.92)'
+                        : (hasSpecialRole ? 'rgba(120, 53, 15, 0.90)' : 'rgba(15, 23, 42, 0.82)');
                     ctx.beginPath();
                     ctx.roundRect(8, 8, w - 16, h - 16, 26);
                     ctx.fill();
@@ -1664,8 +1740,7 @@
                     ctx.fillText(subLine, w / 2, 88, w - 36);
                 });
                 const sprite = new THREE.Sprite(new THREE.SpriteMaterial({ map: tex, transparent: true, depthWrite: false }));
-                sprite.scale.set(2.95, 0.66, 1);
-                sprite.position.set(0, 2.28, 0);
+                configureNameplateTransform(sprite, isSelf, false);
                 return sprite;
             }
 
@@ -1966,28 +2041,74 @@
                 },
                 {
                     id: 'night',
-                    label: '🌙 Đêm lung linh',
-                    bg: 0x0f172a,
-                    fogColor: 0x1e293b,
-                    fogDensity: 0.0028,
-                    hemiSky: 0x64748b,
+                    label: '🌙 Đêm trăng & Sao băng',
+                    bg: 0x070d1f,
+                    fogColor: 0x13203d,
+                    fogDensity: 0.0022,
+                    hemiSky: 0x93c5fd,
                     hemiGround: 0x0f172a,
-                    hemiIntensity: 0.65,
-                    sunColor: 0xbae6fd,
-                    sunIntensity: 0.68,
-                    sunPos: [-45, 75, -50],
-                    fillColor: 0x38bdf8,
-                    fillIntensity: 0.32,
-                    orbColor: 0xf8fafc,
-                    haloColor: 0x7dd3fc,
-                    haloOpacity: 0.35,
+                    hemiIntensity: 0.78,
+                    sunColor: 0xe0f2fe,
+                    sunIntensity: 0.92,
+                    sunPos: [-38, 86, -48],
+                    fillColor: 0x60a5fa,
+                    fillIntensity: 0.46,
+                    orbColor: 0xfefce8,
+                    haloColor: 0x93c5fd,
+                    haloOpacity: 0.62,
                     cloudTop: 0x475569,
                     cloudUnder: 0x1e293b,
                     lampGlow: 1.0,
-                    stops: [[0.0, '#020617'], [0.35, '#0f172a'], [0.58, '#1e293b'], [0.78, '#334155'], [1.0, '#1e293b']]
+                    stops: [[0.0, '#020617'], [0.28, '#091534'], [0.55, '#172554'], [0.78, '#1e3a8a'], [1.0, '#1e293b']]
                 }
             ];
             let currentSkyMoodIdx = 0;
+            let nightSkyGroup = null;
+            let nightStarMatA = null;
+            let nightStarMatB = null;
+            let moonOuterAura = null;
+            let moonBeamSprites = [];
+            let moonlightGroundGlow = null;
+            let moonSurfaceTex = null;
+            const shootingStars = [];
+
+            function resetShootingStar(meteor, initialDelay = null) {
+                meteor.active = false;
+                meteor.timer = 0;
+                meteor.duration = 1.15 + Math.random() * 0.85;
+                meteor.delay = initialDelay !== null ? initialDelay : (0.6 + Math.random() * 2.8);
+                meteor.group.visible = false;
+            }
+
+            function launchShootingStar(meteor) {
+                meteor.active = true;
+                meteor.timer = 0;
+                meteor.duration = 1.2 + Math.random() * 0.85;
+
+                // Xuất phát ở vòm trời cao phía trước / hai bên sân trường để học sinh đứng ở đâu cũng dễ ngắm sao băng
+                const angle = (Math.random() * Math.PI * 1.6) - Math.PI * 0.8;
+                const radius = 115 + Math.random() * 85;
+                const startX = Math.sin(angle) * radius;
+                const startY = 82 + Math.random() * 68;
+                const startZ = -Math.cos(angle) * radius * 0.85 - 15;
+                meteor.startPos.set(startX, startY, startZ);
+
+                // Bay chéo ngang bầu trời đêm
+                const dirSign = Math.random() < 0.5 ? 1 : -1;
+                const vx = dirSign * (68 + Math.random() * 44);
+                const vy = -(26 + Math.random() * 22);
+                const vz = (Math.random() - 0.5) * 48;
+                meteor.velocity.set(vx, vy, vz);
+
+                meteor.group.position.copy(meteor.startPos);
+                // Xoay vệt đuôi sao băng dọc theo đúng hướng bay 3D
+                const dirNorm = meteor.velocity.clone().normalize();
+                const axisX = new THREE.Vector3(1, 0, 0);
+                meteor.group.quaternion.setFromUnitVectors(axisX, dirNorm);
+                meteor.group.visible = true;
+                meteor.trailMat.opacity = 0;
+                meteor.headMat.opacity = 0;
+            }
 
             function buildSkyDome() {
                 const initialCfg = skyMoodConfigs[0];
@@ -1997,25 +2118,234 @@
                 );
                 scene.add(skyDomeMesh);
 
+                // Texture Mặt Trăng tròn chi tiết (có các vùng tối bề mặt trăng + ánh bạc dịu)
+                moonSurfaceTex = makeCanvasTexture(256, 256, (ctx, w, h) => {
+                    ctx.fillStyle = '#fefce8';
+                    ctx.fillRect(0, 0, w, h);
+                    const grad = ctx.createRadialGradient(w * 0.42, h * 0.42, 12, w * 0.5, h * 0.5, w * 0.5);
+                    grad.addColorStop(0, '#ffffff');
+                    grad.addColorStop(0.7, '#fef9c3');
+                    grad.addColorStop(1, '#bae6fd');
+                    ctx.fillStyle = grad;
+                    ctx.fillRect(0, 0, w, h);
+
+                    // Các vùng biển trăng (Lunar Maria) dịu nhẹ
+                    const craters = [
+                        [76, 82, 34, 0.14], [148, 68, 28, 0.12], [172, 128, 42, 0.15],
+                        [98, 152, 38, 0.13], [54, 142, 22, 0.10], [134, 186, 25, 0.11]
+                    ];
+                    craters.forEach(([cx, cy, r, alpha]) => {
+                        const cg = ctx.createRadialGradient(cx, cy, r * 0.15, cx, cy, r);
+                        cg.addColorStop(0, `rgba(100, 116, 139, ${alpha})`);
+                        cg.addColorStop(1, 'rgba(100, 116, 139, 0)');
+                        ctx.fillStyle = cg;
+                        ctx.beginPath();
+                        ctx.arc(cx, cy, r, 0, Math.PI * 2);
+                        ctx.fill();
+                    });
+                });
+
                 celestialOrb = new THREE.Mesh(
-                    new THREE.SphereGeometry(6.2, 16, 12),
+                    new THREE.SphereGeometry(6.8, 20, 16),
                     new THREE.MeshBasicMaterial({ color: initialCfg.orbColor, fog: false })
                 );
                 scene.add(celestialOrb);
 
                 const haloTex = makeCanvasTexture(128, 128, (ctx, w, h) => {
                     const g = ctx.createRadialGradient(w / 2, h / 2, 6, w / 2, h / 2, w / 2);
-                    g.addColorStop(0, 'rgba(255,255,255,0.95)');
-                    g.addColorStop(0.35, 'rgba(255,255,255,0.42)');
+                    g.addColorStop(0, 'rgba(255,255,255,0.98)');
+                    g.addColorStop(0.28, 'rgba(224,242,254,0.58)');
+                    g.addColorStop(0.62, 'rgba(125,211,252,0.22)');
                     g.addColorStop(1, 'rgba(255,255,255,0)');
                     ctx.fillStyle = g;
                     ctx.fillRect(0, 0, w, h);
                 });
                 celestialHalo = new THREE.Sprite(
-                    new THREE.SpriteMaterial({ map: haloTex, color: initialCfg.haloColor, transparent: true, opacity: initialCfg.haloOpacity, fog: false, depthWrite: false })
+                    new THREE.SpriteMaterial({ map: haloTex, color: initialCfg.haloColor, transparent: true, opacity: initialCfg.haloOpacity, fog: false, depthWrite: false, blending: THREE.AdditiveBlending })
                 );
                 celestialHalo.scale.set(48, 48, 1);
                 scene.add(celestialHalo);
+
+                // Nhóm bầu trời đêm: Ngàn sao lấp lánh + Hào quang Ánh Trăng + Luồng tia sáng trăng + Mưa Sao Băng 3D
+                nightSkyGroup = new THREE.Group();
+                nightSkyGroup.visible = false;
+                scene.add(nightSkyGroup);
+
+                const starDotTex = makeCanvasTexture(64, 64, (ctx, w, h) => {
+                    const g = ctx.createRadialGradient(w / 2, h / 2, 1, w / 2, h / 2, w / 2);
+                    g.addColorStop(0, 'rgba(255,255,255,1)');
+                    g.addColorStop(0.35, 'rgba(224,242,254,0.8)');
+                    g.addColorStop(1, 'rgba(255,255,255,0)');
+                    ctx.fillStyle = g;
+                    ctx.fillRect(0, 0, w, h);
+                });
+
+                const makeStarLayer = (count, size, colorHex) => {
+                    const posArr = new Float32Array(count * 3);
+                    for (let i = 0; i < count; i++) {
+                        const theta = Math.random() * Math.PI * 2;
+                        const phi = Math.random() * Math.PI * 0.44; // Nửa trên vòm trời
+                        const r = 252 + Math.random() * 14;
+                        posArr[i * 3] = r * Math.sin(phi) * Math.cos(theta);
+                        posArr[i * 3 + 1] = Math.max(24, r * Math.cos(phi));
+                        posArr[i * 3 + 2] = r * Math.sin(phi) * Math.sin(theta);
+                    }
+                    const geo = new THREE.BufferGeometry();
+                    geo.setAttribute('position', new THREE.BufferAttribute(posArr, 3));
+                    const mat = new THREE.PointsMaterial({
+                        map: starDotTex,
+                        color: colorHex,
+                        size,
+                        transparent: true,
+                        opacity: 0.9,
+                        fog: false,
+                        depthWrite: false,
+                        blending: THREE.AdditiveBlending
+                    });
+                    return { points: new THREE.Points(geo, mat), mat };
+                };
+
+                const starLayerA = makeStarLayer(220, 2.8, 0xffffff);
+                const starLayerB = makeStarLayer(140, 3.8, 0xbae6fd);
+                nightStarMatA = starLayerA.mat;
+                nightStarMatB = starLayerB.mat;
+                nightSkyGroup.add(starLayerA.points, starLayerB.points);
+
+                // Vầng hào quang trăng rộng (Lunar Corona) & Luồng ánh trăng chiếu xuống sân trường
+                moonOuterAura = new THREE.Sprite(
+                    new THREE.SpriteMaterial({
+                        map: haloTex,
+                        color: 0x60a5fa,
+                        transparent: true,
+                        opacity: 0.36,
+                        fog: false,
+                        depthWrite: false,
+                        blending: THREE.AdditiveBlending
+                    })
+                );
+                moonOuterAura.scale.set(145, 145, 1);
+                nightSkyGroup.add(moonOuterAura);
+
+                const beamTex = makeCanvasTexture(128, 256, (ctx, w, h) => {
+                    const g = ctx.createLinearGradient(0, 0, 0, h);
+                    g.addColorStop(0, 'rgba(224, 242, 254, 0.32)');
+                    g.addColorStop(0.45, 'rgba(125, 211, 252, 0.12)');
+                    g.addColorStop(1, 'rgba(56, 189, 248, 0)');
+                    ctx.fillStyle = g;
+                    ctx.beginPath();
+                    ctx.moveTo(w * 0.32, 0);
+                    ctx.lineTo(w * 0.68, 0);
+                    ctx.lineTo(w, h);
+                    ctx.lineTo(0, h);
+                    ctx.closePath();
+                    ctx.fill();
+                });
+
+                for (let b = 0; b < 2; b++) {
+                    const beamSprite = new THREE.Sprite(
+                        new THREE.SpriteMaterial({
+                            map: beamTex,
+                            color: 0xbae6fd,
+                            transparent: true,
+                            opacity: 0.24,
+                            fog: false,
+                            depthWrite: false,
+                            blending: THREE.AdditiveBlending
+                        })
+                    );
+                    beamSprite.scale.set(85 + b * 28, 165, 1);
+                    nightSkyGroup.add(beamSprite);
+                    moonBeamSprites.push(beamSprite);
+                }
+
+                // Ánh trăng bạc phản chiếu dịu nhẹ trên mặt sân trường & hồ cá Koi vào ban đêm
+                const groundMoonTex = makeCanvasTexture(256, 256, (ctx, w, h) => {
+                    const g = ctx.createRadialGradient(w / 2, h / 2, 8, w / 2, h / 2, w / 2);
+                    g.addColorStop(0, 'rgba(186, 230, 253, 0.22)');
+                    g.addColorStop(0.55, 'rgba(56, 189, 248, 0.08)');
+                    g.addColorStop(1, 'rgba(15, 23, 42, 0)');
+                    ctx.fillStyle = g;
+                    ctx.fillRect(0, 0, w, h);
+                });
+                moonlightGroundGlow = new THREE.Mesh(
+                    new THREE.PlaneGeometry(82, 82),
+                    new THREE.MeshBasicMaterial({
+                        map: groundMoonTex,
+                        transparent: true,
+                        opacity: 0.85,
+                        depthWrite: false,
+                        blending: THREE.AdditiveBlending
+                    })
+                );
+                moonlightGroundGlow.rotation.x = -Math.PI / 2;
+                moonlightGroundGlow.position.set(0, 0.06, 8);
+                nightSkyGroup.add(moonlightGroundGlow);
+
+                // Khởi tạo 5 ngôi Sao Băng 3D (Shooting Stars) với đầu sao sáng rực và đuôi ánh sáng dài
+                const meteorTrailTex = makeCanvasTexture(256, 64, (ctx, w, h) => {
+                    ctx.clearRect(0, 0, w, h);
+                    const g = ctx.createLinearGradient(0, h / 2, w, h / 2);
+                    g.addColorStop(0, 'rgba(56, 189, 248, 0)');
+                    g.addColorStop(0.45, 'rgba(125, 211, 252, 0.28)');
+                    g.addColorStop(0.82, 'rgba(224, 242, 254, 0.85)');
+                    g.addColorStop(1.0, 'rgba(255, 255, 255, 1)');
+                    ctx.fillStyle = g;
+                    ctx.beginPath();
+                    ctx.moveTo(0, h * 0.48);
+                    ctx.lineTo(w, h * 0.14);
+                    ctx.lineTo(w, h * 0.86);
+                    ctx.lineTo(0, h * 0.52);
+                    ctx.closePath();
+                    ctx.fill();
+                });
+
+                const meteorTrailGeo = new THREE.PlaneGeometry(28, 1.6);
+                for (let m = 0; m < 5; m++) {
+                    const mGroup = new THREE.Group();
+                    const trailMat = new THREE.MeshBasicMaterial({
+                        map: meteorTrailTex,
+                        transparent: true,
+                        opacity: 0,
+                        side: THREE.DoubleSide,
+                        fog: false,
+                        depthWrite: false,
+                        blending: THREE.AdditiveBlending
+                    });
+                    const trailMeshA = new THREE.Mesh(meteorTrailGeo, trailMat);
+                    trailMeshA.position.x = -14;
+                    const trailMeshB = new THREE.Mesh(meteorTrailGeo, trailMat);
+                    trailMeshB.position.x = -14;
+                    trailMeshB.rotation.x = Math.PI / 2;
+                    mGroup.add(trailMeshA, trailMeshB);
+
+                    const headMat = new THREE.SpriteMaterial({
+                        map: starDotTex,
+                        color: 0xffffff,
+                        transparent: true,
+                        opacity: 0,
+                        fog: false,
+                        depthWrite: false,
+                        blending: THREE.AdditiveBlending
+                    });
+                    const headSprite = new THREE.Sprite(headMat);
+                    headSprite.scale.set(5.2, 5.2, 1);
+                    mGroup.add(headSprite);
+
+                    nightSkyGroup.add(mGroup);
+                    const meteorObj = {
+                        group: mGroup,
+                        trailMat,
+                        headMat,
+                        active: false,
+                        timer: 0,
+                        duration: 1.4,
+                        delay: m * 0.75,
+                        startPos: new THREE.Vector3(),
+                        velocity: new THREE.Vector3()
+                    };
+                    resetShootingStar(meteorObj, m * 0.65);
+                    shootingStars.push(meteorObj);
+                }
 
                 cloudTopMat = new THREE.MeshLambertMaterial({ color: 0xffffff, transparent: true, opacity: 0.92, fog: false });
                 cloudUnderMat = new THREE.MeshLambertMaterial({ color: 0xe2e8f0, transparent: true, opacity: 0.86, fog: false });
@@ -2063,6 +2393,7 @@
             function applySkyMood(idx) {
                 currentSkyMoodIdx = idx % skyMoodConfigs.length;
                 const cfg = skyMoodConfigs[currentSkyMoodIdx];
+                const isNight = cfg.id === 'night';
                 scene.background.setHex(cfg.bg);
                 scene.fog.color.setHex(cfg.fogColor);
                 scene.fog.density = cfg.fogDensity;
@@ -2084,15 +2415,47 @@
                     skyDomeMesh.material.needsUpdate = true;
                 }
                 if (celestialOrb && celestialHalo) {
-                    const orbDir = new THREE.Vector3(cfg.sunPos[0], cfg.sunPos[1], cfg.sunPos[2]).normalize().multiplyScalar(225);
+                    const orbDir = new THREE.Vector3(cfg.sunPos[0], cfg.sunPos[1], cfg.sunPos[2]).normalize().multiplyScalar(222);
                     celestialOrb.position.copy(orbDir);
                     celestialOrb.material.color.setHex(cfg.orbColor);
+                    celestialOrb.material.map = isNight ? moonSurfaceTex : null;
+                    celestialOrb.material.needsUpdate = true;
+                    celestialOrb.scale.setScalar(isNight ? 1.55 : 1.0);
+
                     celestialHalo.position.copy(orbDir);
                     celestialHalo.material.color.setHex(cfg.haloColor);
                     celestialHalo.material.opacity = cfg.haloOpacity;
+                    celestialHalo.scale.set(isNight ? 82 : 48, isNight ? 82 : 48, 1);
+
+                    if (moonOuterAura) {
+                        moonOuterAura.position.copy(orbDir);
+                    }
+                    moonBeamSprites.forEach((beam, bIdx) => {
+                        beam.position.set(orbDir.x * 0.72 + (bIdx === 0 ? -8 : 10), orbDir.y * 0.56, orbDir.z * 0.72);
+                    });
                 }
-                if (cloudTopMat) cloudTopMat.color.setHex(cfg.cloudTop);
-                if (cloudUnderMat) cloudUnderMat.color.setHex(cfg.cloudUnder);
+                if (nightSkyGroup) {
+                    nightSkyGroup.visible = isNight;
+                    if (isNight) {
+                        // Kích hoạt ngay 2 ngôi sao băng đầu tiên khi chuyển sang ban đêm để người chơi thấy liền
+                        shootingStars.forEach((m, i) => {
+                            if (i < 2) launchShootingStar(m);
+                            else resetShootingStar(m, 0.6 + i * 0.7);
+                        });
+                    }
+                }
+                // Ban đêm chim đi ngủ, ban ngày chim bay lượn
+                skyBirds.forEach(b => {
+                    if (b.group) b.group.visible = !isNight;
+                });
+                if (cloudTopMat) {
+                    cloudTopMat.color.setHex(cfg.cloudTop);
+                    cloudTopMat.opacity = isNight ? 0.42 : 0.92;
+                }
+                if (cloudUnderMat) {
+                    cloudUnderMat.color.setHex(cfg.cloudUnder);
+                    cloudUnderMat.opacity = isNight ? 0.35 : 0.86;
+                }
 
                 updateSchoolLightsState();
                 const moodBtn = document.getElementById('btn-sky-mood');
@@ -6307,9 +6670,9 @@
                 guardMesh.position.set(g.x, 0, g.z);
 
                 const tag = makeTextSprite(`${g.name} • ${g.role}`, '#0f172a', '#38bdf8', '#0284c7');
-                tag.scale.set(3.2, 0.62, 1);
-                tag.position.set(0, 2.38, 0);
+                configureNameplateTransform(tag, false, true);
                 guardMesh.add(tag);
+                g.tagSprite = tag;
 
                 g.mesh = guardMesh;
                 scene.add(guardMesh);
@@ -6847,10 +7210,57 @@
             const btnToggleCol = document.getElementById('btn-toggle-control-column');
             const colBody = document.getElementById('hud-toggle-column-body');
             const colArrow = document.getElementById('toggle-col-arrow');
-            btnToggleCol.addEventListener('click', () => {
+            btnToggleCol.addEventListener('click', (e) => {
+                e.stopPropagation();
                 const isHidden = colBody.classList.toggle('hidden');
                 if (colArrow) colArrow.textContent = isHidden ? '◀' : '▼';
             });
+
+            // Đóng menu Tùy chỉnh khi chạm vào vùng canvas 3D
+            canvas.addEventListener('pointerdown', () => {
+                if (colBody && !colBody.classList.contains('hidden')) {
+                    colBody.classList.add('hidden');
+                    if (colArrow) colArrow.textContent = '◀';
+                }
+            });
+
+            // Nút mở/đóng hàng nút công cụ trên điện thoại
+            const btnMobileTools = document.getElementById('btn-toggle-mobile-tools');
+            const topToolsRow = document.getElementById('hud-top-tools-row');
+            const mobileToolsArrow = document.getElementById('mobile-tools-arrow');
+            if (btnMobileTools && topToolsRow) {
+                btnMobileTools.addEventListener('click', () => {
+                    const isHidden = topToolsRow.classList.contains('hidden');
+                    if (isHidden) {
+                        topToolsRow.classList.remove('hidden');
+                        topToolsRow.classList.add('flex');
+                        if (mobileToolsArrow) mobileToolsArrow.textContent = '▲';
+                    } else {
+                        topToolsRow.classList.add('hidden');
+                        topToolsRow.classList.remove('flex');
+                        if (mobileToolsArrow) mobileToolsArrow.textContent = '▼';
+                    }
+                });
+            }
+
+            // Chế độ ẩn nhanh giao diện (Màn hình thoáng) để ngắm cảnh 3D
+            const btnCleanQuick = document.getElementById('btn-clean-screen-quick');
+            const btnRestoreHud = document.getElementById('btn-restore-clean-hud');
+            const hudTopBar = document.getElementById('hud-top-bar');
+            const hudBottomNav = document.getElementById('hud-bottom-nav');
+            if (btnCleanQuick && btnRestoreHud) {
+                btnCleanQuick.addEventListener('click', () => {
+                    if (hudTopBar) hudTopBar.classList.add('hidden');
+                    if (hudBottomNav) hudBottomNav.classList.add('hidden');
+                    btnRestoreHud.classList.remove('hidden');
+                    showToast('👁️ Đã bật chế độ Màn hình thoáng! Vẫn dùng phím di chuyển bình thường.');
+                });
+                btnRestoreHud.addEventListener('click', () => {
+                    if (hudTopBar) hudTopBar.classList.remove('hidden');
+                    if (hudBottomNav) hudBottomNav.classList.remove('hidden');
+                    btnRestoreHud.classList.add('hidden');
+                });
+            }
 
             function bindHudVisibilityToggle(btnId, stateId, targetIds, labelName) {
                 const btn = document.getElementById(btnId);
@@ -6861,7 +7271,15 @@
                     visible = !visible;
                     targetIds.forEach(tid => {
                         const el = document.getElementById(tid);
-                        if (el) el.classList.toggle('hidden', !visible);
+                        if (!el) return;
+                        if (tid === 'hud-top-tools-row') {
+                            el.classList.toggle('hidden', !visible);
+                            el.classList.toggle('sm:flex', visible);
+                            el.classList.toggle('flex', visible);
+                            if (mobileToolsArrow) mobileToolsArrow.textContent = visible ? '▲' : '▼';
+                        } else {
+                            el.classList.toggle('hidden', !visible);
+                        }
                     });
                     if (stateSpan) {
                         stateSpan.textContent = visible ? 'BẬT' : 'TẮT';
@@ -6881,6 +7299,50 @@
             bindHudVisibilityToggle('btn-toggle-top-tools', 'state-toggle-top-tools', ['hud-top-tools-row'], 'Hàng nút chức năng trên');
             bindHudVisibilityToggle('btn-toggle-bottom-nav', 'state-toggle-bottom-nav', ['hud-bottom-nav'], 'Thanh menu dưới cùng');
             bindHudVisibilityToggle('btn-toggle-touch-pad', 'state-toggle-touch-pad', ['joystick-zone', 'touch-action-btns'], 'Cụm phím di chuyển ảo');
+
+            function applyAllNameplateModes(showNotification = false) {
+                try {
+                    localStorage.setItem('thptnk_nameplate_mode', nameplateDisplayMode);
+                } catch (e) {}
+
+                if (typeof playerNameplate !== 'undefined' && playerNameplate) {
+                    configureNameplateTransform(playerNameplate, true, false);
+                }
+                if (typeof remotePlayers !== 'undefined' && remotePlayers) {
+                    remotePlayers.forEach(rp => {
+                        if (rp.labelSprite) configureNameplateTransform(rp.labelSprite, false, false);
+                    });
+                }
+                if (typeof securityGuards !== 'undefined' && securityGuards) {
+                    securityGuards.forEach(g => {
+                        if (g.tagSprite) configureNameplateTransform(g.tagSprite, false, true);
+                    });
+                }
+
+                const quickBtn = document.getElementById('btn-nameplate-quick');
+                const colState = document.getElementById('state-toggle-nameplate-mode');
+                const modeMeta = {
+                    compact: { quick: '🏷️ Tên: Nhỏ', col: 'NHỎ GỌN', toast: '🏷️ Đã thu nhỏ bảng tên trên đầu để không che tầm nhìn!' },
+                    hide_self: { quick: '🏷️ Tên: Ẩn mình', col: 'ẨN TÊN MÌNH', toast: '🙈 Đã ẩn tên trên đầu nhân vật của bạn (vẫn hiện tên bạn bè ở gần)!' },
+                    off: { quick: '🏷️ Tên: Tắt', col: 'TẮT HẾT', toast: '👁️ Đã tắt toàn bộ bảng tên trên đầu để nhìn sân trường thoáng 100%!' },
+                    full: { quick: '🏷️ Tên: Lớn', col: 'CỠ LỚN', toast: '🏷️ Đã chuyển bảng tên trên đầu về kích thước lớn!' }
+                }[nameplateDisplayMode] || { quick: '🏷️ Tên: Nhỏ', col: 'NHỎ GỌN', toast: '' };
+
+                if (quickBtn) quickBtn.textContent = modeMeta.quick;
+                if (colState) colState.textContent = modeMeta.col;
+                if (showNotification && modeMeta.toast) showToast(modeMeta.toast);
+            }
+
+            function cycleNameplateDisplayMode() {
+                const idx = NAMEPLATE_MODES.indexOf(nameplateDisplayMode);
+                nameplateDisplayMode = NAMEPLATE_MODES[(idx + 1) % NAMEPLATE_MODES.length];
+                applyAllNameplateModes(true);
+            }
+
+            const btnNameplateQuick = document.getElementById('btn-nameplate-quick');
+            if (btnNameplateQuick) btnNameplateQuick.addEventListener('click', cycleNameplateDisplayMode);
+            const btnNameplateCol = document.getElementById('btn-toggle-nameplate-mode');
+            if (btnNameplateCol) btnNameplateCol.addEventListener('click', cycleNameplateDisplayMode);
 
             document.getElementById('btn-toggle-school-lights').addEventListener('click', () => {
                 if (schoolLightsMode === 'auto') schoolLightsMode = 'on';
@@ -6942,6 +7404,7 @@
             // 20. 1 MÁY CHỦ CHUNG TỰ ĐỘNG, QUẢN TRỊ VIÊN BAN, CẤM CHAT, BXH & CHAT RIÊNG
             // =========================================================================
             const remotePlayers = new Map();
+            applyAllNameplateModes(false);
             const mutedPlayers = new Map();
             const bannedPlayers = new Map();
             let isSelfMuted = false;
@@ -9815,16 +10278,53 @@
                     rp.mesh.scale.set(scale, scale, 1);
                     rp.mesh.material.opacity = (1 - t) * 0.55;
                 }
-                for (let b = 0; b < skyBirds.length; b++) {
-                    const bd = skyBirds[b];
-                    bd.angle += bd.speed * dt;
-                    const bx = Math.cos(bd.angle) * bd.radius;
-                    const bz = bd.centerZ + Math.sin(bd.angle) * (bd.radius * 0.72);
-                    bd.group.rotation.y = Math.atan2(bx - bd.group.position.x, bz - bd.group.position.z);
-                    bd.group.position.set(bx, bd.height + Math.sin(now * 0.002 + b) * 0.5, bz);
-                    const flap = Math.sin(now * 0.012 + b * 1.4) * 0.48;
-                    bd.leftWing.rotation.z = flap;
-                    bd.rightWing.rotation.z = -flap;
+                if (nightSkyGroup && nightSkyGroup.visible) {
+                    if (nightStarMatA) nightStarMatA.opacity = 0.68 + Math.sin(now * 0.0028) * 0.26;
+                    if (nightStarMatB) nightStarMatB.opacity = 0.62 + Math.cos(now * 0.0036 + 1.2) * 0.32;
+                    if (moonOuterAura) {
+                        const pulse = 142 + Math.sin(now * 0.0018) * 10;
+                        moonOuterAura.scale.set(pulse, pulse, 1);
+                    }
+                    for (let bIdx = 0; bIdx < moonBeamSprites.length; bIdx++) {
+                        moonBeamSprites[bIdx].material.opacity = 0.19 + Math.sin(now * 0.0015 + bIdx * 1.7) * 0.06;
+                    }
+                    if (moonlightGroundGlow) {
+                        moonlightGroundGlow.material.opacity = 0.72 + Math.sin(now * 0.0022) * 0.15;
+                    }
+                    for (let m = 0; m < shootingStars.length; m++) {
+                        const st = shootingStars[m];
+                        if (!st.active) {
+                            st.delay -= dt;
+                            if (st.delay <= 0) {
+                                launchShootingStar(st);
+                            }
+                        } else {
+                            st.timer += dt;
+                            const progress = st.timer / st.duration;
+                            if (progress >= 1) {
+                                resetShootingStar(st);
+                            } else {
+                                st.group.position.addScaledVector(st.velocity, dt);
+                                const fade = progress < 0.2
+                                    ? (progress / 0.2)
+                                    : (progress > 0.72 ? (1 - (progress - 0.72) / 0.28) : 1.0);
+                                st.trailMat.opacity = Math.max(0, fade * 0.92);
+                                st.headMat.opacity = Math.max(0, fade);
+                            }
+                        }
+                    }
+                } else {
+                    for (let b = 0; b < skyBirds.length; b++) {
+                        const bd = skyBirds[b];
+                        bd.angle += bd.speed * dt;
+                        const bx = Math.cos(bd.angle) * bd.radius;
+                        const bz = bd.centerZ + Math.sin(bd.angle) * (bd.radius * 0.72);
+                        bd.group.rotation.y = Math.atan2(bx - bd.group.position.x, bz - bd.group.position.z);
+                        bd.group.position.set(bx, bd.height + Math.sin(now * 0.002 + b) * 0.5, bz);
+                        const flap = Math.sin(now * 0.012 + b * 1.4) * 0.48;
+                        bd.leftWing.rotation.z = flap;
+                        bd.rightWing.rotation.z = -flap;
+                    }
                 }
                 for (let bf = 0; bf < gardenButterflies.length; bf++) {
                     const bObj = gardenButterflies[bf];
@@ -10467,9 +10967,9 @@
                     if (!withinRange) return;
 
                     visibleCount++;
-                    // Ẩn bảng tên của người chơi ở xa (> 28m) để giảm tải GPU overdraw khi đông người
+                    // Ẩn bảng tên của người chơi ở xa (> 28m) hoặc khi người chơi chọn Tắt hết tên
                     if (rp.labelSprite) {
-                        rp.labelSprite.visible = distSq <= (28 * 28);
+                        rp.labelSprite.visible = nameplateDisplayMode !== 'off' && distSq <= (28 * 28);
                     }
 
                     const isCloseLOD = distSq <= (22 * 22) || (minimapTick % 3 === 0);
